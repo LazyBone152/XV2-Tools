@@ -7,6 +7,7 @@
              xmlns:vector="clr-namespace:EEPK_Organiser.View.Vectors"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
+             xmlns:helper="clr-namespace:LB_Common.AttachedProperties;assembly=LB_Common"
              xmlns:mvvm="clr-namespace:LB_Common.Mvvm;assembly=LB_Common"
              xmlns:emm="clr-namespace:Xv2CoreLib.EMM;assembly=Xv2CoreLib"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
@@ -100,7 +101,9 @@
         
         <!-- Material selection -->
         <Grid Grid.Column="1" Grid.Row="1" Margin="0,0,0,10">
-            <DataGrid x:Name="materialDataGrid" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" ItemsSource="{Binding ElementName=UserControl, Path=ViewMaterials}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedMaterial}" Controls:ControlsHelper.ContentCharacterCasing="Normal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+            <DataGrid x:Name="materialDataGrid" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" 
+                      ItemsSource="{Binding ElementName=UserControl, Path=ViewMaterials}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedMaterial}" Controls:ControlsHelper.ContentCharacterCasing="Normal" 
+                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" helper:DataGridHelper.SelectedItems="{Binding ElementName=UserControl, Path=SelectedMaterials, Mode=OneWay}">
 
                 <DataGrid.InputBindings>
                     <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AddNewMaterialCommand}"/>

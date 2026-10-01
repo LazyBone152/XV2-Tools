@@ -204,9 +204,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueAdjustment()
         {
-            Window empEditor = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
-
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, false, empEditor);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, false);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -215,9 +213,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueSet()
         {
-            Window empEditor = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
-
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, true, empEditor);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, true);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();

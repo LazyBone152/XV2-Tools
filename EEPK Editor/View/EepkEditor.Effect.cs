@@ -57,6 +57,8 @@ namespace EEPK_Organiser.View
                 }
             }
         }
+        public ObservableCollection<Effect> SelectedEffects { get; } = new();
+
         public int SelectedEffectID
         {
             get => SelectedEffect != null ? SelectedEffect.IndexNum : 0;
@@ -111,10 +113,26 @@ namespace EEPK_Organiser.View
 
         private void SelectEffect(Effect effect)
         {
+            SelectedEffects.Clear();
             SelectedEffect = effect;
 
             if(effect != null)
                 effectDataGrid.ScrollIntoView(effect);
+        }
+
+        private void SetSelectEffects(IList<Effect> effects)
+        {
+            if (effects.Count == 0) return;
+
+            SelectedEffect = effects[0];
+            SelectedEffects.Clear();
+
+            foreach (var material in effects)
+            {
+                SelectedEffects.Add(material);
+            }
+
+            effectDataGrid.ScrollIntoView(SelectedEffect);
         }
 
         private void SelectEffectPart(EffectPart effectPart)
@@ -135,11 +153,6 @@ namespace EEPK_Organiser.View
             }
 
             SelectEffect(effectParts.Count > 0 ? effectContainerFile.GetEffectAssociatedWithEffectPart(effectParts[0]) : null);
-        }
-
-        private IList<Effect> GetSelectedEffects()
-        {
-            return effectDataGrid.SelectedItems.Cast<Effect>().ToList();
         }
 
         /// <summary>
@@ -186,19 +199,17 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsEffectSelected))]
         private void Effect_Copy()
         {
-            var selectedEffects = GetSelectedEffects();
-
-            if (selectedEffects.Count > 0)
+            if (SelectedEffects.Count > 0)
             {
                 effectContainerFile.SaveDds();
-                CustomClipboard.SetData(ClipboardDataTypes.Effect, selectedEffects);
+                CustomClipboard.SetData(ClipboardDataTypes.Effect, SelectedEffects.ToArray());
             }
         }
 
         [RelayCommand(CanExecute = nameof(CanPasteEffect))]
         private void Effect_Paste()
         {
-            CustomClipboard.TryGetData(ClipboardDataTypes.Effect, out IList<Effect> effects);
+            CustomClipboard.TryGetData(ClipboardDataTypes.Effect, out Effect[] effects);
 
             if (effects != null)
             {
@@ -210,9 +221,9 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsEffectSelected))]
         private void Effect_DeleteEffect()
         {
-            var selectedEffects = GetSelectedEffects();
+            var selectedEffects = SelectedEffects.ToArray();
 
-            if (selectedEffects.Count > 0)
+            if (selectedEffects.Length > 0)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
 
@@ -246,11 +257,9 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsEffectSelected))]
         private void Effect_ExportSelected()
         {
-            var selectedEffects = GetSelectedEffects();
-
-            if (selectedEffects.Count > 0)
+            if (SelectedEffects.Count > 0)
             {
-                ExportVfxPackage(selectedEffects);
+                ExportVfxPackage(SelectedEffects.ToList());
             }
         }
 

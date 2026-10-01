@@ -188,14 +188,11 @@ namespace EEPK_Organiser.View.Editors.EMP
                     node.UpdatePreviewBrush();
                     return;
                 }
-                else if (e.UndoContext is Asset asset)
+                else if (e.UndoContext is IList<Asset> assets)
                 {
-                    if(asset.AssetType == Xv2CoreLib.EEPK.AssetType.PBIND)
+                    if(assets.Any(x => x.AssetType == Xv2CoreLib.EEPK.AssetType.PBIND && x.Files[0].EmpFile == EmpFile))
                     {
-                        if(asset.Files[0].EmpFile == EmpFile)
-                        {
-                            EmpFile.UpdateBrushPreview();
-                        }
+                        EmpFile.UpdateBrushPreview();
                     }
                 }
                 else if(e.UndoContext is EffectContainerFile eepk)
@@ -291,7 +288,7 @@ namespace EEPK_Organiser.View.Editors.EMP
 
         private bool HasTextureRef(int texIndex)
         {
-            return true;
+            //return true;
             return IsNodeSelected() ? Node.EmissionNode.Texture.TextureEntryRef[texIndex].TextureRef != null : false;
         }
 

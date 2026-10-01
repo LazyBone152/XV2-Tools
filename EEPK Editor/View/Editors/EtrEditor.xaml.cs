@@ -1,20 +1,20 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using EEPK_Organiser.Forms;
-using EEPK_Organiser.View.Controls;
-using EEPK_Organiser.ViewModel;
-using LB_Common.Forms;
-using LB_Common.Mvvm;
-using LB_Common.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
+using CommunityToolkit.Mvvm.Input;
+using LB_Common.Forms;
+using LB_Common.Mvvm;
+using LB_Common.Utils;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.ETR;
 using Xv2CoreLib.Resource.UndoRedo;
+using EEPK_Organiser.Forms;
+using EEPK_Organiser.View.Controls;
+using EEPK_Organiser.ViewModel;
 
 namespace EEPK_Organiser.View.Editors
 {
@@ -62,6 +62,7 @@ namespace EEPK_Organiser.View.Editors
                 }
             }
         }
+        public ObservableCollection<ETR_Node> SelectedNodes { get; } = new ObservableCollection<ETR_Node>();
         private EtrNodeViewModel _viewModel = new EtrNodeViewModel();
         public EtrNodeViewModel ViewModel => SelectedNode != null ? _viewModel : null;
         public bool IsNodeEnabled => SelectedNode != null;
@@ -101,19 +102,29 @@ namespace EEPK_Organiser.View.Editors
             //Update PreviewBrush when color has been changed externally
             if (e.UndoGroup == UndoGroup.ColorControl)
             {
-                if (e.UndoContext is ETR_Node node)
+                if (e.UndoContext is ETR_Node _node)
                 {
-                    node.UpdatePreviewBrush();
-                    return;
+                    _node.UpdatePreviewBrush();
+                }
+                else if (e.UndoContext is IList<ETR_Node> nodes)
+                {
+                    foreach(var node in nodes)
+                    {
+                        node.UpdatePreviewBrush();
+                    }
                 }
                 else if (e.UndoContext is Asset asset)
                 {
-                    if (asset.AssetType == Xv2CoreLib.EEPK.AssetType.TBIND)
+                    if (asset.AssetType == Xv2CoreLib.EEPK.AssetType.TBIND && asset.Files[0].EtrFile == EtrFile)
                     {
-                        if (asset.Files[0].EtrFile == EtrFile)
-                        {
-                            EtrFile.UpdateBrushPreview();
-                        }
+                        EtrFile.UpdateBrushPreview();
+                    }
+                }
+                else if (e.UndoContext is IList<Asset> assets)
+                {
+                    if(assets.Any(x => x.AssetType == Xv2CoreLib.EEPK.AssetType.TBIND && x.Files[0].EtrFile == EtrFile))
+                    {
+                        EtrFile.UpdateBrushPreview();
                     }
                 }
                 else if (e.UndoContext is EffectContainerFile eepk)
@@ -132,7 +143,6 @@ namespace EEPK_Organiser.View.Editors
         }
 
         #region Commands
-        private List<ETR_Node> SelectedNodes => etrDataGrid.SelectedItems.Cast<ETR_Node>().ToList();
 
         [RelayCommand(CanExecute = nameof(IsETRLoaded))]
         private void AddNode()
@@ -141,13 +151,16 @@ namespace EEPK_Organiser.View.Editors
             EtrFile.Nodes.Add(node);
 
             UndoManager.Instance.AddUndo(new UndoableListAdd<ETR_Node>(EtrFile.Nodes, node, "ETR -> Add Node"));
+
+            SelectedNodes.Clear();
+            SelectedNode = node;
         }
 
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void DeleteNode()
         {
-            List<ETR_Node> nodes = SelectedNodes;
-            List<IUndoRedo> undos = new List<IUndoRedo>();
+            var nodes = SelectedNodes.ToArray();
+            List<IUndoRedo> undos = new List<IUndoRedo>(nodes.Length);
 
             foreach (ETR_Node node in nodes)
             {
@@ -161,48 +174,53 @@ namespace EEPK_Organiser.View.Editors
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void CopyNode()
         {
-            CustomClipboard.SetData(ETR_Node.CLIPBOARD_ID, SelectedNodes);
+            CustomClipboard.SetData(ETR_Node.CLIPBOARD_ID, SelectedNodes.ToArray());
         }
 
         [RelayCommand(CanExecute = nameof(CanPasteNode))]
         private void PasteNode()
         {
-            if (!CustomClipboard.TryGetData(ETR_Node.CLIPBOARD_ID, out List<ETR_Node> nodes))
+            if (!CustomClipboard.TryGetData(ETR_Node.CLIPBOARD_ID, out ETR_Node[] nodes))
                 return;
 
-            List<IUndoRedo> undos = new List<IUndoRedo>();
+            List<IUndoRedo> undos = new List<IUndoRedo>(nodes.Length);
+            List<ETR_Node> newNodes = new List<ETR_Node>();
 
             foreach (ETR_Node node in nodes)
             {
+                AssetContainer.AddTbindDependencies(node, EtrFile, undos);
                 undos.Add(new UndoableListAdd<ETR_Node>(EtrFile.Nodes, node));
                 EtrFile.Nodes.Add(node);
+                newNodes.Add(node);
             }
 
             UndoManager.Instance.AddCompositeUndo(undos, "ETR -> Paste Node");
+            SetSelectedNodes(newNodes);
         }
 
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void DuplicateNode()
         {
-            List<ETR_Node> nodes = SelectedNodes;
-            List<IUndoRedo> undos = new List<IUndoRedo>();
+            var nodes = SelectedNodes.ToArray();
+            List<IUndoRedo> undos = new List<IUndoRedo>(nodes.Length);
+            List<ETR_Node> newNodes = new List<ETR_Node>();
 
             foreach (ETR_Node node in nodes)
             {
-                ETR_Node newNode = node.Copy();
+                ETR_Node newNode = node.Clone();
                 undos.Add(new UndoableListAdd<ETR_Node>(EtrFile.Nodes, newNode));
                 EtrFile.Nodes.Add(newNode);
+                newNodes.Add(newNode);
             }
 
             UndoManager.Instance.AddCompositeUndo(undos, "ETR -> Duplicate Node");
+            SetSelectedNodes(newNodes);
         }
 
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueAdjustment()
         {
-            Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
-
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, false, editorWindow);
+            RecolorAll recolor = new RecolorAll(SelectedNodes, false);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -211,9 +229,7 @@ namespace EEPK_Organiser.View.Editors
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueSet()
         {
-            Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
-
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, true, editorWindow);
+            RecolorAll recolor = new RecolorAll(SelectedNodes, true);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -240,8 +256,6 @@ namespace EEPK_Organiser.View.Editors
         [RelayCommand(CanExecute = nameof(HasMaterial))]
         private void Node_RemoveMaterial()
         {
-            //UndoManager.Instance.AddUndo(new UndoableProperty<ETR_Node>(nameof(ETR_Node.MaterialRef), SelectedNode, SelectedNode.MaterialRef, null, "Remove Material"));
-            //SelectedNode.MaterialRef = null;
             ViewModel.MaterialRef = null;
         }
 
@@ -249,8 +263,7 @@ namespace EEPK_Organiser.View.Editors
         private void Node_GotoMaterial()
         {
             MaterialsEditorForm emmForm = EepkEditor.AssetContainerOpenMaterialForm(AssetContainer, Xv2CoreLib.EEPK.AssetType.TBIND);
-            emmForm.materialsEditor.SelectedMaterial = SelectedNode.MaterialRef;
-            emmForm.materialsEditor.materialDataGrid.ScrollIntoView(SelectedNode.MaterialRef);
+            emmForm.SelectMaterial(SelectedNode.MaterialRef);
         }
 
         [RelayCommand(CanExecute = nameof(HasTextureRef))]
@@ -500,6 +513,21 @@ namespace EEPK_Organiser.View.Editors
         private void EmpKeyframesView_IsEnabledToggled(object sender, EventArgs e)
         {
             SelectedNode.UpdatePreviewBrush();
+        }
+
+        private void SetSelectedNodes(IList<ETR_Node> nodes)
+        {
+            if (nodes.Count == 0) return;
+
+            SelectedNode = nodes[0];
+            SelectedNodes.Clear();
+
+            foreach (var material in nodes)
+            {
+                SelectedNodes.Add(material);
+            }
+
+            etrDataGrid.ScrollIntoView(SelectedNode);
         }
     }
 }

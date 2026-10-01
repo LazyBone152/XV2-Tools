@@ -131,8 +131,7 @@ namespace Xv2CoreLib
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool ShouldLoadFileIO()
         {
-            if (FileIO == null) return true;
-            return FileIO.GameDir != SettingsManager.Instance.Settings.GameDirectory;
+            return FileIO == null || FileIO.GameDir != SettingsManager.Instance.Settings.GameDirectory;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -232,14 +231,20 @@ namespace Xv2CoreLib
             return (T)file;
         }
 
-        public byte[] GetBytesFromGame(string path, bool onlyFromCpk = false, bool raiseEx = false)
+        /// <summary>
+        /// Load a single file from the game as a raw byte array.
+        /// </summary>
+        /// <param name="path">The path (relative to data folder) to the file.</param>
+        /// <param name="onlyFromCpk">Limit file loading to just the CPK files. When true, loose files will be ignored.</param>
+        /// <param name="throwOnMissingFile">Indicates whether an exception should be thrown if the file could not be found.</param>
+        /// <returns>A byte array containing the requested file or null if not found and no exception was thrown.</returns>
+        /// <exception cref="NullReferenceException"></exception>
+        /// <remarks>If a file is not found, <see cref="FileNotFoundEvent"/> will be raised if an exception was not thrown.</remarks>
+        public byte[] GetBytesFromGame(string path, bool onlyFromCpk = false, bool throwOnMissingFile = false)
         {
             CheckInitState();
 
-            if (FileIO == null && raiseEx) throw new NullReferenceException("FileManager.GetBytesFromGame: fileIO is null.");
-            if (FileIO == null) return null;
-
-            var bytes = FileIO.GetFileFromGame(path, raiseEx, onlyFromCpk);
+            var bytes = FileIO.GetFileFromGame(path, throwOnMissingFile, onlyFromCpk);
             if (bytes == null) FileNotFoundEvent?.Invoke(this, new Xv2FileNotFoundEventArgs(path));
             return bytes;
         }
@@ -247,11 +252,12 @@ namespace Xv2CoreLib
         public string GetAbsolutePath(string relativePath)
         {
             CheckInitState();
-            return (FileIO != null) ? FileIO.PathInGameDir(relativePath) : relativePath;
+            return FileIO.PathInGameDir(relativePath);
         }
         
         public bool Exists(string path)
         {
+            CheckInitState();
             return FileIO.FileExists(path);
         }
         #endregion

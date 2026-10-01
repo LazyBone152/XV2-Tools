@@ -417,6 +417,7 @@ namespace EEPK_Organiser.ViewModel
         public void Dispose()
         {
             UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
+            GC.SuppressFinalize(this);
         }
 
         #region UndoableSetMethods

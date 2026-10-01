@@ -635,6 +635,14 @@ namespace Xv2CoreLib.EMP_NEW
             };
         }
 
+        public void RemoveMaterialRef(EmmMaterial materialRef, List<IUndoRedo> undos = null)
+        {
+            foreach(var node in ParticleNodes)
+            {
+                node.RemoveMaterialRef(materialRef, undos);
+            }
+        }
+
         //DEBUG:
         public List<ParticleNode> GetAllParticleEffects_DEBUG()
         {
@@ -1218,6 +1226,22 @@ namespace Xv2CoreLib.EMP_NEW
                 {
                     node.UpdatePreviewBrush(true);
                 }
+            }
+        }
+    
+        public void RemoveMaterialRef(EmmMaterial materialRefToRemove, List<IUndoRedo> undos = null)
+        {
+            if (materialRefToRemove == null) return;
+
+            if(EmissionNode.Texture?.MaterialRef == materialRefToRemove)
+            {
+                undos?.Add(new UndoableProperty<ParticleTexture>(nameof(ParticleTexture.MaterialRef), EmissionNode.Texture, EmissionNode.Texture.MaterialRef, null));
+                EmissionNode.Texture.MaterialRef = null;
+            }
+
+            foreach(var node in ChildParticleNodes)
+            {
+                node.RemoveMaterialRef(materialRefToRemove, undos);
             }
         }
     }
@@ -3235,6 +3259,20 @@ namespace Xv2CoreLib.EMP_NEW
         public static int GetSize(VersionEnum version)
         {
             return version == VersionEnum.SDBH ? 36 : 28;
+        }
+        
+        public static void RemoveTextureRef(IList<EMP_TextureSamplerDef> textures, EMB_TextureEntry textureRefToRemove, List<IUndoRedo> undos = null)
+        {
+            if (textureRefToRemove == null) return;
+
+            foreach(var texture in textures)
+            {
+                if(texture._textureRef == textureRefToRemove)
+                {
+                    undos?.Add(new UndoableProperty<EMP_TextureSamplerDef>(nameof(TextureRef), texture, textureRefToRemove, null));
+                    texture.TextureRef = null;
+                }
+            }
         }
     }
 

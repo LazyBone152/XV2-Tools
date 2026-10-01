@@ -10,6 +10,7 @@ using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.HslColor;
 using LB_Common.Numbers;
+using FastCloner.Code;
 
 namespace Xv2CoreLib.ETR
 {
@@ -379,6 +380,17 @@ namespace Xv2CoreLib.ETR
                 node.UpdatePreviewBrush();
             }
         }
+
+        public void RemoveMaterialRef(EmmMaterial materialRef, List<IUndoRedo> undos = null)
+        {
+            if (materialRef == null) return;
+
+            foreach (var node in Nodes)
+            {
+                undos?.Add(new UndoableProperty<ETR_Node>(nameof(ETR_Node.MaterialRef), node, node.MaterialRef, null));
+                node.MaterialRef = null;
+            }
+        }
     }
 
     [Serializable]
@@ -433,7 +445,9 @@ namespace Xv2CoreLib.ETR
         }
 
         #region References
+        [FastClonerIgnore]
         private EmmMaterial _materialRef = null;
+        [FastClonerIgnore]
         public EmmMaterial MaterialRef
         {
             get
@@ -447,6 +461,8 @@ namespace Xv2CoreLib.ETR
                 NotifyPropertyChanged(nameof(MaterialRef));
             }
         }
+        
+        [FastClonerIgnore] 
         public AsyncObservableCollection<TextureEntry_Ref> TextureEntryRef { get; set; } = new AsyncObservableCollection<TextureEntry_Ref>();
 
         #endregion
@@ -862,6 +878,24 @@ namespace Xv2CoreLib.ETR
         public void UpdatePreviewBrush()
         {
             NotifyPropertyChanged(nameof(PreviewBrush));
+        }
+    
+        public ETR_Node Clone()
+        {
+            AsyncObservableCollection<TextureEntry_Ref> textureRefs = new AsyncObservableCollection<TextureEntry_Ref>();
+
+            if (TextureEntryRef != null)
+            {
+                foreach (var textRef in TextureEntryRef)
+                {
+                    textureRefs.Add(new TextureEntry_Ref() { TextureRef = textRef.TextureRef });
+                }
+            }
+
+            ETR_Node clone = this.Copy();
+            clone._materialRef = _materialRef;
+            clone.TextureEntryRef = textureRefs;
+            return clone;
         }
     }
 

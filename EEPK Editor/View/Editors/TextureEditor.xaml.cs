@@ -1,20 +1,19 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using EEPK_Organiser.Forms;
-using EEPK_Organiser.Misc;
-using LB_Common.Forms;
-using LB_Common.Mvvm;
-using LB_Common.Utils;
-using MahApps.Metro.Controls;
-using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
+using Microsoft.Win32;
+using CommunityToolkit.Mvvm.Input;
+using LB_Common.Forms;
+using LB_Common.Mvvm;
+using LB_Common.Utils;
+using EEPK_Organiser.Forms;
+using EEPK_Organiser.Misc;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMP_NEW;
@@ -82,7 +81,7 @@ namespace EEPK_Organiser.View
                 NotifyPropertyChanged(nameof(SelectedTexture));
             }
         }
-
+        public ObservableCollection<EMB_TextureEntry> SelectedTextures { get; } = new ObservableCollection<EMB_TextureEntry>();
         public bool AllowTextureNames
         {
             get => EmbFile?.UseFileNames == true;
@@ -218,8 +217,14 @@ namespace EEPK_Organiser.View
             }
 
             _viewTextures.CommitEdit();
-            _viewTextures.SortDescriptions.Clear();
-            _viewTextures.SortDescriptions.Add(new SortDescription(nameof(EMB_TextureEntry.ID), ListSortDirection.Ascending));
+
+            //Apply ID sorting for non-container EMBs (a container EMB is one used as a EEPK texture container... PBIND, TBIND etc - which has it's IDs automatically calculated and hidden from the user)
+            if (!IsForContainer)
+            {
+                _viewTextures.SortDescriptions.Clear();
+                _viewTextures.SortDescriptions.Add(new SortDescription(nameof(EMB_TextureEntry.ID), ListSortDirection.Ascending));
+            }
+
             NotifyPropertyChanged(nameof(ViewTextures));
         }
 
@@ -420,12 +425,11 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsTextureSelected))]
         private void ExtractTexture()
         {
-            List<EMB_TextureEntry> selectedTextures = textureDataGrid.SelectedItems.Cast<EMB_TextureEntry>().ToList();
-            if (selectedTextures.Count == 0) return;
+            if (SelectedTextures.Count == 0) return;
 
             string extractionPath;
 
-            if (selectedTextures.Count > 1)
+            if (SelectedTextures.Count > 1)
             {
                 //Select dir to dump textures
                 var _browser = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
@@ -439,7 +443,7 @@ namespace EEPK_Organiser.View
             {
                 var _browser = new SaveFileDialog();
                 _browser.Filter = "DDS file |*.dds;";
-                _browser.FileName += $"{selectedTextures[0].Name}";
+                _browser.FileName += $"{SelectedTextures[0].Name}";
 
                 if (_browser.ShowDialog() == false)
                     return;
@@ -447,9 +451,9 @@ namespace EEPK_Organiser.View
                 extractionPath = _browser.FileName;
             }
 
-            foreach (var texture in selectedTextures)
+            foreach (var texture in SelectedTextures)
             {
-                string path = (selectedTextures.Count == 1) ? extractionPath : $"{extractionPath}/{texture.Name}";
+                string path = (SelectedTextures.Count == 1) ? extractionPath : $"{extractionPath}/{texture.Name}";
                 Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
                 texture.SaveDds();
                 File.WriteAllBytes(path, texture.Data);
@@ -459,25 +463,25 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsTextureSelected))]
         private void DeleteTexture()
         {
-            bool textureInUse = false;
-            List<EMB_TextureEntry> selectedTextures = textureDataGrid.SelectedItems.Cast<EMB_TextureEntry>().ToList();
+            //bool textureInUse = false;
+            var selectedTextures = SelectedTextures.ToArray();
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            if (selectedTextures.Count > 0)
+            if (selectedTextures.Length > 0)
             {
+                if (IsForContainer && selectedTextures.Any(x => AssetContainer.IsTextureUsed(x)))
+                {
+                    string type = TextureEditorType == TextureEditorType.Pbind ? "EMP" : "ETR";
+                    if (MessagePrompt.Show($"One or more of the selected textures is currently assigned to a {type} and its reference will be removed if the texture is deleted.\n\nDo you wish to continue?",
+                            "Delete", MessagePromptButtons.YesNo, MessagePromptIcon.Warning) != MessagePromptResult.Yes)
+                        return;
+                }
+
                 foreach (var texture in selectedTextures)
                 {
                     if (IsForContainer)
                     {
-                        //Container mode. Only allow deleting if texture is unused by EMP/ETRs.
-                        if (AssetContainer.IsTextureUsed(texture))
-                        {
-                            textureInUse = true;
-                        }
-                        else
-                        {
-                            AssetContainer.DeleteTexture(texture, undos);
-                        }
+                        AssetContainer.DeleteTexture(texture, undos);
                     }
                     else
                     {
@@ -485,14 +489,6 @@ namespace EEPK_Organiser.View
                         undos.Add(new UndoableListRemove<EMB_TextureEntry>(EmbFile.Entry, texture));
                         EmbFile.Entry.Remove(texture);
                     }
-                }
-                if (textureInUse && selectedTextures.Count == 1)
-                {
-                    MessagePrompt.Show("The selected texture cannot be deleted because it is currently being used.", "Delete", MessagePromptButtons.OK, MessagePromptIcon.Error);
-                }
-                else if (textureInUse && selectedTextures.Count > 1)
-                {
-                    MessagePrompt.Show("One or more of the selected textures cannot be deleted because they are currently being used.", "Delete", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 }
 
                 undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
@@ -506,10 +502,11 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsTextureSelected))]
         private void DuplicateTexture()
         {
-            List<EMB_TextureEntry> selectedTextures = textureDataGrid.SelectedItems.Cast<EMB_TextureEntry>().ToList();
-            List<IUndoRedo> undos = new List<IUndoRedo>();
+            var selectedTextures = SelectedTextures.ToArray();
+            List<IUndoRedo> undos = new List<IUndoRedo>(selectedTextures.Length);
+            List<EMB_TextureEntry> newTextures = new List<EMB_TextureEntry>(selectedTextures.Length);
 
-            int newEntryId = EmbFile.GetNewID(); ;
+            int newEntryId = EmbFile.GetNewID();
 
             foreach (var texture in selectedTextures)
             {
@@ -520,21 +517,21 @@ namespace EEPK_Organiser.View
                 }
 
                 var newTexture = texture.Clone() as EMB_TextureEntry;
+                newTextures.Add(newTexture);
                 newTexture.ID = EmbFile.GetNewID();
                 newTexture.Name = EmbFile.GetUnusedName(newTexture.Name);
+
                 undos.Add(new UndoableListAdd<EMB_TextureEntry>(EmbFile.Entry, newTexture));
                 EmbFile.AddTexture(newTexture);
             }
 
-            if (selectedTextures.Count > 0)
+            if (selectedTextures.Length > 0)
             {
                 undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
                 EmbFile.TriggerTexturesChanged();
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Texture Duplicate"));
 
-                var selectedEntry = EmbFile.GetEntry(newEntryId);
-                textureDataGrid.SelectedItem = selectedEntry;
-                textureDataGrid.ScrollIntoView(selectedEntry);
+                SetSelectedTextures(newTextures);
             }
 
             NotifyPropertyChanged(nameof(TextureCount));
@@ -543,24 +540,22 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsTextureSelected))]
         private void CopyTexture()
         {
-            List<EMB_TextureEntry> selectedTextures = textureDataGrid.SelectedItems.Cast<EMB_TextureEntry>().ToList();
-
-            if (selectedTextures.Count > 0)
+            if (SelectedTextures.Count > 0)
             {
-                CustomClipboard.SetData(ClipboardDataTypes.EmbTexture, selectedTextures);
+                CustomClipboard.SetData(ClipboardDataTypes.EmbTexture, SelectedTextures.ToArray());
             }
         }
 
         [RelayCommand(CanExecute = nameof(CanPasteTexture))]
         private void PasteTexture()
         {
-            if (!CustomClipboard.TryGetData(ClipboardDataTypes.EmbTexture, out List<EMB_TextureEntry> copiedTextures))
+            if (!CustomClipboard.TryGetData(ClipboardDataTypes.EmbTexture, out EMB_TextureEntry[] copiedTextures))
                 return;
 
             if (copiedTextures != null)
             {
-                List<IUndoRedo> undos = new List<IUndoRedo>();
-                int selectedId = EmbFile.GetNewID();
+                List<IUndoRedo> undos = new List<IUndoRedo>(copiedTextures.Length);
+                List<EMB_TextureEntry> newTextures = new List<EMB_TextureEntry>(copiedTextures.Length);
 
                 foreach (var texture in copiedTextures)
                 {
@@ -571,6 +566,7 @@ namespace EEPK_Organiser.View
                     }
 
                     var newTexture = texture.Copy();
+                    newTextures.Add(newTexture);
                     newTexture.ID = EmbFile.GetNewID();
                     newTexture.Name = EmbFile.GetUnusedName(newTexture.Name);
                     EmbFile.AddTexture(newTexture);
@@ -578,15 +574,13 @@ namespace EEPK_Organiser.View
                     undos.Add(new UndoableListAdd<EMB_TextureEntry>(EmbFile.Entry, newTexture));
                 }
 
-                if (copiedTextures.Count > 0)
+                if (copiedTextures.Length > 0)
                 {
-                    SelectedTexture = EmbFile.GetEntry(selectedId);
-                    textureDataGrid.ScrollIntoView(SelectedTexture);
-
                     undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
                     EmbFile.TriggerTexturesChanged();
-
                     UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Texture Paste"));
+
+                    SetSelectedTextures(newTextures);
                 }
             }
 
@@ -601,7 +595,7 @@ namespace EEPK_Organiser.View
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
             var texture = SelectedTexture;
-            List<EMB_TextureEntry> selectedTextures = textureDataGrid.SelectedItems.Cast<EMB_TextureEntry>().ToList();
+            List<EMB_TextureEntry> selectedTextures = SelectedTextures.ToList();
             selectedTextures.Remove(texture);
 
             if (texture != null && selectedTextures.Count > 0)
@@ -660,7 +654,7 @@ namespace EEPK_Organiser.View
                 }
                 else
                 {
-                    var editForm = new RecolorTexture(SelectedTexture, false, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
+                    var editForm = new RecolorTexture(SelectedTexture, SelectedTextures.ToList(), false);
                     editForm.ShowDialog();
                 }
             }
@@ -677,7 +671,7 @@ namespace EEPK_Organiser.View
                 }
                 else
                 {
-                    var editForm = new RecolorTexture(SelectedTexture, true, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
+                    var editForm = new RecolorTexture(SelectedTexture, SelectedTextures.ToList(), true);
                     editForm.ShowDialog();
                 }
             }
@@ -723,7 +717,7 @@ namespace EEPK_Organiser.View
         {
             if (TextureEditorType != TextureEditorType.Pbind) return;
 
-            List<EMB_TextureEntry> selectedTextures = textureDataGrid.SelectedItems.Cast<EMB_TextureEntry>().ToList();
+            List<EMB_TextureEntry> selectedTextures = SelectedTextures.ToList();
 
             if (selectedTextures.Count < 2)
             {
@@ -848,6 +842,31 @@ namespace EEPK_Organiser.View
         }
 
         #endregion
+
+        private void SetSelectedTexture(EMB_TextureEntry texture)
+        {
+            SelectedTextures.Clear();
+            SelectedTexture = texture;
+
+            if (texture != null)
+                textureDataGrid.ScrollIntoView(texture);
+        }
+
+        private void SetSelectedTextures(IList<EMB_TextureEntry> textures)
+        {
+            if (textures.Count == 0) return;
+
+            SelectedTexture = textures[0];
+            SelectedTextures.Clear();
+
+            foreach (var material in textures)
+            {
+                SelectedTextures.Add(material);
+            }
+
+            textureDataGrid.ScrollIntoView(SelectedTexture);
+        }
+    
     }
 
     public enum TextureEditorType

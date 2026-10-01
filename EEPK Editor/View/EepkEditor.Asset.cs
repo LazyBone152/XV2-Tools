@@ -446,13 +446,13 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsAssetTypeSelected))]
         private void AssetHueAdjust(AssetType assetType)
         {
-            AssetOpenRecolorDialog(GetSelectedAsset(assetType), false);
+            AssetOpenRecolorDialog(assetType, GetSelectedAssets(assetType), false);
         }
 
         [RelayCommand(CanExecute = nameof(IsAssetTypeSelected))]
         private void AssetHueSet(AssetType assetType)
         {
-            AssetOpenRecolorDialog(GetSelectedAsset(assetType), true);
+            AssetOpenRecolorDialog(assetType, GetSelectedAssets(assetType), true);
         }
 
         [RelayCommand(CanExecute = nameof(IsAssetTypeSelected))]
@@ -535,11 +535,11 @@ namespace EEPK_Organiser.View
         }
 
         //Helpers
-        private void AssetOpenRecolorDialog(Asset asset, bool hueSet)
+        private void AssetOpenRecolorDialog(AssetType assetType, IList<Asset> selectedAssets, bool hueSet)
         {
-            if (asset != null)
+            if (selectedAssets?.Count > 0)
             {
-                RecolorAll recolor = new RecolorAll(asset.AssetType, asset, hueSet, Application.Current.MainWindow);
+                RecolorAll recolor = new RecolorAll(assetType, selectedAssets, hueSet);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();

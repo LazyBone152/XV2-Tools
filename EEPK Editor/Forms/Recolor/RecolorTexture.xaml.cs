@@ -1,26 +1,22 @@
-﻿using System;
+﻿using LB_Common.Mvvm;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
-using MahApps.Metro.Controls;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.Resource.Image;
 using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
 {
-    public partial class RecolorTexture : MetroWindow, INotifyPropertyChanged
+    public partial class RecolorTexture : AutoObservableWindow
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public EMB_TextureEntry CurrentTexture { get; set; }
+        private readonly EMB_TextureEntry CurrentTexture;
+        private readonly IList<EMB_TextureEntry> Textures;
         private readonly WriteableBitmapEditOperation EditOperation;
         private bool IsCancelled = true;
 
@@ -86,16 +82,17 @@ namespace EEPK_Organiser.Forms
         public string HueRevertTooltip => string.Format("Revert to original value of {0}", initialHue);
 
 
-        public RecolorTexture(EMB_TextureEntry texture, bool isHueSet, Window parent)
+        public RecolorTexture(EMB_TextureEntry primaryTexture, List<EMB_TextureEntry> otherTextures, bool isHueSet)
         {
             IsHueSet = isHueSet;
-            CurrentTexture = texture;
+            CurrentTexture = primaryTexture;
+            Textures = otherTextures;
+            Textures.Remove(CurrentTexture);
             EditOperation = new WriteableBitmapEditOperation(CurrentTexture.Texture);
             CurrentTexture.Texture = EditOperation.OutputBitmap;
 
             InitializeComponent();
             DataContext = this;
-            Owner = parent;
             stopwatch.Start();
 
             if (isHueSet)
@@ -107,15 +104,16 @@ namespace EEPK_Organiser.Forms
                 saturationGrid.Visibility = Visibility.Collapsed;
                 lightnessGrid.Visibility = Visibility.Collapsed;
                 Height = 210;
-                Title = "Hue Set";
+                Title = Textures.Count > 0 ? $"Hue Set ({Textures.Count + 1} textures selected)" : $"Hue Set (1 texture selected)";
             }
             else
             {
                 helpTextBlock.Text = "Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount. This recolors the texture while preserving any color variation.";
+                Title = Textures.Count > 0 ? $"Hue Adjustment ({Textures.Count + 1} textures selected)" : $"Hue Adjustment (1 texture selected)";
             }
 
             //Dynamically set the delay time based on thread count
-            //WriteableBitmapEditOperation will use every thread available, so more generally.... more threads = shorter image processing times
+            //WriteableBitmapEditOperation will use every thread available, so generally.... more threads = shorter image processing times
             if (Environment.ProcessorCount >= 16)
             {
                 PreviewMillisecondDelay = 50;
@@ -130,9 +128,27 @@ namespace EEPK_Organiser.Forms
             }
         }
 
-        private void Ok_Click(object sender, RoutedEventArgs e)
+        private async void Ok_Click(object sender, RoutedEventArgs e)
         {
             IsCancelled = false;
+
+            var controller = await this.ShowProgressAsync("Finalizing...", "Applying hue adjustment to other selected textures...", false, DialogSettings.Default);
+            controller.SetIndeterminate();
+
+            try
+            {
+                await FinalizeEdit();
+            }
+            finally
+            {
+                await controller.CloseAsync();
+            }
+            
+            Close();
+        }
+
+        private async Task FinalizeEdit()
+        {
             CurrentTexture.wasEdited = true;
 
             List<IUndoRedo> undos = new List<IUndoRedo>()
@@ -141,10 +157,26 @@ namespace EEPK_Organiser.Forms
             };
             CurrentTexture.SaveDds(true, undos);
 
-            UndoManager.Instance.AddCompositeUndo(undos, "Hue Adjustment");
-            UndoManager.Instance.ForceEventCall();
+            foreach(var texture in Textures)
+            {
+                WriteableBitmapEditOperation editOp = new WriteableBitmapEditOperation(texture.Texture);
 
-            Close();
+                if (IsHueSet)
+                {
+                    await editOp.AsyncApplyHueSet(HueValue);
+                }
+                else
+                {
+                    await editOp.AsyncApplyHueAdjust(HueValue, SaturationValue, LightnessValue);
+                }
+
+                undos.Add(new UndoableProperty<EMB_TextureEntry>(nameof(EMB_TextureEntry.Texture), texture, editOp.SourceBitmap, editOp.OutputBitmap));
+                texture.Texture = editOp.OutputBitmap;
+                texture.SaveDds(true, undos);
+            }
+
+            UndoManager.Instance.AddCompositeUndo(undos, IsHueSet ? "Hue Set" : "Hue Adjustment");
+            UndoManager.Instance.ForceEventCall();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)

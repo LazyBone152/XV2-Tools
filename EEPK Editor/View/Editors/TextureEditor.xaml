@@ -9,6 +9,7 @@
              xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
              xmlns:mvvm="clr-namespace:LB_Common.Mvvm;assembly=LB_Common"
              xmlns:lbCommon="clr-namespace:LB_Common;assembly=LB_Common"
+             xmlns:helper="clr-namespace:LB_Common.AttachedProperties;assembly=LB_Common"
              xmlns:emm="clr-namespace:Xv2CoreLib.EMM;assembly=Xv2CoreLib"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -96,7 +97,9 @@
 
         <!-- Texture selection -->
         <Grid Grid.Column="1" Grid.Row="1">
-            <DataGrid x:Name="textureDataGrid" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" ItemsSource="{Binding ElementName=UserControl, Path=ViewTextures}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTexture}" Controls:ControlsHelper.ContentCharacterCasing="Normal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+            <DataGrid x:Name="textureDataGrid" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" 
+                      ItemsSource="{Binding ElementName=UserControl, Path=ViewTextures}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTexture}" Controls:ControlsHelper.ContentCharacterCasing="Normal" 
+                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" helper:DataGridHelper.SelectedItems="{Binding ElementName=UserControl, Path=SelectedTextures, Mode=OneWay}">
 
                 <DataGrid.InputBindings>
                     <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=CopyTextureCommand}"/>

@@ -706,7 +706,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsFileLoaded))]
         private void ToolMenu_HueAdjust()
         {
-            RecolorAll recolor = new RecolorAll(effectContainerFile, false, Application.Current.MainWindow);
+            RecolorAll recolor = new RecolorAll(effectContainerFile, false);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -715,7 +715,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsFileLoaded))]
         private void ToolMenu_HueSet()
         {
-            RecolorAll recolor = new RecolorAll(effectContainerFile, true, Application.Current.MainWindow);
+            RecolorAll recolor = new RecolorAll(effectContainerFile, true);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -872,5 +872,6 @@ namespace EEPK_Organiser.View
         partial void AssetEmoOpenEditor(Asset asset);
 
         #endregion
+
     }
 }

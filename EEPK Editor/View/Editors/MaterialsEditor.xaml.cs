@@ -7,6 +7,7 @@ using LB_Common.Utils;
 using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -70,6 +71,7 @@ namespace EEPK_Organiser.View
                 RefreshViewModel();
             }
         }
+        public ObservableCollection<EmmMaterial> SelectedMaterials { get; } = new ObservableCollection<EmmMaterial>();
         public bool ParameterEditorEnabled => _selectedMaterial != null;
 
         //ViewModel
@@ -395,8 +397,7 @@ namespace EEPK_Organiser.View
             material.Index = EmmFile.GetNewID();
 
             EmmFile.Materials.Add(material);
-            SelectedMaterial = material;
-            materialDataGrid.ScrollIntoView(material);
+            SetSelectedMaterial(material);
 
             UndoManager.Instance.AddCompositeUndo(new List<IUndoRedo>()
             {
@@ -409,35 +410,28 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsMaterialSelected))]
         private void DeleteMaterial()
         {
-            bool materialInUse = false;
+            //bool materialInUse = false;
             int removed = 0;
-            List<EmmMaterial> selectedMaterials = materialDataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
+            var selectedMaterials = SelectedMaterials.ToArray();
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            if (selectedMaterials.Count > 0)
+            if (selectedMaterials.Length > 0)
             {
+
+                if (IsForContainer && selectedMaterials.Any(x => AssetContainer.IsMaterialUsed(x)))
+                {
+                    string type = AssetContainer.ContainerAssetType == Xv2CoreLib.EEPK.AssetType.PBIND ? "EMP" : "ETR";
+                    if (MessagePrompt.Show($"One or more of the selected materials is currently assigned to a {type} and its reference will be removed if the material is deleted.\n\nDo you wish to continue?",
+                            "Delete", MessagePromptButtons.YesNo, MessagePromptIcon.Warning) != MessagePromptResult.Yes)
+                        return;
+                }
+
                 if (IsForContainer)
                 {
                     foreach (var material in selectedMaterials)
                     {
-                        if (AssetContainer.IsMaterialUsed(material))
-                        {
-                            materialInUse = true;
-                        }
-                        else
-                        {
-                            removed++;
-                            AssetContainer.DeleteMaterial(material, undos);
-                        }
-                    }
-
-                    if (materialInUse && selectedMaterials.Count == 1)
-                    {
-                        MessagePrompt.Show("The selected material cannot be deleted because it is currently being used.", "Delete", MessagePromptButtons.OK, MessagePromptIcon.Warning);
-                    }
-                    else if (materialInUse && selectedMaterials.Count > 1)
-                    {
-                        MessagePrompt.Show("One or more of the selected materials cannot be deleted because they are currently being used.", "Delete", MessagePromptButtons.OK, MessagePromptIcon.Warning);
+                        removed++;
+                        AssetContainer.DeleteMaterial(material, undos);
                     }
                 }
                 else
@@ -463,26 +457,23 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsMaterialSelected))]
         private void DuplicateMaterial()
         {
-            List<EmmMaterial> selectedMaterials = materialDataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
-            List<IUndoRedo> undos = new List<IUndoRedo>();
-
-            EmmMaterial selectedMat = null;
+            var selectedMaterials = SelectedMaterials.ToArray();
+            List<IUndoRedo> undos = new List<IUndoRedo>(selectedMaterials.Length);
+            List<EmmMaterial> newMaterials = new List<EmmMaterial>(selectedMaterials.Length);
 
             try
             {
                 foreach (var mat in selectedMaterials)
                 {
                     EmmMaterial newMaterial = mat.Copy();
+                    newMaterials.Add(newMaterial);
                     newMaterial.Index = EmmFile.GetNewID();
                     newMaterial.Name = EmmFile.GetUnusedName(newMaterial.Name);
                     undos.Add(new UndoableListAdd<EmmMaterial>(EmmFile.Materials, newMaterial));
                     EmmFile.Materials.Add(newMaterial);
-
-                    selectedMat = newMaterial;
                 }
 
-                SelectedMaterial = selectedMat;
-                materialDataGrid.ScrollIntoView(SelectedMaterial);
+                SetSelectedMaterials(newMaterials);
             }
             finally
             {
@@ -495,7 +486,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsMaterialSelected))]
         private void MergeMaterial()
         {
-            List<EmmMaterial> selectedMaterials = materialDataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
+            var selectedMaterials = SelectedMaterials.ToList();
             selectedMaterials.Remove(SelectedMaterial);
 
             if (SelectedMaterial != null && selectedMaterials.Count > 0)
@@ -551,7 +542,7 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll recolor = new RecolorAll(SelectedMaterial, false, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused), ShiftGlareColor);
+                RecolorAll recolor = new RecolorAll(SelectedMaterials.ToList(), false, ShiftGlareColor);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
@@ -565,7 +556,7 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll recolor = new RecolorAll(SelectedMaterial, true, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused), ShiftGlareColor);
+                RecolorAll recolor = new RecolorAll(SelectedMaterials.ToList(), true, ShiftGlareColor);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
@@ -577,7 +568,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsMaterialSelected))]
         private void CopyMaterial()
         {
-            List<EmmMaterial> selectedMaterials = materialDataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
+            IList<EmmMaterial> selectedMaterials = SelectedMaterials.ToList();
 
             if (selectedMaterials != null)
             {
@@ -593,10 +584,12 @@ namespace EEPK_Organiser.View
 
             if (copiedMaterials != null)
             {
-                List<IUndoRedo> undos = new List<IUndoRedo>();
+                List<IUndoRedo> undos = new List<IUndoRedo>(copiedMaterials.Count);
+                List<EmmMaterial> newMaterials = new List<EmmMaterial>(copiedMaterials.Count);
 
                 foreach (var material in copiedMaterials)
                 {
+                    newMaterials.Add(material);
                     material.Name = EmmFile.GetUnusedName(material.Name);
                     material.Index = EmmFile.GetNewID();
                     EmmFile.Materials.Add(material);
@@ -607,6 +600,8 @@ namespace EEPK_Organiser.View
                 undos.Add(new UndoActionDelegate(EmmFile, nameof(EmmFile.TriggerMaterialsChanged), true));
                 EmmFile.TriggerMaterialsChanged();
                 UndoManager.Instance.AddCompositeUndo(undos, copiedMaterials.Count > 1 ? "Paste Materials" : "Paste Material");
+
+                SetSelectedMaterials(newMaterials);
             }
 
         }
@@ -818,6 +813,30 @@ namespace EEPK_Organiser.View
             _selectedMaterial.ShaderProgram = shader;
             NotifyPropertyChanged(nameof(SelectedMaterialShaderProgram));
             UpdateVisibilities();
+        }
+
+        private void SetSelectedMaterial(EmmMaterial material)
+        {
+            SelectedMaterials.Clear();
+            SelectedMaterial = material;
+
+            if (material != null)
+                materialDataGrid.ScrollIntoView(material);
+        }
+
+        private void SetSelectedMaterials(IList<EmmMaterial> materials)
+        {
+            if (materials.Count == 0) return;
+
+            SelectedMaterial = materials[0];
+            SelectedMaterials.Clear();
+
+            foreach(var material in materials)
+            {
+                SelectedMaterials.Add(material);
+            }
+
+            materialDataGrid.ScrollIntoView(SelectedMaterial);
         }
     }
 }

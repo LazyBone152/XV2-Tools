@@ -2,10 +2,11 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
              xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
+             xmlns:helper="clr-namespace:LB_Common.AttachedProperties;assembly=LB_Common"
              xmlns:eepk="clr-namespace:Xv2CoreLib.EEPK;assembly=Xv2CoreLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:mvvm="clr-namespace:LB_Common.Mvvm;assembly=LB_Common"
@@ -76,7 +77,8 @@
                               AutoGenerateColumns="False" CanUserDeleteRows="False" CellEditEnding="EffectDataGrid_CellEditEnding"
                               HeadersVisibility="Row" RowHeaderWidth="25" RowDetailsVisibilityMode="Collapsed" RowHeaderStyle="{DynamicResource ExpandableDataGridHeaderStyle}"
                               SelectionUnit="FullRow"
-                              BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1">
+                              BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1"
+                              helper:DataGridHelper.SelectedItems="{Binding ElementName=UserControl, Path=SelectedEffects, Mode=OneWay}">
                         <DataGrid.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=Effect_DeleteEffectCommand}"/>
                             <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=EffectNewCommand}"/>
@@ -123,8 +125,12 @@
 
                         <DataGrid.RowDetailsTemplate>
                             <DataTemplate>
-                                <ListBox BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" MouseDoubleClick="EffectPartListBox_MouseDoubleClick" PreviewMouseWheel="ListBox_PreviewMouseWheel" BorderThickness="1" SelectionChanged="EffectPart_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding EffectParts.Binding}" SelectionMode="Extended" SelectedItem="{Binding Data.SelectedEffectPart, Source={StaticResource proxy}, UpdateSourceTrigger=PropertyChanged}" lbUtils:AttachedProperties.SelectedItems="{Binding Data.SelectedEffectParts, Source={StaticResource proxy}, UpdateSourceTrigger=PropertyChanged}">
-
+                                <ListBox BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" MouseDoubleClick="EffectPartListBox_MouseDoubleClick" PreviewMouseWheel="ListBox_PreviewMouseWheel" BorderThickness="1" 
+                                         SelectionChanged="EffectPart_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding EffectParts.Binding}" SelectionMode="Extended" 
+                                         SelectedItem="{Binding Data.SelectedEffectPart, Source={StaticResource proxy}, UpdateSourceTrigger=PropertyChanged}"
+                                         helper:ListBoxHelper.SelectedItems="{Binding Data.SelectedEffectParts, Source={StaticResource proxy}, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewMouseDown="EffectPartListBox_PreviewMouseDown">
+                                    
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Margin="0,2">

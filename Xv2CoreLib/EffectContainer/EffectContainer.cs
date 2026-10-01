@@ -268,11 +268,14 @@ namespace Xv2CoreLib.EffectContainer
         public void UpdateEffectFilter()
         {
             if (_viewEffects == null)
+            {
                 _viewEffects = new ListCollectionView(Effects.Binding);
+                _viewEffects.Filter = new Predicate<object>(EffectFilterCheck);
+            }
 
             _viewEffects.CommitEdit();
+            _viewEffects.SortDescriptions.Clear();
             _viewEffects.SortDescriptions.Add(new SortDescription(nameof(Effect.IndexNum), ListSortDirection.Ascending));
-            _viewEffects.Filter = new Predicate<object>(EffectFilterCheck);
             NotifyPropertyChanged(nameof(ViewEffects));
         }
 
@@ -3466,10 +3469,25 @@ namespace Xv2CoreLib.EffectContainer
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("DeleteTexture: AssetType is not PBIND or TBIND, cannot continue.");
 
-            if (undos != null && File3_Ref.Entry.Contains(embEntry))
-                undos.Add(new UndoableListRemove<EMB_TextureEntry>(File3_Ref.Entry, embEntry, File3_Ref.Entry.IndexOf(embEntry)));
+            //Remove references on texture definitions in EMP / ETR
+            foreach(var asset in Assets)
+            {
+                if(ContainerAssetType == AssetType.PBIND)
+                {
+                    EMP_TextureSamplerDef.RemoveTextureRef(asset.Files[0].EmpFile.Textures, embEntry, undos);
+                }
+                else if(ContainerAssetType == AssetType.TBIND)
+                {
+                    EMP_TextureSamplerDef.RemoveTextureRef(asset.Files[0].EtrFile.Textures, embEntry, undos);
+                }
+            }
 
-            File3_Ref.Entry.Remove(embEntry);
+            if (File3_Ref.Entry.Contains(embEntry))
+            {
+                undos?.Add(new UndoableListRemove<EMB_TextureEntry>(File3_Ref.Entry, embEntry, File3_Ref.Entry.IndexOf(embEntry)));
+
+                File3_Ref.Entry.Remove(embEntry);
+            }
         }
 
         public void DeleteMaterial(EmmMaterial material, List<IUndoRedo> undos = null)
@@ -3477,10 +3495,24 @@ namespace Xv2CoreLib.EffectContainer
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("DeleteMaterial: AssetType is not PBIND or TBIND, cannot continue.");
 
-            if (undos != null && File2_Ref.Materials.Contains(material))
-                undos.Add(new UndoableListRemove<EmmMaterial>(File2_Ref.Materials, material, File2_Ref.Materials.IndexOf(material)));
+            if (File2_Ref.Materials.Contains(material))
+            {
+                foreach(var asset in Assets)
+                {
+                    if (ContainerAssetType == AssetType.PBIND)
+                    {
+                        asset.Files[0].EmpFile?.RemoveMaterialRef(material, undos);
+                    }
+                    else if (ContainerAssetType == AssetType.TBIND)
+                    {
+                        asset.Files[0].EtrFile?.RemoveMaterialRef(material, undos);
+                    }
+                }
 
-            File2_Ref.Materials.Remove(material);
+                undos?.Add(new UndoableListRemove<EmmMaterial>(File2_Ref.Materials, material, File2_Ref.Materials.IndexOf(material)));
+
+                File2_Ref.Materials.Remove(material);
+            }
         }
 
         //Operations

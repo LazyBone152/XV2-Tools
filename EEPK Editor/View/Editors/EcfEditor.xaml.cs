@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
+using CommunityToolkit.Mvvm.Input;
+using LB_Common.Mvvm;
+using LB_Common.Utils;
 using Xv2CoreLib.ECF;
+using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.UndoRedo;
 using EEPK_Organiser.ViewModel;
-using Xv2CoreLib.EffectContainer;
-using LB_Common.Mvvm;
-using CommunityToolkit.Mvvm.Input;
-using LB_Common.Utils;
 
 namespace EEPK_Organiser.View.Editors
 {
@@ -48,6 +48,7 @@ namespace EEPK_Organiser.View.Editors
                 }
             }
         }
+        public ObservableCollection<ECF_Node> SelectedNodes { get; } = new ObservableCollection<ECF_Node>();
 
         private EcfNodeViewModel _viewModel = new EcfNodeViewModel();
         public EcfNodeViewModel ViewModel => SelectedNode != null ? _viewModel : null;
@@ -82,16 +83,26 @@ namespace EEPK_Organiser.View.Editors
                 if (e.UndoContext is ECF_Node node)
                 {
                     node.UpdatePreviewBrush();
-                    return;
+                }
+                else if (e.UndoContext is IList<ECF_Node> nodes)
+                {
+                    foreach(var _node in nodes)
+                    {
+                        _node.UpdatePreviewBrush();
+                    }
                 }
                 else if (e.UndoContext is Asset asset)
                 {
-                    if (asset.AssetType == Xv2CoreLib.EEPK.AssetType.CBIND)
+                    if (asset.AssetType == Xv2CoreLib.EEPK.AssetType.CBIND && asset.Files[0].EcfFile == EcfFile)
                     {
-                        if (asset.Files[0].EcfFile == EcfFile)
-                        {
-                            EcfFile.UpdatePreviewBrush();
-                        }
+                        EcfFile.UpdatePreviewBrush();
+                    }
+                }
+                else if (e.UndoContext is IList<Asset> assets)
+                {
+                    if (assets.Any(x => x.AssetType == Xv2CoreLib.EEPK.AssetType.CBIND && x.Files[0].EcfFile == EcfFile))
+                    {
+                        EcfFile.UpdatePreviewBrush();
                     }
                 }
 
@@ -103,7 +114,6 @@ namespace EEPK_Organiser.View.Editors
         }
 
         #region Commands
-        private List<ECF_Node> SelectedNodes => ecfDataGrid.SelectedItems.Cast<ECF_Node>().ToList();
 
         [RelayCommand(CanExecute = nameof(IsEcfLoaded))]
         private void AddNode()
@@ -112,13 +122,16 @@ namespace EEPK_Organiser.View.Editors
             EcfFile.Nodes.Add(node);
 
             UndoManager.Instance.AddUndo(new UndoableListAdd<ECF_Node>(EcfFile.Nodes, node, "ECF -> Add Node"));
+
+            SelectedNodes.Clear();
+            SelectedNode = node;
         }
 
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void DeleteNode()
         {
-            List<ECF_Node> nodes = SelectedNodes;
-            List<IUndoRedo> undos = new List<IUndoRedo>();
+            var nodes = SelectedNodes.ToArray();
+            List<IUndoRedo> undos = new List<IUndoRedo>(nodes.Length);
 
             foreach(ECF_Node node in nodes)
             {
@@ -132,48 +145,52 @@ namespace EEPK_Organiser.View.Editors
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void CopyNode()
         {
-            CustomClipboard.SetData(ECF_Node.CLIPBOARD_ID, SelectedNodes);
+            CustomClipboard.SetData(ECF_Node.CLIPBOARD_ID, SelectedNodes.ToArray());
         }
 
         [RelayCommand(CanExecute = nameof(IsNodeInClipboard))]
         private void PasteNode()
         {
-            if (!CustomClipboard.TryGetData(ECF_Node.CLIPBOARD_ID, out List<ECF_Node> nodes))
+            if (!CustomClipboard.TryGetData(ECF_Node.CLIPBOARD_ID, out ECF_Node[] nodes))
                 return;
 
-            List<IUndoRedo> undos = new List<IUndoRedo>();
+            List<IUndoRedo> undos = new List<IUndoRedo>(nodes.Length);
+            List<ECF_Node> newNodes = new List<ECF_Node>(nodes.Length);
 
             foreach (ECF_Node node in nodes)
             {
                 undos.Add(new UndoableListAdd<ECF_Node>(EcfFile.Nodes, node));
                 EcfFile.Nodes.Add(node);
+                newNodes.Add(node);
             }
 
             UndoManager.Instance.AddCompositeUndo(undos, "ECF -> Paste Node");
+            SetSelectedNodes(newNodes);
         }
 
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void DuplicateNode()
         {
-            List<ECF_Node> nodes = SelectedNodes;
-            List<IUndoRedo> undos = new List<IUndoRedo>();
+            List<ECF_Node> nodes = SelectedNodes.ToList();
+            List<IUndoRedo> undos = new List<IUndoRedo>(nodes.Count);
+            List<ECF_Node> newNodes = new List<ECF_Node>(nodes.Count);
 
             foreach (ECF_Node node in nodes)
             {
                 ECF_Node newNode = node.Copy();
+                newNodes.Add(newNode);
                 undos.Add(new UndoableListAdd<ECF_Node>(EcfFile.Nodes, newNode));
                 EcfFile.Nodes.Add(newNode);
             }
 
             UndoManager.Instance.AddCompositeUndo(undos, "ECF -> Duplicate Node");
+            SetSelectedNodes(newNodes);
         }
 
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueAdjustment()
         {
-            Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
-
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, false, editorWindow);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNodes, false);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -182,9 +199,7 @@ namespace EEPK_Organiser.View.Editors
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueSet()
         {
-            Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
-
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, true, editorWindow);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNodes, true);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -210,5 +225,21 @@ namespace EEPK_Organiser.View.Editors
         {
             SelectedNode.UpdatePreviewBrush();
         }
+
+        private void SetSelectedNodes(IList<ECF_Node> nodes)
+        {
+            if (nodes.Count == 0) return;
+
+            SelectedNode = nodes[0];
+            SelectedNodes.Clear();
+
+            foreach (var material in nodes)
+            {
+                SelectedNodes.Add(material);
+            }
+
+            ecfDataGrid.ScrollIntoView(SelectedNode);
+        }
+
     }
 }
