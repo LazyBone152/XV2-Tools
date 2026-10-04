@@ -208,6 +208,8 @@ namespace EEPK_Organiser.View
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
+
+            nodeView?.NodeViewModel?.UpdateProperties();
         }
 
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
@@ -217,6 +219,8 @@ namespace EEPK_Organiser.View
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
+
+            nodeView?.NodeViewModel?.UpdateProperties();
         }
 
         [RelayCommand(CanExecute = nameof(IsEmpFileLoaded))]

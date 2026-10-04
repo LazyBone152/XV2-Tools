@@ -1,18 +1,19 @@
 ﻿using LB_Common.Forms;
 using LB_Common.Mvvm;
+using LB_Common.Numbers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Media3D;
-using Xv2CoreLib.BCS;
 using Xv2CoreLib.ECF;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.ETR;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
+using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource.UndoRedo;
 
@@ -54,9 +55,6 @@ namespace EEPK_Organiser.Forms
         private double lightnessChange = 0;
         private int _variance = 0;
         private bool _textureVariance = false;
-        private RgbColor _rgbColor = new RgbColor(255, 255, 255);
-        private HslColor _hslColor = null;
-
 
         //For use with Global mode. Without multiplying this changing saturation globally is difficult as it doesn't change much.
         private double SaturationChangeMulti
@@ -76,37 +74,12 @@ namespace EEPK_Organiser.Forms
                 ? Visibility.Visible
                 : Visibility.Collapsed;
 
-        public RgbColor RgbColor
-        {
-            get
-            {
-                return _rgbColor;
-            }
-            set
-            {
-                if (value != _rgbColor)
-                {
-                    _rgbColor = value;
-                    NotifyPropertyChanged(nameof(RgbColor));
-                    NotifyPropertyChanged(nameof(PreviewBrush));
-                }
-            }
-        }
-        public HslColor HslColor
-        {
-            get
-            {
-                return _hslColor;
-            }
-            set
-            {
-                if (value != _hslColor)
-                {
-                    _hslColor = value;
-                    NotifyPropertyChanged(nameof(HslColor));
-                }
-            }
-        }
+
+        public CustomColor PreviewColor { get; set; }
+        public double Hue { get; set; }
+        public double Saturation { get; set; }
+        public double Lightness { get; set; }
+
         public int Variance
         {
             get
@@ -138,13 +111,13 @@ namespace EEPK_Organiser.Forms
             }
         }
 
-        public Brush PreviewBrush => new SolidColorBrush(Color.FromArgb(255, RgbColor.R_int, RgbColor.G_int, RgbColor.B_int));
+        public Brush PreviewBrush => PreviewColor != null ? new SolidColorBrush(Color.FromArgb(255, (byte)(PreviewColor.R * 255f), (byte)(PreviewColor.G * 255f), (byte)(PreviewColor.B * 255f))) : null;
 
         #region Tooltips
-        public string HueRevertTooltip => string.Format("Revert to original value of {0}", initialHue);
-        public string SaturationRevertTooltip => string.Format("Revert to original value of {0}", initialSaturation);
-        public string LightnessRevertTooltip => string.Format("Revert to original value of {0}", initialLightness);
-        public string RgbPreviewTooltip => string.Format("R: {0} ({3}), G: {1} ({4}), B: {2} ({5})", RgbColor.R, RgbColor.G, RgbColor.B, RgbColor.R_int, RgbColor.G_int, RgbColor.B_int);
+        public string HueRevertTooltip => $"Revert to original value of {initialHue:##0.0#}";
+        public string SaturationRevertTooltip => $"Revert to original value of {initialSaturation:0.0}";
+        public string LightnessRevertTooltip => $"Revert to original value of {initialLightness:0.0}";
+        public string RgbPreviewTooltip => PreviewColor != null ? string.Format("R: {0} ({3}), G: {1} ({4}), B: {2} ({5})", PreviewColor.R, PreviewColor.G, PreviewColor.B, (byte)(PreviewColor.R * 255f), (byte)(PreviewColor.G * 255f), (byte)(PreviewColor.B * 255f)) : null;
         #endregion
 
         #region Constructor
@@ -251,37 +224,38 @@ namespace EEPK_Organiser.Forms
                 return false;
             }
 
-            List<RgbColor> colors = new List<RgbColor>();
+            //List<RgbColor> colors = new List<RgbColor>();
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
 
             if(currentMode == Mode.Asset)
             {
                 Title += Assets.Count > 1 ? $" ({Assets.Count} {assetType} Assets)" : $" (1 {assetType} Asset)";
-                colors = GetUsedColorsForAssets(Assets);
+                GetUsedColorsForAssets(Assets, accumulator);
             }
             else if (currentMode == Mode.Material)
             {
                 Title += Materials.Count > 1 ? $" ({Materials.Count} Materials)" : " (1 Material)";
                 foreach (var material in Materials)
                 {
-                    colors.Add(material.GetUsedColor());
+                    material.AccumulateUsedColors(accumulator);
                 }
             }
             else if (currentMode == Mode.Global)
             {
                 Title += $" (Global)";
-                colors = GetUsedColorsByEverything();
+                GetUsedColorsByEverything(accumulator);
             }
             else if (currentMode == Mode.ParticleNode)
             {
                 Title += $" (1 Particle Node)";
-                colors = particleNode.GetUsedColors();
+                particleNode.AccumulateUsedColors(accumulator);
             }
             else if (currentMode == Mode.TraceNode)
             {
                 Title += etrNodes.Count > 1 ? $" ({etrNodes.Count} Trace Nodes)" : " (1 Trace Node)";
                 foreach (var node in etrNodes)
                 {
-                    colors.AddRange(node.GetUsedColors());
+                    node.AccumulateUsedColors(accumulator);
                 }
             }
             else if (currentMode == Mode.ColorFadeNode)
@@ -289,24 +263,25 @@ namespace EEPK_Organiser.Forms
                 Title += ecfNodes.Count > 1 ? $" ({ecfNodes.Count} Color Fade Nodes)" : " (1 Color Fade Node)";
                 foreach (var node in ecfNodes)
                 {
-                    colors.AddRange(node.GetUsedColors());
+                    node.AccumulateUsedColors(accumulator);
                 }
             }
 
-            if (colors.Count == 0)
+            if (accumulator.NumColors == 0)
             {
                 MessagePrompt.Show("No color information was found on this asset so it cannot be modified.\n\nThe most likely cause of this is that all color sources for this asset were either all white (1,1,1) or all black (0,0,0).", "No color information", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                 return false;
             }
 
-            RgbColor = ColorEx.GetAverageColor(colors);
-            HslColor = RgbColor.ToHsl();
+            PreviewColor = accumulator.ToCustomColor();
+            PreviewColor.ExtractHsl(out double hue, out double saturation, out double lightness);
 
-            //hslColor.Lightness = 0.5f; //Gives a "pure" color. Not light or dark. Good for previewing.
-            //hslColor.Saturation = 1f; //Completely saturated. Good for previewing.
-            initialHue = HslColor.Hue;
-            initialSaturation = HslColor.Saturation;
-            initialLightness = HslColor.Lightness;
+            initialHue = hue;
+            initialSaturation = saturation;
+            initialLightness = lightness;
+            Hue = initialHue;
+            Saturation = initialSaturation;
+            Lightness = initialLightness;
 
             ValueChanged();
 
@@ -373,41 +348,33 @@ namespace EEPK_Organiser.Forms
             }
         }
 
-        private List<RgbColor> GetUsedColorsByEverything()
+        private void GetUsedColorsByEverything(Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>(1024);
-
-            colors.AddRange(GetUsedColorsForAssets(effectContainerFile.Pbind.Assets));
-            colors.AddRange(GetUsedColorsForAssets(effectContainerFile.Tbind.Assets));
-            colors.AddRange(GetUsedColorsForAssets(effectContainerFile.Cbind.Assets));
-            colors.AddRange(GetUsedColorsForAssets(effectContainerFile.LightEma.Assets));
-            colors.AddRange(GetUsedColorsForAssets(effectContainerFile.Emo.Assets));
-            colors.AddRange(effectContainerFile.Pbind.File3_Ref.GetUsedColors());
-            colors.AddRange(effectContainerFile.Tbind.File3_Ref.GetUsedColors());
-            colors.AddRange(effectContainerFile.Pbind.File2_Ref.GetUsedColors());
-            colors.AddRange(effectContainerFile.Tbind.File2_Ref.GetUsedColors());
-
-            return colors;
+            GetUsedColorsForAssets(effectContainerFile.Pbind.Assets, accumulator);
+            GetUsedColorsForAssets(effectContainerFile.Tbind.Assets, accumulator);
+            GetUsedColorsForAssets(effectContainerFile.Cbind.Assets, accumulator);
+            GetUsedColorsForAssets(effectContainerFile.LightEma.Assets, accumulator);
+            GetUsedColorsForAssets(effectContainerFile.Emo.Assets, accumulator);
+            effectContainerFile.Pbind.File3_Ref.AccumulateUsedColors(accumulator);
+            effectContainerFile.Tbind.File3_Ref.AccumulateUsedColors(accumulator);
+            effectContainerFile.Pbind.File2_Ref.AccumulateUsedColors(accumulator);
+            effectContainerFile.Tbind.File2_Ref.AccumulateUsedColors(accumulator);
         }
 
-        private List<RgbColor> GetUsedColorsForAssets(IList<Asset> _assets)
+        private void GetUsedColorsForAssets(IList<Asset> _assets, Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>();
-
-            foreach(var _asset in _assets)
+            foreach (var _asset in _assets)
             {
-                colors.AddRange(_asset.GetUsedColors());
+                _asset.AccumulateUsedColors(accumulator);
 
                 if (assetType == AssetType.PBIND)
                 {
                     foreach (var material in _asset.Files[0].EmpFile.GetUsedMaterials())
                     {
-                        colors.Add(material.GetUsedColor());
+                        //material.AccumulateUsedColors(accumulator);
                     }
                 }
             }
-
-            return colors;
         }
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -422,11 +389,17 @@ namespace EEPK_Organiser.Forms
 
         private void ValueChanged()
         {
-            RgbColor = HslColor.ToRgb();
+            //PreviewColor.SetHls(initialHue, initialLightness, initialSaturation);
+            PreviewColor?.SetHsl(Hue, Saturation, Lightness);
             NotifyPropertyChanged(nameof(HueRevertTooltip));
             NotifyPropertyChanged(nameof(SaturationRevertTooltip));
             NotifyPropertyChanged(nameof(LightnessRevertTooltip));
             NotifyPropertyChanged(nameof(RgbPreviewTooltip));
+            NotifyPropertyChanged(nameof(Hue));
+            NotifyPropertyChanged(nameof(Saturation));
+            NotifyPropertyChanged(nameof(Lightness));
+            NotifyPropertyChanged(nameof(PreviewBrush));
+            NotifyPropertyChanged(nameof(PreviewColor));
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
@@ -434,9 +407,9 @@ namespace EEPK_Organiser.Forms
             List<IUndoRedo> undos = new List<IUndoRedo>();
             object context = null;
 
-            hueChange = isHueSet ? HslColor.Hue : HslColor.Hue - initialHue;
-            saturationChange = HslColor.Saturation - initialSaturation;
-            lightnessChange = HslColor.Lightness - initialLightness;
+            hueChange = isHueSet ? Hue : Hue - initialHue;
+            saturationChange = Saturation - initialSaturation;
+            lightnessChange = Lightness - initialLightness;
 
             if (currentMode == Mode.Asset)
             {
@@ -490,19 +463,19 @@ namespace EEPK_Organiser.Forms
 
         private void Button_UndoHueChange_Click(object sender, RoutedEventArgs e)
         {
-            HslColor.Hue = initialHue;
+            Hue = initialHue;
             ValueChanged();
         }
 
         private void Button_UndoSaturationChange_Click(object sender, RoutedEventArgs e)
         {
-            HslColor.Saturation = initialSaturation;
+            Saturation = initialSaturation;
             ValueChanged();
         }
 
         private void Button_UndoLightnessChange_Click(object sender, RoutedEventArgs e)
         {
-            HslColor.Lightness = initialLightness;
+            Lightness = initialLightness;
             ValueChanged();
         }
 

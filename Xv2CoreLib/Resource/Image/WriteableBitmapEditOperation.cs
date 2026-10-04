@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 
 namespace Xv2CoreLib.Resource.Image
 {
@@ -179,6 +179,18 @@ namespace Xv2CoreLib.Resource.Image
         private void ResetWorkPixels()
         {
             _sourceBitmap.GetPixels(_workPixels);
+        }
+        
+        /// <summary>
+        /// Calculates the average color of the source bitmap and returns a <see cref="Xv2Color"/> instance containing the RGB values.
+        /// </summary>
+        public Xv2Color CalculateAverageColor()
+        {
+            //We can avoid another array allocation by just reusing the workPixels array
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
+            SourceBitmap.GetPixels(_workPixels);
+            accumulator.AddBitmap(_workPixels, SourceBitmap.Format, SourceBitmap.PixelHeight, SourceBitmap.PixelWidth);
+            return accumulator.AverageColor;
         }
     }
 }

@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.EMP_NEW.Keyframes;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 
@@ -34,16 +34,25 @@ namespace Xv2CoreLib.ECF
             return new Parser(bytes).GetEcfFile();
         }
 
-        public List<RgbColor> GetUsedColors()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>();
-            if (Nodes == null) return colors;
+            foreach (var node in Nodes)
+            {
+                node.AccumulateUsedColors(accumulator);
+            }
+        }
+
+        public Xv2Color GetAverageColor()
+        {
+            if (Nodes == null) return Xv2Color.Transparent;
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
 
             foreach (var entry in Nodes)
             {
-                colors.AddRange(entry.GetUsedColors());
+                entry.AccumulateUsedColors(accumulator);
             }
-            return colors;
+
+            return accumulator.AverageColor;
         }
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
@@ -93,13 +102,13 @@ namespace Xv2CoreLib.ECF
         {
             get
             {
-                RgbColor multColor = MultiColor.GetAverageColor();
-                RgbColor rimColor = RimColor.GetAverageColor();
-                RgbColor addColor = AddColor.GetAverageColor();
+                Xv2Color multColor = MultiColor.CalculateAverageColor(true);
+                Xv2Color rimColor = RimColor.CalculateAverageColor(true);
+                Xv2Color addColor = AddColor.CalculateAverageColor(true);
 
-                byte r = (byte)((multColor.R_int + rimColor.R_int + addColor.R_int) / 3);
-                byte g = (byte)((rimColor.G_int + rimColor.G_int + addColor.G_int) / 3);
-                byte b = (byte)((multColor.B_int + rimColor.B_int + addColor.B_int) / 3);
+                byte r = (byte)((multColor.R_Preview + rimColor.R_Preview + addColor.R_Preview) / 3);
+                byte g = (byte)((multColor.G_Preview + rimColor.G_Preview + addColor.G_Preview) / 3);
+                byte b = (byte)((multColor.B_Preview + rimColor.B_Preview + addColor.B_Preview) / 3);
 
                 return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(r, g, b));
             }
@@ -161,24 +170,27 @@ namespace Xv2CoreLib.ECF
 
         public List<EMP_KeyframedValue> KeyframedValues { get; set; } = new List<EMP_KeyframedValue>();
 
-        public List<RgbColor> GetUsedColors()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>();
+            var multiColor = MultiColor.CalculateAverageColor();
+            var rimColor = RimColor.CalculateAverageColor();
+            var addColor = AddColor.CalculateAverageColor();
 
-            RgbColor diffuse = MultiColor.GetAverageColor();
-            RgbColor specular = RimColor.GetAverageColor();
-            RgbColor ambient = AddColor.GetAverageColor();
+            if(!multiColor.IsTransparent)
+                accumulator.AddColor(multiColor);
 
-            if (!diffuse.IsWhiteOrBlack)
-                colors.Add(diffuse);
+            if(!rimColor.IsTransparent)
+                accumulator.AddColor(rimColor);
 
-            if (!specular.IsWhiteOrBlack)
-                colors.Add(specular);
+            if(!addColor.IsTransparent)
+                accumulator.AddColor(addColor);
+        }
 
-            if (!ambient.IsWhiteOrBlack)
-                colors.Add(ambient);
-
-            return colors;
+        public Xv2Color GetUsedColor()
+        {
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
+            AccumulateUsedColors(accumulator);
+            return accumulator.AverageColor;
         }
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)

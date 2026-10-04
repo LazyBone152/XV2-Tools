@@ -185,7 +185,7 @@ namespace EEPK_Organiser.View.Editors.EMP
             {
                 if (e.UndoContext is ParticleNode node)
                 {
-                    node.UpdatePreviewBrush();
+                    node.UpdatePreviewBrush(true);
                     return;
                 }
                 else if (e.UndoContext is IList<Asset> assets)

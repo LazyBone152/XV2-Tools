@@ -6,7 +6,7 @@ using LB_Common.Numbers;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.EMM.Analyzer;
 using System.Linq;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 
 namespace Xv2CoreLib.EMM
 {
@@ -828,6 +828,7 @@ namespace Xv2CoreLib.EMM
 
             return null;
         }
+        
         public bool Compare(DecompiledMaterial material)
         {
             foreach (var field in Fields)
@@ -976,7 +977,7 @@ namespace Xv2CoreLib.EMM
             _parametersChanged = 0;
         }
 
-        private System.Windows.Media.Color CalculatePreviewColor(AnalyzedShader shader)
+        public System.Windows.Media.Color CalculatePreviewColor(AnalyzedShader shader)
         {
             float r = 0, g = 0, b = 0;
             int numColors = 0;
@@ -1005,10 +1006,10 @@ namespace Xv2CoreLib.EMM
             return new System.Windows.Media.SolidColorBrush(CalculatePreviewColor(shader));
         }
 
-        public RgbColor GetPreviewColor(AnalyzedShader shader)
+        public Xv2Color GetPreviewColor(AnalyzedShader shader)
         {
             var color = CalculatePreviewColor(shader);
-            return new RgbColor(color.R, color.G, color.B);
+            return new Xv2Color(color.R, color.G, color.B);
         }
     }
 

@@ -10,6 +10,13 @@
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Title="Hue Adjustment" Height="250" Width="444" ShowInTaskbar="True" Topmost="True" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow" TitleCharacterCasing="Normal" Name="Window">
+    <mvvm:AutoObservableWindow.Resources>
+        <Style x:Key="ToolBarButton_NoFocus" TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.ToolBar}">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        </Style>
+    </mvvm:AutoObservableWindow.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="90"/>
@@ -44,10 +51,10 @@
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
                 <Label Content="Hue" HorizontalContentAlignment="Right" Width="75"/>
-                <Slider x:Name="hueSlider" Grid.Column="1" ValueChanged="Slider_ValueChanged" Value="{Binding ElementName=Window, Path=HslColor.Hue, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="360" Width="200"/>
-                <Controls:NumericUpDown x:Name="hueInput" Grid.Column="2" StringFormat="0.00" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding ElementName=Window, Path=HslColor.Hue, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="360" Width="105" />
-                <Button Grid.Column="3"  Width="25" Height="25" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoHueChange_Click" ToolTip="{Binding ElementName=Window, Path=HueRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
-                    <iconPacks:PackIconMaterialDesign Margin="0, -20, 0,0" Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
+                <Slider x:Name="hueSlider" Grid.Column="1" ValueChanged="Slider_ValueChanged" Value="{Binding ElementName=Window, Path=Hue, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="360" Width="200"/>
+                <Controls:NumericUpDown x:Name="hueInput" Grid.Column="2" StringFormat="0.00" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding ElementName=Window, Path=Hue, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="360" Width="105" />
+                <Button Grid.Column="3"  Width="30" Height="30" Style="{StaticResource ToolBarButton_NoFocus}" Click="Button_UndoHueChange_Click" ToolTip="{Binding ElementName=Window, Path=HueRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
+                    <iconPacks:PackIconMaterialDesign Margin="-10" Width="20" Height="20" Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
                 </Button>
             </Grid>
             <Grid x:Name="saturationGrid" Margin="0, 2.5" Visibility="Collapsed">
@@ -58,10 +65,10 @@
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
                 <Label Content="Saturation" HorizontalContentAlignment="Right" Width="75"/>
-                <Slider Grid.Column="1" ValueChanged="Slider_ValueChanged" Value="{Binding ElementName=Window, Path=HslColor.Saturation, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Width="200"/>
-                <Controls:NumericUpDown Grid.Column="2" StringFormat="0.00" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding ElementName=Window, Path=HslColor.Saturation, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Interval="0.05" Width="105" />
-                <Button Grid.Column="3"  Width="25" Height="25" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoSaturationChange_Click" ToolTip="{Binding ElementName=Window, Path=SaturationRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
-                    <iconPacks:PackIconMaterialDesign Margin="0, -20, 0,0" Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}" />
+                <Slider Grid.Column="1" ValueChanged="Slider_ValueChanged" Value="{Binding ElementName=Window, Path=Saturation, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Width="200"/>
+                <Controls:NumericUpDown Grid.Column="2" StringFormat="0.00" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding ElementName=Window, Path=Saturation, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Interval="0.05" Width="105" />
+                <Button Grid.Column="3"  Width="30" Height="30" Style="{StaticResource ToolBarButton_NoFocus}" Click="Button_UndoSaturationChange_Click" ToolTip="{Binding ElementName=Window, Path=SaturationRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
+                    <iconPacks:PackIconMaterialDesign Margin="-10" Width="20" Height="20" Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}" />
                 </Button>
             </Grid>
             <Grid x:Name="lightnessGrid" Margin="0, 2.5" Visibility="Collapsed">
@@ -72,10 +79,10 @@
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
                 <Label Content="Lightness" HorizontalContentAlignment="Right" Width="75"/>
-                <Slider Grid.Column="1" ValueChanged="Slider_ValueChanged" Value="{Binding ElementName=Window, Path=HslColor.Lightness, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Width="200"/>
-                <Controls:NumericUpDown Grid.Column="2" StringFormat="0.00" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding ElementName=Window, Path=HslColor.Lightness, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Interval="0.05" Width="105" />
-                <Button Grid.Column="3"  Width="25" Height="25" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoLightnessChange_Click" ToolTip="{Binding ElementName=Window, Path=LightnessRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
-                    <iconPacks:PackIconMaterialDesign Margin="0, -20, 0,0" Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}" />
+                <Slider Grid.Column="1" ValueChanged="Slider_ValueChanged" Value="{Binding ElementName=Window, Path=Lightness, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Width="200"/>
+                <Controls:NumericUpDown Grid.Column="2" StringFormat="0.00" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding ElementName=Window, Path=Lightness, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Interval="0.05" Width="105" />
+                <Button Grid.Column="3"  Width="30" Height="30" Style="{StaticResource ToolBarButton_NoFocus}" Click="Button_UndoLightnessChange_Click" ToolTip="{Binding ElementName=Window, Path=LightnessRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
+                    <iconPacks:PackIconMaterialDesign Margin="-10" Width="20" Height="20" Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}" />
                 </Button>
             </Grid>
             <Grid x:Name="varianceGrid" Margin="0, 2.5">

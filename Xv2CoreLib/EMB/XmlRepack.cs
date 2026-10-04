@@ -35,7 +35,7 @@ namespace Xv2CoreLib.EMB
                             break;
                         case ".emp":
                             Console.WriteLine(String.Format("Converting \"{0}\" to binary file...", s));
-                            new EMP.Deserializer(s);
+                            new EMP_XML.Deserializer(s);
                             break;
                     }
                 }

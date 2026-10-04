@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using Xv2CoreLib.EffectContainer;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.Image;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -86,16 +86,12 @@ namespace Xv2CoreLib.EMB_CLASS
             }
         }
 
-        public List<RgbColor> GetUsedColors()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>();
-
             foreach (var entry in Entry)
             {
-                colors.Add(entry.GetDdsColor());
+                entry.AccumulateUsedColor(accumulator);
             }
-
-            return colors;
         }
 
         public List<EMB_TextureEntry> GetAllEmbEntriesByBitmap(List<WriteableBitmap> bitmaps)
@@ -432,36 +428,19 @@ namespace Xv2CoreLib.EMB_CLASS
                 undos.Add(new UndoableProperty<EmbEntry>(nameof(Texture), this, editOperation.SourceBitmap, editOperation.OutputBitmap));
         }
 
-        public RgbColor GetDdsColor()
+        public void AccumulateUsedColor(Xv2ColorAccumulator accumulator)
         {
-            if (Texture == null) throw new InvalidOperationException("GetDdsColor: DdsImage was null.");
-            List<RgbColor> colors = new List<RgbColor>();
+            if (Texture == null) throw new InvalidOperationException("AccumulateUsedColor: DdsImage was null.");
+            accumulator.AddBitmap(Texture);
+        }
 
-            //Lazy code. Checking every single pixel would be WAY too slow, so we just skim through them instead.
-            for (int i = 0; i < Texture.Width; i += 15)
-            {
-                if (i > Texture.Width) break;
+        public Xv2Color CalculateAverageColor()
+        {
+            if (Texture == null) throw new InvalidOperationException("GetUsedColor: DdsImage was null.");
 
-                for (int a = 0; a < Texture.Height; a += 15)
-                {
-                    if (a > Texture.Height) break;
-
-                    var pixel = Texture.GetPixel(i, a);
-                    RgbColor rgbColor = new RgbColor(pixel.R, pixel.G, pixel.B);
-
-                    if (!rgbColor.IsWhiteOrBlack)
-                    {
-                        colors.Add(rgbColor);
-                    }
-                }
-            }
-
-            if (colors.Count == 0)
-            {
-                return new RgbColor(255, 255, 255);
-            }
-
-            return ColorEx.GetAverageColor(colors);
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
+            accumulator.AddBitmap(Texture);
+            return accumulator.AverageColor;
         }
 
         public BitmapSource GetBitmap()

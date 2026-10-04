@@ -5,8 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Xv2CoreLib.EMM.Analyzer;
-using Xv2CoreLib.EMP_NEW;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
@@ -150,17 +149,25 @@ namespace Xv2CoreLib.EMM
             return id;
         }
 
-        public List<RgbColor> GetUsedColors()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>();
-            if (Materials == null) return colors;
-
-            foreach (EmmMaterial mat in Materials)
+            foreach (var node in Materials)
             {
-                colors.Add(mat.GetUsedColor());
+                node.AccumulateUsedColors(accumulator);
+            }
+        }
+
+        public Xv2Color GetAverageColor()
+        {
+            if (Materials is null) return Xv2Color.Transparent;
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
+
+            foreach(EmmMaterial mat in Materials)
+            {
+                mat.AccumulateUsedColors(accumulator);
             }
 
-            return colors;
+            return accumulator.AverageColor;
         }
 
         //Name Helpers:
@@ -418,26 +425,6 @@ namespace Xv2CoreLib.EMM
             return mat;
         }
 
-        private static bool TryGetColorForHsl(string parameterName, CustomColor color, out RgbColor rgbColor, out double glareScale)
-        {
-            rgbColor = null;
-            glareScale = 1.0;
-
-            if (color.IsBlack())
-                return false;
-
-            if (parameterName == "GlareCol")
-            {
-                if (color.R == color.G && color.G == color.B)
-                    return false;
-
-                glareScale = Math.Max(1.0, Math.Max(color.R, Math.Max(color.G, color.B)));
-            }
-
-            rgbColor = new RgbColor(color.R / glareScale, color.G / glareScale, color.B / glareScale);
-            return true;
-        }
-
         public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = true)
         {
             if (Parameters == null) return;
@@ -451,37 +438,8 @@ namespace Xv2CoreLib.EMM
 
                 CustomColor col = DecompiledParameters.GetColor(param);
 
-                if (!TryGetColorForHsl(param, col, out RgbColor rgbColor, out double glareScale))
-                    continue;
-
-                var hslColor = rgbColor.ToHsl();
-
-                if (hueSet)
-                {
-                    hslColor.SetHue(hue, variance);
-                }
-                else
-                {
-                    hslColor.ChangeHue(hue);
-                    hslColor.ChangeLightness(lightness);
-                    hslColor.ChangeSaturation(saturation);
-                }
-
-                RgbColor newColor = hslColor.ToRgb();
-                float R = (float)(newColor.R * glareScale);
-                float G = (float)(newColor.G * glareScale);
-                float B = (float)(newColor.B * glareScale);
-
-                if (col.R != R || col.G != G || col.B != B)
+                if(col != null && col.ChangeHue(hue, saturation, lightness, undos, hueSet, variance))
                     colorChanged = true;
-
-                undos.Add(new UndoablePropertyGeneric(nameof(col.R), col, col.R, R));
-                undos.Add(new UndoablePropertyGeneric(nameof(col.G), col, col.G, G));
-                undos.Add(new UndoablePropertyGeneric(nameof(col.B), col, col.B, B));
-
-                col.R = R;
-                col.G = G;
-                col.B = B;
             }
 
             if (colorChanged)
@@ -519,10 +477,18 @@ namespace Xv2CoreLib.EMM
             return GetParameter(paramName) != null;
         }
 
-        public RgbColor GetUsedColor()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
             AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.Shaders.FirstOrDefault(x => x.ShaderProgram == ShaderProgram);
-            if (DecompiledParameters == null || shader == null) return new RgbColor(1f, 1f, 1f);
+            if(DecompiledParameters == null || shader == null) return;
+
+            accumulator.AddColor(DecompiledParameters.CalculatePreviewColor(shader));
+        }
+
+        public Xv2Color GetUsedColor()
+        {
+            AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.Shaders.FirstOrDefault(x => x.ShaderProgram == ShaderProgram);
+            if (DecompiledParameters == null || shader == null) return Xv2Color.Transparent;
 
             return DecompiledParameters.GetPreviewColor(shader);
         }

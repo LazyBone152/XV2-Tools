@@ -1276,15 +1276,15 @@ namespace Xv2CoreLib.BCS
         private SolidColorBrush CreateColorPreview()
         {
             if (!Color1.IsBlack())
-                return new SolidColorBrush(Color.FromArgb(255, RgbConverter.ConvertToByte(Color1.R), RgbConverter.ConvertToByte(Color1.G), RgbConverter.ConvertToByte(Color1.B)));
+                return new SolidColorBrush(Color1.ToWpfColor(true));
 
             if (!Color4.IsBlack())
-                return new SolidColorBrush(Color.FromArgb(255, RgbConverter.ConvertToByte(Color4.R), RgbConverter.ConvertToByte(Color4.G), RgbConverter.ConvertToByte(Color4.B)));
+                return new SolidColorBrush(Color4.ToWpfColor(true));
 
             if (!Color2.IsBlack())
-                return new SolidColorBrush(Color.FromArgb(255, RgbConverter.ConvertToByte(Color2.R), RgbConverter.ConvertToByte(Color2.G), RgbConverter.ConvertToByte(Color2.B)));
+                return new SolidColorBrush(Color2.ToWpfColor(true));
 
-            return new SolidColorBrush(Color.FromArgb(255, RgbConverter.ConvertToByte(Color3.R), RgbConverter.ConvertToByte(Color3.G), RgbConverter.ConvertToByte(Color3.B)));
+            return new SolidColorBrush(Color3.ToWpfColor(true));
         }
 
         public void RefreshPreview()

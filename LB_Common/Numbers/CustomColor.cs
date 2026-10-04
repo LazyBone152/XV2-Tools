@@ -44,6 +44,11 @@ namespace LB_Common.Numbers
             return (R == 0f && G == 0f && B == 0f) || (R == 1f && G == 1f && B == 1f);
         }
 
+        public bool IsSameChannels()
+        {
+            return (R == G && R == B);
+        }
+
         public bool IsBlack()
         {
             return (R == 0f && G == 0f && B == 0f);
@@ -81,6 +86,24 @@ namespace LB_Common.Numbers
                 Values = new float[4];
 
             return Values[idx];
+        }
+
+        public System.Windows.Media.Color ToWpfColor(bool opaque = false)
+        {
+            return System.Windows.Media.Color.FromScRgb(opaque ? 1f : CalculatePreviewValue(A), CalculatePreviewValue(R), CalculatePreviewValue(G), CalculatePreviewValue(B));
+        }
+
+        private static float CalculatePreviewValue(float value)
+        {
+            if (value <= 1f)
+                return value;
+
+            float floor = (float)Math.Floor(value);
+
+            if (value == floor)
+                return 1f;
+
+            return value - floor;
         }
 
         #region Operators

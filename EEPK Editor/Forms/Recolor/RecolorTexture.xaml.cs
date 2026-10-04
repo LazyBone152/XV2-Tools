@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.Resource.Image;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -75,11 +76,11 @@ namespace EEPK_Organiser.Forms
         
         //Time
         private readonly Stopwatch stopwatch = new Stopwatch();
-        private bool IsImageProcessing = false;
+        private bool ReadyForProcessing = false; //Initialize to false to prevent image processing during the start up phase
         private readonly int PreviewMillisecondDelay;
 
         //Tooltips
-        public string HueRevertTooltip => string.Format("Revert to original value of {0}", initialHue);
+        public string HueRevertTooltip => $"Revert to original value of {initialHue:##0.0#}";
 
 
         public RecolorTexture(EMB_TextureEntry primaryTexture, List<EMB_TextureEntry> otherTextures, bool isHueSet)
@@ -90,21 +91,27 @@ namespace EEPK_Organiser.Forms
             Textures.Remove(CurrentTexture);
             EditOperation = new WriteableBitmapEditOperation(CurrentTexture.Texture);
             CurrentTexture.Texture = EditOperation.OutputBitmap;
-
             InitializeComponent();
             DataContext = this;
+
             stopwatch.Start();
 
             if (isHueSet)
             {
-                var initial = CurrentTexture.GetDdsColor().ToHsl();
-                initialHue = (int)initial.Hue;
-
                 helpTextBlock.Text = "Sets the hue value to the desired amount on all pixels, keeping the saturation and lightness values the same. This will result in the texture being different shades of the same color.";
                 saturationGrid.Visibility = Visibility.Collapsed;
                 lightnessGrid.Visibility = Visibility.Collapsed;
+                hueSlider.Minimum = 0;
+                hueSlider.Maximum = 359.0;
+                hueUpDown.Minimum = 0;
+                hueUpDown.Maximum = 359.0;
                 Height = 210;
                 Title = Textures.Count > 0 ? $"Hue Set ({Textures.Count + 1} textures selected)" : $"Hue Set (1 texture selected)";
+
+                Xv2Color textureColor = EditOperation.CalculateAverageColor();
+                textureColor.ToHsl(out double hue, out _, out _);
+                initialHue = (int)hue;
+                HueValue = initialHue;
             }
             else
             {
@@ -126,6 +133,15 @@ namespace EEPK_Organiser.Forms
             {
                 PreviewMillisecondDelay = 250;
             }
+
+            Loaded += RecolorTexture_Loaded;
+        }
+
+        private void RecolorTexture_Loaded(object sender, RoutedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(HueRevertTooltip));
+            ReadyForProcessing = true;
+            ProcessImage();
         }
 
         private async void Ok_Click(object sender, RoutedEventArgs e)
@@ -192,8 +208,8 @@ namespace EEPK_Organiser.Forms
         private async Task ProcessImage()
         {
             //If we are already waiting on another process request, then stop here.
-            if (IsImageProcessing) return;
-            IsImageProcessing = true;
+            if (!ReadyForProcessing) return;
+            ReadyForProcessing = false;
 
             //If enough time has not passed since the last process then we must enter a waiting state
             if (stopwatch.ElapsedMilliseconds < PreviewMillisecondDelay)
@@ -211,7 +227,7 @@ namespace EEPK_Organiser.Forms
             }
             
             //Restart the timer
-            IsImageProcessing = false;
+            ReadyForProcessing = true;
             stopwatch.Restart();
         }
 

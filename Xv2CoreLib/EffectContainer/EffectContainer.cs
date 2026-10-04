@@ -16,7 +16,7 @@ using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMO;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.ETR;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.ValuesDictionary;
@@ -4226,46 +4226,46 @@ namespace Xv2CoreLib.EffectContainer
             return true;
         }
 
-        public List<RgbColor> GetUsedColors()
+        public Xv2Color GetAverageColor()
         {
-            List<RgbColor> colors;
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
+            AccumulateUsedColors(accumulator);
+            return accumulator.AverageColor;
+        }
 
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
+        {
             switch (AssetType)
             {
                 case AssetType.PBIND:
-                    colors = Files[0].EmpFile.GetUsedColors();
+                    Files[0].EmpFile.AccumulateUsedColors(accumulator);
                     break;
                 case AssetType.TBIND:
-                    colors = Files[0].EtrFile.GetUsedColors();
+                    Files[0].EtrFile.AccumulateUsedColors(accumulator);
                     break;
                 case AssetType.CBIND:
-                    colors = Files[0].EcfFile.GetUsedColors();
+                    Files[0].EcfFile.AccumulateUsedColors(accumulator);
                     break;
                 case AssetType.LIGHT:
-                    colors = Files[0].EmaFile.GetUsedColors();
+                    Files[0].EmaFile.AccumulateUsedColors(accumulator);
                     break;
                 case AssetType.EMO:
-                    colors = new List<RgbColor>();
-
                     foreach (var file in Files)
                     {
                         switch (file.Extension)
                         {
                             case ".emb":
-                                colors.AddRange(file.EmbFile.GetUsedColors());
+                                file.EmbFile.AccumulateUsedColors(accumulator);
                                 break;
                             case ".emm":
-                                colors.AddRange(file.EmmFile.GetUsedColors());
+                                file.EmmFile.AccumulateUsedColors(accumulator);
                                 break;
                         }
                     }
-
                     break;
                 default:
-                    throw new InvalidOperationException(string.Format("Asset.GetUsedColors: Not supported for {0}.", AssetType));
+                    throw new InvalidOperationException(string.Format("Asset.AccumulateUsedColors: Not supported for {0}.", AssetType));
             }
-
-            return colors;
         }
 
     }

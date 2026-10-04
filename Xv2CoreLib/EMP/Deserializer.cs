@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Xv2CoreLib.Resource;
 using YAXLib;
 
-namespace Xv2CoreLib.EMP
+namespace Xv2CoreLib.EMP_XML
 {
     public class Deserializer
     {
@@ -22,8 +22,6 @@ namespace Xv2CoreLib.EMP
         List<List<int>> EmbTextureOffsets = new List<List<int>>();
         List<List<int>> EmbTextureOffsets_Minus = new List<List<int>>();
 
-        private ParserMode parserMode = ParserMode.Xml;
-
         public Deserializer(string location)
         {
             fromXml = true;
@@ -34,25 +32,6 @@ namespace Xv2CoreLib.EMP
 
             Write();
             File.WriteAllBytes(saveLocation, bytes.ToArray());
-        }
-
-        public Deserializer(EMP_File _empFile, string location, ParserMode _parserMode)
-        {
-            parserMode = _parserMode;
-            saveLocation = location;
-            empFile = _empFile;
-            EmbTextureList_Setup();
-
-            Write();
-            File.WriteAllBytes(saveLocation, bytes.ToArray());
-        }
-
-        public Deserializer(EMP_File _empFile, ParserMode _parserMode)
-        {
-            parserMode = _parserMode;
-            empFile = _empFile;
-            EmbTextureList_Setup();
-            Write();
         }
 
 
@@ -83,13 +62,6 @@ namespace Xv2CoreLib.EMP
 
         private void Write()
         {
-            //Prep
-            if(parserMode == ParserMode.Tool)
-            {
-                RegenerateTextureIds(); //Reset Texture IDs to match Index. (Texture ID is for XMLs only. In tool mode it can be ignored as we use direct refs instead.)
-                LinkTextureRefs(empFile.ParticleEffects); //Link the texture refs to the generated texture IDs
-            }
-
             //Count
             int particleEffectCount = (empFile.ParticleEffects != null) ? empFile.ParticleEffects.Count() : 0;
             int textureEntryCount = (empFile.Textures != null) ? empFile.Textures.Count() : 0;
@@ -449,19 +421,6 @@ namespace Xv2CoreLib.EMP
             return mesh.Count();
         }
 
-        private int WriteFloatArray(float[] array)
-        {
-            int size = array.Count() * 4;
-
-            foreach (float f in array)
-            {
-                bytes.AddRange(BitConverter.GetBytes(f));
-            }
-
-            return size;
-
-        }
-
         private void WriteType0(IList<Type0> type0, int Type0_Offset, int mainEntryOffset, bool scale2)
         {
 
@@ -785,42 +744,6 @@ namespace Xv2CoreLib.EMP
             return 32;
         }
 
-        private int WriteFloatPart12Type0<T>(T floatParts) where T : IFloatSize12Type0, new()
-        {
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_00));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_04));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_08));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_12));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_16));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_20));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_24));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_28));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_32));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_36));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_40));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_44));
-
-            return 48;
-        }
-
-        private int WriteFloatPart12Type1<T>(T floatParts) where T : IFloatSize12Type1, new()
-        {
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_00));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_04));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_08));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_12));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_16));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_20));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_24));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_28));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_32));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_36));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.GetShape()));
-            bytes.AddRange(BitConverter.GetBytes(floatParts.F_44));
-
-            return 48;
-        }
-
         private int WriteFloatPart_2_1(FloatPart_2_1 floatParts)
         {
             bytes.AddRange(BitConverter.GetBytes(floatParts.F_00));
@@ -858,22 +781,6 @@ namespace Xv2CoreLib.EMP
         }
 
         //Utility
-        private bool TextureScrollAnimationIsType0Check(ObservableCollection<SubData_2_Entry> keyframes)
-        {
-            if (keyframes != null)
-            {
-                if (keyframes.Count() == 1)
-                {
-                    if (keyframes[0].I_00 == -1)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-        
         private int CalculatePaddingAfterMainEntry()
         {
             return Utils.CalculatePadding(bytes.Count, 16);
@@ -1116,15 +1023,6 @@ namespace Xv2CoreLib.EMP
             }
         }
 
-        private void ValidateComponents(ParticleEffect particleEffect, string _component)
-        {
-            if (_component == "00_02")
-            {
-                particleEffect.Type_Texture = ValidateTexturePart(particleEffect);
-                particleEffect.FloatPart_00_02 = (particleEffect.FloatPart_00_02 != null) ? particleEffect.FloatPart_00_02 : new FloatPart_0_2();
-            }
-        }
-
         /// <summary>
         /// If TexturePart is null, create a new one and return it, otherwise return the already existing one.
         /// </summary>
@@ -1139,52 +1037,5 @@ namespace Xv2CoreLib.EMP
                 return particleEffect.Type_Texture;
             }
         }
-
-        //Tool Mode
-        private void RegenerateTextureIds()
-        {
-            //Reset IDs to match Index
-            for(int i = 0; i < empFile.Textures.Count; i++)
-            {
-                empFile.Textures[i].EntryIndex = i;
-            }
-        }
-
-        private void LinkTextureRefs(IList<ParticleEffect> particleEffects)
-        {
-            //Regenerate particleEffect.Type_Texture.TextureIndex to match the reference Texture entries
-
-            foreach (var particleEffect in particleEffects)
-            {
-                if(particleEffect.Type_Texture != null)
-                {
-                    particleEffect.Type_Texture.TextureIndex.Clear();
-
-                    foreach(var texture in particleEffect.Type_Texture.TextureEntryRef)
-                    {
-                        particleEffect.Type_Texture.TextureIndex.Add(texture.TextureRef != null ? texture.TextureRef.EntryIndex : -1);
-                    }
-
-                    //Remove null entries at the end
-                    for (int i = particleEffect.Type_Texture.TextureIndex.Count - 1; i >= 0; i--)
-                    {
-                        if (particleEffect.Type_Texture.TextureIndex[i] == -1)
-                        {
-                            particleEffect.Type_Texture.TextureIndex.RemoveAt(i);
-                        }
-                        else if (particleEffect.Type_Texture.TextureIndex[i] != -1)
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                if(particleEffect.ChildParticleEffects != null)
-                {
-                    LinkTextureRefs(particleEffect.ChildParticleEffects);
-                }
-            }
-        }
-
     }
 }

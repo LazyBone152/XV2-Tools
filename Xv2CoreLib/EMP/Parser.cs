@@ -6,7 +6,7 @@ using YAXLib;
 using System.Collections;
 using Xv2CoreLib.Resource;
 
-namespace Xv2CoreLib.EMP
+namespace Xv2CoreLib.EMP_XML
 {
     public class Parser
     {
@@ -21,8 +21,6 @@ namespace Xv2CoreLib.EMP
         int mainEntryOffset;
         int textureEntryOffset;
         int currentEntryEnd = 0;
-
-        private ParserMode parserMode = ParserMode.Xml;
 
         public Parser(string location, bool _writeXml = true)
         {
@@ -39,9 +37,8 @@ namespace Xv2CoreLib.EMP
                 WriteXmlFile();
         }
 
-        public Parser(byte[] _bytes, ParserMode _parserMode)
+        public Parser(byte[] _bytes)
         {
-            parserMode = _parserMode;
             rawBytes = _bytes;
             totalMainEntries = BitConverter.ToInt16(rawBytes, 12);
             totalTextureEntries = BitConverter.ToInt16(rawBytes, 14);
@@ -84,12 +81,6 @@ namespace Xv2CoreLib.EMP
                     }
                 }
             }
-
-            //Only do the following if in tool mode
-            if(parserMode == ParserMode.Tool)
-            {
-                LinkTextureEntries();
-            }
         }
 
         private AsyncObservableCollection<ParticleEffect> SortEffect(int entryOffset, int nextParticleEffectOffset_Abs)
@@ -129,7 +120,7 @@ namespace Xv2CoreLib.EMP
 
         private ParticleEffect ParseEffect(int mainEntryOffset)
         {
-            ParticleEffect newEffect = ParticleEffect.GetNew((parserMode == ParserMode.Tool) ? true : false);
+            ParticleEffect newEffect = ParticleEffect.GetNew(false);
 
             //Flags and Offsets for extra data
             int FLAG_36 = rawBytes[mainEntryOffset + 36];
@@ -565,18 +556,6 @@ namespace Xv2CoreLib.EMP
             return newTexture;
         }
 
-        private List<float> ParseFloatList(int FloatListOffset, int count)
-        {
-            List<float> newFloatList = new List<float>();
-
-            for (int i = 0; i < count * 4; i += 4)
-            {
-                newFloatList.Add(BitConverter.ToSingle(rawBytes, FloatListOffset + i));
-            }
-
-            return newFloatList;
-        }
-
         private Struct3 ParseStruct3(int StructOffset, int mainEntryOffset)
         {
             Struct3 _struct3 = new Struct3()
@@ -700,46 +679,6 @@ namespace Xv2CoreLib.EMP
             return FloatParts;
         }
 
-        private T ParseFloatPart12Type0<T>(int offset) where T : IFloatSize12Type0, new()
-        {
-            T FloatParts = new T();
-
-            FloatParts.F_00 = BitConverter.ToSingle(rawBytes, offset + 0);
-            FloatParts.F_04 = BitConverter.ToSingle(rawBytes, offset + 4);
-            FloatParts.F_08 = BitConverter.ToSingle(rawBytes, offset + 8);
-            FloatParts.F_12 = BitConverter.ToSingle(rawBytes, offset + 12);
-            FloatParts.F_16 = BitConverter.ToSingle(rawBytes, offset + 16);
-            FloatParts.F_20 = BitConverter.ToSingle(rawBytes, offset + 20);
-            FloatParts.F_24 = BitConverter.ToSingle(rawBytes, offset + 24);
-            FloatParts.F_28 = BitConverter.ToSingle(rawBytes, offset + 28);
-            FloatParts.F_32 = BitConverter.ToSingle(rawBytes, offset + 32);
-            FloatParts.F_36 = BitConverter.ToSingle(rawBytes, offset + 36);
-            FloatParts.F_40 = BitConverter.ToSingle(rawBytes, offset + 40);
-            FloatParts.F_44 = BitConverter.ToSingle(rawBytes, offset + 44);
-
-            return FloatParts;
-        }
-
-        private T ParseFloatPart12Type1<T>(int offset) where T : IFloatSize12Type1, new()
-        {
-            T FloatParts = new T();
-
-            FloatParts.F_00 = BitConverter.ToSingle(rawBytes, offset + 0);
-            FloatParts.F_04 = BitConverter.ToSingle(rawBytes, offset + 4);
-            FloatParts.F_08 = BitConverter.ToSingle(rawBytes, offset + 8);
-            FloatParts.F_12 = BitConverter.ToSingle(rawBytes, offset + 12);
-            FloatParts.F_16 = BitConverter.ToSingle(rawBytes, offset + 16);
-            FloatParts.F_20 = BitConverter.ToSingle(rawBytes, offset + 20);
-            FloatParts.F_24 = BitConverter.ToSingle(rawBytes, offset + 24);
-            FloatParts.F_28 = BitConverter.ToSingle(rawBytes, offset + 28);
-            FloatParts.F_32 = BitConverter.ToSingle(rawBytes, offset + 32);
-            FloatParts.F_36 = BitConverter.ToSingle(rawBytes, offset + 36);
-            FloatParts.I_40 = FloatPart4Type1_GetShape(BitConverter.ToInt32(rawBytes, offset + 40));
-            FloatParts.F_44 = BitConverter.ToSingle(rawBytes, offset + 44);
-
-            return FloatParts;
-        }
-
         private FloatPart_2_1 ParseFloatPart_2_1(int offset)
         {
             FloatPart_2_1 FloatParts = new FloatPart_2_1();
@@ -783,21 +722,6 @@ namespace Xv2CoreLib.EMP
 
         //Utility
 
-        private int GetTexturePartSize(TexturePart texture)
-        {
-            int size = 112;
-
-            if (texture.TextureIndex != null)
-            {
-                for (int i = 0; i < texture.TextureIndex.Count(); i++)
-                {
-                    size += 4;
-                }
-            }
-
-            return size;
-        }
-
         private int CalculateEmgSize(int EmgOffset, int mainEntryOffset)
         {
             int Type0_Offset = BitConverter.ToInt32(rawBytes, mainEntryOffset + 140);
@@ -826,55 +750,6 @@ namespace Xv2CoreLib.EMP
                 //If no subdata, child particleEffect or nextParticleEffect. (So, the last Particle Effect in the current hierarchy... but NOT the last in the file)
                 int relativeOffset = (currentEntryEnd - mainEntryOffset);
                 return relativeOffset - EmgOffset;
-            }
-        }
-
-        public static string FloatPart4Type1_GetShape(int _shape)
-        {
-            switch (_shape)
-            {
-                case 0:
-                    return "Circle";
-                case 1:
-                    return "Square";
-                default:
-                    return _shape.ToString();
-            }
-        }
-
-        //Tool Mode
-        private void LinkTextureEntries()
-        {
-            foreach(var texture in empFile.Textures)
-            {
-                LinkTextureEntries_Recursive(empFile.ParticleEffects, texture.EntryIndex, new TextureEntry_Ref() { TextureRef = texture });
-            }
-
-        }
-
-        private void LinkTextureEntries_Recursive(IList<ParticleEffect> particleEffects, int id, TextureEntry_Ref textureRef)
-        {
-            foreach(var particleEffect in particleEffects)
-            {
-                if(particleEffect.Type_Texture != null)
-                {
-                    //Add default empty texture entries
-                    while (particleEffect.Type_Texture.TextureEntryRef.Count < 2)
-                        particleEffect.Type_Texture.TextureEntryRef.Add(new TextureEntry_Ref());
-
-                    int idx = particleEffect.Type_Texture.TextureIndex.IndexOf(id);
-
-                    if (idx != -1)
-                    {
-                        particleEffect.Type_Texture.TextureEntryRef[idx] = new TextureEntry_Ref() { TextureRef = textureRef.TextureRef };
-                    }
-
-                }
-
-                if(particleEffect.ChildParticleEffects != null)
-                {
-                    LinkTextureEntries_Recursive(particleEffect.ChildParticleEffects, id, textureRef);
-                }
             }
         }
 

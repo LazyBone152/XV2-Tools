@@ -8,7 +8,7 @@ using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW.Keyframes;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 using LB_Common.Numbers;
 using FastCloner.Code;
 
@@ -283,16 +283,24 @@ namespace Xv2CoreLib.ETR
         }
         #endregion
 
-        public List<RgbColor> GetUsedColors()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>();
+            foreach (var node in Nodes)
+            {
+                node.AccumulateUsedColors(accumulator);
+            }
+        }
+
+        public Xv2Color GetAverageColor()
+        {
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
 
             foreach(var node in Nodes)
             {
-                colors.AddRange(node.GetUsedColors());
+                node.AccumulateUsedColors(accumulator);
             }
 
-            return colors;
+            return accumulator.AverageColor;
         }
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
@@ -467,26 +475,29 @@ namespace Xv2CoreLib.ETR
 
         #endregion
 
-        public System.Windows.Media.LinearGradientBrush PreviewBrush
+        public System.Windows.Media.Brush PreviewBrush
         {
             get
             {
-                RgbColor color1_Value = Color1.GetAverageColor();
-                RgbColor color2_Value = Color2.GetAverageColor();
+                Xv2Color color1_Value = Color1.CalculateAverageColor(true);
+                bool invertColor = MaterialRef?.DecompiledParameters?.AlphaBlend == 1 && MaterialRef?.DecompiledParameters?.AlphaBlendType == 2;
 
-                if (MaterialRef?.DecompiledParameters?.AlphaBlend == 1 && MaterialRef?.DecompiledParameters?.AlphaBlendType == 2)
-                {
-                    color1_Value.Invert();
-                    color2_Value.Invert();
-                }
-
-                var color1 = System.Windows.Media.Color.FromRgb((byte)MathHelpers.Clamp(0, 255, color1_Value.R_int), (byte)MathHelpers.Clamp(0, 255, color1_Value.G_int), (byte)MathHelpers.Clamp(0, 255, color1_Value.B_int));
-                var color2 = color1;
-
+                if (invertColor)
+                    color1_Value = color1_Value.Invert();
+                
                 if (!Flags.HasFlag(ExtrudeFlags.NoDegrade))
-                    color2 = System.Windows.Media.Color.FromRgb((byte)MathHelpers.Clamp(0, 255, color2_Value.R_int), (byte)MathHelpers.Clamp(0, 255, color2_Value.G_int), (byte)MathHelpers.Clamp(0, 255, color2_Value.B_int));
+                {
+                    Xv2Color color2_Value = Color2.CalculateAverageColor(true);
 
-                return new System.Windows.Media.LinearGradientBrush(color1, color2, 0);
+                    if (invertColor)
+                        color2_Value = color2_Value.Invert();
+                    
+                    return new System.Windows.Media.LinearGradientBrush(color1_Value.ToWpfColor(), color2_Value.ToWpfColor(), 0);
+                }
+                else
+                {
+                    return new System.Windows.Media.SolidColorBrush(color1_Value.ToWpfColor());
+                }
             }
         }
 
@@ -819,25 +830,19 @@ namespace Xv2CoreLib.ETR
         }
         #endregion
 
-        private RgbColor GetUsedColor()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            return ColorEx.GetAverageColor(GetUsedColors(true));
+            Xv2Color color1 = Color1.CalculateAverageColor();
+            Xv2Color color2 = Color2.CalculateAverageColor();
+            accumulator.AddColor(color1);
+            accumulator.AddColor(color2);
         }
 
-        public List<RgbColor> GetUsedColors(bool includeBlackAndWhite = false)
+        public Xv2Color GetAverageColor()
         {
-            List<RgbColor> colors = new List<RgbColor>();
-
-            RgbColor color1 = Color1.GetAverageColor();
-            RgbColor color2 = Color2.GetAverageColor();
-
-            if (!color1.IsWhiteOrBlack || includeBlackAndWhite)
-                colors.Add(color1);
-
-            if ((!color2.IsWhiteOrBlack || includeBlackAndWhite) && !Flags.HasFlag(ExtrudeFlags.NoDegrade))
-                colors.Add(color2);
-
-            return colors;
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
+            AccumulateUsedColors(accumulator);
+            return accumulator.AverageColor;
         }
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)

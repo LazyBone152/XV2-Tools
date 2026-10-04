@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Xv2CoreLib.EMP_NEW;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.View.Vectors
@@ -115,8 +116,8 @@ namespace EEPK_Organiser.View.Vectors
         {
             get
             {
-                return Color.FromScRgb(NormalizedFloatColor(A), NormalizedFloatColor(R), NormalizedFloatColor(G), NormalizedFloatColor(B));
-                //return Color.FromArgb((byte)(NormalizedFloatColor(A) * 255), (byte)(NormalizedFloatColor(R) * 255), (byte)(NormalizedFloatColor(G) * 255), (byte)(NormalizedFloatColor(B) * 255));
+                Xv2Color color = new Xv2Color(R, G, B, A);
+                return Color.FromScRgb(color.A_Preview_Float, color.R_Preview_Float, color.G_Preview_Float, color.B_Preview_Float);
             }
             set
             {
@@ -183,18 +184,11 @@ namespace EEPK_Organiser.View.Vectors
             NotifyPropertyChanged(nameof(Preview));
         }
     
-        private Brush CalculateColorPreview()
+        private SolidColorBrush CalculateColorPreview()
         {
-            float r = NormalizedFloatColor(R);
-            float g = NormalizedFloatColor(G);
-            float b = NormalizedFloatColor(B);
+            Xv2Color color = new Xv2Color(R, G, B, A);
 
-            return new SolidColorBrush(Color.FromArgb(255, (byte)(r * 255), (byte)(g * 255), (byte)(b * 255)));
-        }
-
-        private float NormalizedFloatColor(float value)
-        {
-            return value / (1f + value);
+            return new SolidColorBrush(Color.FromArgb(255, color.R_Preview, color.G_Preview, color.B_Preview));
         }
     }
 }

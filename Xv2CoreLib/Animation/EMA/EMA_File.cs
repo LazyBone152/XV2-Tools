@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Controls;
 using Xv2CoreLib.AnimationFramework;
 using Xv2CoreLib.EAN;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.ValuesDictionary;
@@ -357,17 +357,26 @@ namespace Xv2CoreLib.EMA
             throw new Exception(String.Format("Could not find a bone wih the name: {0}", boneName));
         }
 
-        public List<RgbColor> GetUsedColors()
+
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>();
-            if (Animations == null) Animations = new AsyncObservableCollection<EMA_Animation>();
+            foreach (var node in Animations)
+            {
+                node.AccumulateUsedColors(accumulator);
+            }
+        }
+
+        public Xv2Color GetAverageColor()
+        {
+            if (Animations == null) return Xv2Color.Transparent;
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
 
             foreach (var anim in Animations)
             {
-                colors.AddRange(anim.GetUsedColors());
+                anim.AccumulateUsedColors(accumulator);
             }
 
-            return colors;
+            return accumulator.AverageColor;
         }
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, EMM.EMM_File emmFile = null)
@@ -920,7 +929,7 @@ namespace Xv2CoreLib.EMA
             }
         }
 
-        private void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet, int variance, params EMA_Command[] commands)
+        private static void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet, int variance, params EMA_Command[] commands)
         {
             if (commands == null || commands.Length < 3 || commands.Any(x => x == null || x.Keyframes == null || x.Keyframes.Any(keyframe => keyframe == null))) return;
             //EMA_Command r_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_R);
@@ -932,6 +941,22 @@ namespace Xv2CoreLib.EMA
                 float g = commands[1].GetKeyframeValue(r.Time);
                 float b = commands[2].GetKeyframeValue(r.Time);
 
+                Xv2Color xv2Color = new Xv2Color(r.Value, g, b);
+
+                if(hueSet)
+                {
+                    xv2Color = xv2Color.ApplyHueSet((int)hue, variance);
+                }
+                else
+                {
+                    xv2Color = xv2Color.ApplyHueAdjustment((int)hue, (float)saturation, (float)lightness);
+                }
+
+                commands[0].SetValue(r.Time, xv2Color.R, undos);
+                commands[1].SetValue(r.Time, xv2Color.G, undos);
+                commands[2].SetValue(r.Time, xv2Color.B, undos);
+
+                /*
                 HslColor.HslColor hslColor = new RgbColor(r.Value, g, b).ToHsl();
                 RgbColor convertedColor;
 
@@ -951,6 +976,7 @@ namespace Xv2CoreLib.EMA
                 commands[0].SetValue(r.Time, (float)convertedColor.R, undos);
                 commands[1].SetValue(r.Time, (float)convertedColor.G, undos);
                 commands[2].SetValue(r.Time, (float)convertedColor.B, undos);
+                */
             }
         }
 
@@ -1004,11 +1030,9 @@ namespace Xv2CoreLib.EMA
             return null;
         }
 
-        public List<RgbColor> GetUsedColors()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
             SyncColorCommands();
-
-            List<RgbColor> colors = new List<RgbColor>();
 
             EMA_Command r_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_R);
             EMA_Command g_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_G);
@@ -1019,10 +1043,8 @@ namespace Xv2CoreLib.EMA
                 float g = g_command.GetKeyframeValue(r.Time);
                 float b = b_command.GetKeyframeValue(r.Time);
 
-                colors.Add(new RgbColor(r.Value, g, b));
+                accumulator.AddColor(Xv2Color.CalculatePreviewValue(r.Value), Xv2Color.CalculatePreviewValue(g), Xv2Color.CalculatePreviewValue(b));
             }
-
-            return colors;
         }
 
         public void AddCommand(string bone, EMA_Command command, List<IUndoRedo> undos = null)

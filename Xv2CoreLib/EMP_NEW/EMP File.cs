@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Windows;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMG;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW.Keyframes;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 
@@ -537,16 +536,24 @@ namespace Xv2CoreLib.EMP_NEW
 
         #region Color
 
-        public List<RgbColor> GetUsedColors()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>();
+            foreach (var particleEffect in ParticleNodes)
+            {
+                particleEffect.AccumulateUsedColors(accumulator);
+            }
+        }
+
+        public Xv2Color GetAverageColor()
+        {
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
 
             foreach (var particleEffect in ParticleNodes)
             {
-                colors.AddRange(particleEffect.GetUsedColors());
+                particleEffect.AccumulateUsedColors(accumulator);
             }
 
-            return colors;
+            return accumulator.AverageColor;
         }
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = false)
@@ -701,28 +708,25 @@ namespace Xv2CoreLib.EMP_NEW
         public bool IsEmission => NodeType == ParticleNodeType.Emission;
         public bool IsNull => NodeType == ParticleNodeType.Null;
 
-        public System.Windows.Media.LinearGradientBrush PreviewBrush
+        public System.Windows.Media.Brush PreviewBrush
         {
             get
             {
-                RgbColor color1_Value = EmissionNode.Texture.Color1.GetAverageColor();
-                RgbColor color2_Value = EmissionNode.Texture.Color2.GetAverageColor();
-                RgbColor colorVariance = new RgbColor(EmissionNode.Texture.Color_Variance.R, EmissionNode.Texture.Color_Variance.G, EmissionNode.Texture.Color_Variance.B);
+                bool invertColors = EmissionNode.Texture.MaterialRef?.DecompiledParameters?.AlphaBlend == 1 && EmissionNode.Texture.MaterialRef?.DecompiledParameters?.AlphaBlendType == 2;
+                Xv2Color color1_Value = EmissionNode.Texture.Color1.CalculateAverageColor(true);
+                Xv2Color color2_Value = EmissionNode.Texture.Color2.CalculateAverageColor(true);
+                Xv2Color colorVariance = new Xv2Color(EmissionNode.Texture.Color_Variance.R, EmissionNode.Texture.Color_Variance.G, EmissionNode.Texture.Color_Variance.B);
 
-                if(EmissionNode.Texture.MaterialRef?.DecompiledParameters?.AlphaBlend == 1 && EmissionNode.Texture.MaterialRef?.DecompiledParameters?.AlphaBlendType == 2)
+                if (NodeFlags.HasFlag(NodeFlags1.EnableSecondaryColor))
                 {
-                    color1_Value.Invert();
-                    color2_Value.Invert();
-                    colorVariance.Invert();
+                    return new System.Windows.Media.LinearGradientBrush(
+                        color1_Value.ToWpfColor(invertColors) + colorVariance.ToWpfColor(invertColors), 
+                        color2_Value.ToWpfColor(invertColors) + colorVariance.ToWpfColor(invertColors), 0);
                 }
-
-                var color1 = System.Windows.Media.Color.FromRgb((byte)MathHelpers.Clamp(0, 255, color1_Value.R_int + colorVariance.R_int), (byte)MathHelpers.Clamp(0, 255, color1_Value.G_int + colorVariance.G_int), (byte)MathHelpers.Clamp(0, 255, color1_Value.B_int + colorVariance.B_int));
-                var color2 = color1;
-
-                if(NodeFlags.HasFlag(NodeFlags1.EnableSecondaryColor))
-                    color2 = System.Windows.Media.Color.FromRgb((byte)MathHelpers.Clamp(0, 255, color2_Value.R_int + colorVariance.R_int), (byte)MathHelpers.Clamp(0, 255, color2_Value.G_int + colorVariance.G_int), (byte)MathHelpers.Clamp(0, 255, color2_Value.B_int + colorVariance.B_int));
-
-                return new System.Windows.Media.LinearGradientBrush(color1, color2, 0);
+                else
+                {
+                    return new System.Windows.Media.SolidColorBrush(color1_Value.ToWpfColor(invertColors) + colorVariance.ToWpfColor(invertColors));
+                }
             }
         }
 
@@ -1039,53 +1043,52 @@ namespace Xv2CoreLib.EMP_NEW
             this.NotifyPropsChanged();
         }
 
-        public List<RgbColor> GetUsedColors()
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            List<RgbColor> colors = new List<RgbColor>();
-
-            bool invertColor = false;
-
             //Invert color if AlphaBlendType 2 (Subtractive) is used for this node.
-            if (EmissionNode.Texture.MaterialRef != null)
-                invertColor = EmissionNode.Texture.MaterialRef.DecompiledParameters.AlphaBlendType == 2;
+            bool invertColor = EmissionNode.Texture.MaterialRef?.DecompiledParameters.AlphaBlendType == 2;
 
-            RgbColor color1 = EmissionNode.Texture.Color1.GetAverageColor();
-            RgbColor color2 = EmissionNode.Texture.Color2.GetAverageColor();
+            Xv2Color color1 = EmissionNode.Texture.Color1.CalculateAverageColor(true) + new Xv2Color(EmissionNode.Texture.Color_Variance);
 
             if (invertColor)
-            {
-                color1.Invert();
-                color2.Invert();
-            }
+                color1 = color1.Invert();
 
             if (!color1.IsWhiteOrBlack)
-                colors.Add(color1);
+                accumulator.AddColor(color1);
 
-            if (!color2.IsWhiteOrBlack && NodeFlags.HasFlag(NodeFlags1.EnableSecondaryColor))
-                colors.Add(color2);
+            if (NodeFlags.HasFlag(NodeFlags1.EnableSecondaryColor))
+            {
+                Xv2Color color2 = EmissionNode.Texture.Color2.CalculateAverageColor(true) + new Xv2Color(EmissionNode.Texture.Color_Variance);
 
+                if (invertColor)
+                    color2 = color2.Invert();
+
+                if(!color2.IsWhiteOrBlack)
+                    accumulator.AddColor(color2);
+            }
 
             if (ChildParticleNodes != null)
             {
-                foreach(var child in ChildParticleNodes)
+                foreach (var child in ChildParticleNodes)
                 {
-                    colors.AddRange(child.GetUsedColors());
+                    child.AccumulateUsedColors(accumulator);
                 }
             }
+        }
 
-
-            return colors;
+        public Xv2Color GetAverageColor()
+        {
+            Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
+            AccumulateUsedColors(accumulator);
+            return accumulator.AverageColor;
         }
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
             if(NodeType == ParticleNodeType.Emission)
             {
-                bool invertColor = false;
-
                 //Invert color if AlphaBlendType 2 (Subtractive) is used for this node.
-                if (EmissionNode.Texture.MaterialRef != null)
-                    invertColor = EmissionNode.Texture.MaterialRef.DecompiledParameters.AlphaBlendType == 2;
+                bool invertColor = EmissionNode.Texture.MaterialRef?.DecompiledParameters.AlphaBlendType == 2;
 
                 EmissionNode.Texture.Color1.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
                 EmissionNode.Texture.Color2.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);

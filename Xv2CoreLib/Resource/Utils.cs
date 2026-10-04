@@ -221,19 +221,6 @@ namespace Xv2CoreLib
 
     }
 
-    public static class Xv2ColorConverter
-    {
-        public static float ConvertColor(int RGB_Int_Value)
-        {
-            return (float)RGB_Int_Value / 255;
-        }
-
-        public static byte ConvertColor(float RGB_Float_Value)
-        {
-            return (byte)(RGB_Float_Value * 255);
-        }
-    }
-
     public static class Utils
     {
         public static void RemoveAll<K, V>(this IDictionary<K, V> dict, Func<K, V, bool> match)

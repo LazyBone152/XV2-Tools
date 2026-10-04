@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using LB_Common.Numbers;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 
@@ -131,28 +131,26 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             return undos;
         }
 
-        /// <summary>
-        /// Gets the average color between the constant value and all keyframes.
-        /// </summary>
-        public RgbColor GetAverageColor(bool allowWhiteAndBlack = false)
+        public Xv2Color CalculateAverageColor(bool allowWhiteAndBlack = false)
         {
-            List<RgbColor> colors = new List<RgbColor>();
-
             if (IsAnimated)
             {
+                Xv2ColorAccumulator accumulator = new Xv2ColorAccumulator();
+
                 foreach (KeyframeColorValue keyframe in Keyframes)
                 {
                     if (!keyframe.Value.IsWhiteOrBlack() || allowWhiteAndBlack)
-                        colors.Add(new RgbColor(keyframe.Value));
+                        accumulator.AddColor(keyframe.Value);
                 }
+
+                return accumulator.AverageColor;
             }
-            else
+            else if (!Constant.IsWhiteOrBlack() || allowWhiteAndBlack)
             {
-                if (!Constant.IsWhiteOrBlack() || allowWhiteAndBlack)
-                    colors.Add(new RgbColor(Constant));
+                return new Xv2Color(Constant);
             }
 
-            return colors.Count > 0 ? ColorEx.GetAverageColor(colors) : new RgbColor(Constant);
+            return Xv2Color.Transparent;
         }
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0, bool invertColor = false)

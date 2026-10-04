@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Color;
 
 namespace System.Windows.Media.Imaging
 {
