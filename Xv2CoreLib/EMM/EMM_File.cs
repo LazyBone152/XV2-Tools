@@ -233,7 +233,7 @@ namespace Xv2CoreLib.EMM
 
             foreach (var mat in Materials)
             {
-                mat.ChangeHsl(hue, saturation, lightness, undos, hueSet: hueSet, variance: variance, shiftGlareColor: shiftGlareColor);
+                mat.ChangeHue(hue, saturation, lightness, undos, hueSet: hueSet, variance: variance, shiftGlareColor: shiftGlareColor);
             }
         }
     
@@ -425,7 +425,7 @@ namespace Xv2CoreLib.EMM
             return mat;
         }
 
-        public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = true)
+        public void ChangeHue(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = true)
         {
             if (Parameters == null) return;
 

@@ -220,7 +220,7 @@ namespace EEPK_Organiser.View.Editors
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueAdjustment()
         {
-            RecolorAll recolor = new RecolorAll(SelectedNodes, false);
+            RecolorAll recolor = new RecolorAll(AssetContainer, SelectedNodes, false);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -229,7 +229,7 @@ namespace EEPK_Organiser.View.Editors
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueSet()
         {
-            RecolorAll recolor = new RecolorAll(SelectedNodes, true);
+            RecolorAll recolor = new RecolorAll(AssetContainer, SelectedNodes, true);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();

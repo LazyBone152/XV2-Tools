@@ -278,6 +278,7 @@ namespace EEPK_Organiser.View
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SelectedEffectTabChanged?.Invoke(this, EventArgs.Empty);
+            XenoKit_OnSelectedTabChanged((Tabs)tabControl.SelectedIndex);
             if (effectContainerFile == null) return;
 
             switch ((Tabs)tabControl.SelectedIndex)
@@ -287,23 +288,18 @@ namespace EEPK_Organiser.View
                     break;
                 case Tabs.Pbind:
                     SearchFilter = effectContainerFile.Pbind.AssetSearchFilter;
-                    PlayAsset(GetSelectedAsset(AssetType.PBIND));
                     break;
                 case Tabs.Tbind:
                     SearchFilter = effectContainerFile.Tbind.AssetSearchFilter;
-                    PlayAsset(GetSelectedAsset(AssetType.TBIND));
                     break;
                 case Tabs.Cbind:
                     SearchFilter = effectContainerFile.Cbind.AssetSearchFilter;
-                    PlayAsset(GetSelectedAsset(AssetType.CBIND));
                     break;
                 case Tabs.Emo:
                     SearchFilter = effectContainerFile.Emo.AssetSearchFilter;
-                    PlayAsset(GetSelectedAsset(AssetType.EMO));
                     break;
                 case Tabs.Light:
                     SearchFilter = effectContainerFile.LightEma.AssetSearchFilter;
-                    PlayAsset(GetSelectedAsset(AssetType.LIGHT));
                     break;
             }
 
@@ -859,6 +855,8 @@ namespace EEPK_Organiser.View
         private bool XenoKitAvailable { get; set; } = false;
 
         partial void XenoKit_Init();
+
+        partial void XenoKit_OnSelectedTabChanged(Tabs tab);
 
         partial void XenoKit_OnEffectSelectionChange();
 

@@ -95,11 +95,11 @@ namespace LB_Common.Forms
             if(!string.IsNullOrWhiteSpace(affirmativeBtnAlias))
                 okBtn.Content = affirmativeBtnAlias;
             if (!string.IsNullOrWhiteSpace(affirmativeAltBtnAlias))
-                yesBtn.Content = affirmativeBtnAlias;
+                yesBtn.Content = affirmativeAltBtnAlias;
             if (!string.IsNullOrWhiteSpace(negativeBtnAlias))
-                cancelBtn.Content = affirmativeBtnAlias;
+                cancelBtn.Content = negativeBtnAlias;
             if (!string.IsNullOrWhiteSpace(negativeAltBtnAlias))
-                noBtn.Content = affirmativeBtnAlias;
+                noBtn.Content = negativeAltBtnAlias;
 
             //Set icon
             switch (icon)
@@ -155,6 +155,16 @@ namespace LB_Common.Forms
         public static MessagePromptResult Show(string message, string title, MessagePromptButtons buttons, MessagePromptIcon icon, string richText, string affirmativeBtnAlias, string affirmativeAltBtnAlias, string negativeBtnAlias, string negativeAltBtnAlias, bool noSound = false, bool topmost = true)
         {
             return InternalShow(title, message, icon, buttons, richText, affirmativeBtnAlias, affirmativeAltBtnAlias, negativeBtnAlias, negativeAltBtnAlias, noSound: noSound, topmost: topmost);
+        }
+
+        public static MessagePromptResult Show(string message, string title, MessagePromptButtons buttons, MessagePromptIcon icon, string affirmativeBtnAlias, string negativeBtnAlias, bool noSound = false, bool topmost = true)
+        {
+            return InternalShow(title, message, icon, buttons, null, affirmativeBtnAlias, null, negativeBtnAlias, null, noSound: noSound, topmost: topmost);
+        }
+
+        public static MessagePromptResult Show(string message, string title, MessagePromptButtons buttons, MessagePromptIcon icon, string richText, string affirmativeBtnAlias, string negativeBtnAlias, bool noSound = false, bool topmost = true)
+        {
+            return InternalShow(title, message, icon, buttons, richText, affirmativeBtnAlias, null, negativeBtnAlias, null, noSound: noSound, topmost: topmost);
         }
 
         private static MessagePromptResult InternalShow(string title, string message, MessagePromptIcon icon, MessagePromptButtons buttons, string richText = null,

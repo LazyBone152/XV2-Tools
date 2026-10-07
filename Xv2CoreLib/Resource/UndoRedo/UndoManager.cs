@@ -213,7 +213,10 @@ namespace Xv2CoreLib.Resource.UndoRedo
         /// <param name="undoGroup">The UndoGroup attached to the event. This can be used to conditionally respond when the event is raised.</param>
         public void ForceEventCall(UndoGroup undoGroup = UndoGroup.Default, string undoArg = null, object undoContext = null)
         {
-            UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(undoGroup, undoArg, undoContext));
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(undoGroup, undoArg, undoContext));
+            });
         }
 
 

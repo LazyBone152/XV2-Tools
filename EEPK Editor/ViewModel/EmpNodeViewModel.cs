@@ -1,5 +1,7 @@
 ﻿using LB_Common.Mvvm;
 using LB_Common.Numbers;
+using System.Timers;
+using System.Windows.Media.Media3D;
 using Xv2CoreLib;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW;
@@ -12,6 +14,7 @@ namespace EEPK_Organiser.ViewModel
     {
         private EMP_File empFile;
         private ParticleNode node;
+        private readonly EMM_File EmmFile;
 
         public string Name
         {
@@ -968,10 +971,29 @@ namespace EEPK_Organiser.ViewModel
             get => node.EmissionNode.Texture.MaterialRef;
             set
             {
-                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.MaterialRef), node.EmissionNode.Texture, node.EmissionNode.Texture.MaterialRef, value, "ETR -> Material"));
-                node.EmissionNode.Texture.MaterialRef = value;
-                RaisePropertyChanged(nameof(MaterialRef));
+                //Prevent the ComboBox from pushing a null value when the SelectedItem is removed from its ItemsSource
+                if (value == null && node.EmissionNode.Texture.MaterialRef != null && !EmmFile.Materials.Contains(node.EmissionNode.Texture.MaterialRef))
+                    return;
+
+                if(node.EmissionNode.Texture.MaterialRef != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.MaterialRef), node.EmissionNode.Texture, node.EmissionNode.Texture.MaterialRef, value, "ETR -> Material"));
+                    node.EmissionNode.Texture.MaterialRef = value;
+                    RaisePropertyChanged(nameof(MaterialRef));
+                }
             }
+        }
+
+        public EmpNodeViewModel(EMM_File materials)
+        {
+            this.EmmFile = materials;
+        }
+
+        public void SetContext(ParticleNode node, EMP_File empFile)
+        {
+            this.node = node;
+            this.empFile = empFile;
+            UpdateProperties();
         }
 
         public void UpdateProperties()
@@ -1088,14 +1110,6 @@ namespace EEPK_Organiser.ViewModel
 
         }
 
-        public void SetContext(ParticleNode node, EMP_File empFile)
-        {
-           this.node = node;
-           this.empFile = empFile;
-           UpdateProperties();
-        }
-
-
         private void SetNodeFlags(NodeFlags1 flag, bool state)
         {
             var newFlag = node.NodeFlags.SetFlag(flag, state);
@@ -1118,9 +1132,5 @@ namespace EEPK_Organiser.ViewModel
             }
         }
 
-        private void AddUndo(IUndoRedo undo, string desc)
-        {
-            //todo: implement particle update event
-        }
     }
 }

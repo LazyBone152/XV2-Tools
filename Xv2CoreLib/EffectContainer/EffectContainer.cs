@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Xv2CoreLib.Color;
 using Xv2CoreLib.ECF;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EMA;
@@ -16,7 +17,6 @@ using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMO;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.ETR;
-using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.ValuesDictionary;
@@ -42,7 +42,7 @@ namespace Xv2CoreLib.EffectContainer
         }
         #endregion
 
-        public static readonly List<string> SupportedFormats = new List<string>()
+        internal static readonly IReadOnlyCollection<string> SupportedFormats = new string[]
         {
             ".emp",
             ".etr",
@@ -2598,12 +2598,9 @@ namespace Xv2CoreLib.EffectContainer
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
 
@@ -3000,21 +2997,30 @@ namespace Xv2CoreLib.EffectContainer
 
         public bool IsMaterialUsed(EmmMaterial material)
         {
+            return IsMaterialUsedInternal(material, null);
+        }
+
+        private bool IsMaterialUsedInternal(EmmMaterial material, IList<Asset> excludedAssets = null, IList<ETR_Node> excludedEtrNodes = null, ParticleNode excludedParticleNode = null)
+        {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("IsMaterialUsed: AssetType is not PBIND or TBIND, cannot continue.");
 
             foreach (var asset in Assets)
             {
+                if (excludedAssets?.Contains(asset) == true) continue;
+
                 if (ContainerAssetType == AssetType.PBIND)
                 {
-                    if (IsMaterialUsed_Recursive(asset.Files[0].EmpFile.ParticleNodes, material))
+                    if (IsMaterialUsedInternal_Recursive(asset.Files[0].EmpFile.ParticleNodes, material, excludedParticleNode as ParticleNode))
                         return true;
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
-                    foreach (var mat in asset.Files[0].EtrFile.Nodes)
+                    foreach (var node in asset.Files[0].EtrFile.Nodes)
                     {
-                        if (mat.MaterialRef == material)
+                        if (excludedEtrNodes?.Contains(node) == true) continue;
+
+                        if (node.MaterialRef == material)
                         {
                             return true;
                         }
@@ -3025,18 +3031,20 @@ namespace Xv2CoreLib.EffectContainer
             return false;
         }
 
-        private bool IsMaterialUsed_Recursive(IList<ParticleNode> childParticleEffects, EmmMaterial material)
+        private bool IsMaterialUsedInternal_Recursive(IList<ParticleNode> childParticleEffects, EmmMaterial material, ParticleNode excludedNode = null)
         {
-            foreach (var mat in childParticleEffects)
+            foreach (var node in childParticleEffects)
             {
-                if (mat.EmissionNode.Texture.MaterialRef == material)
+                if (node == excludedNode) continue;
+
+                if (node.EmissionNode.Texture.MaterialRef == material)
                 {
                     return true;
                 }
 
-                if (mat.ChildParticleNodes != null)
+                if (node.ChildParticleNodes != null)
                 {
-                    if (IsMaterialUsed_Recursive(mat.ChildParticleNodes, material))
+                    if (IsMaterialUsedInternal_Recursive(node.ChildParticleNodes, material))
                     {
                         return true;
                     }
@@ -3115,6 +3123,156 @@ namespace Xv2CoreLib.EffectContainer
 
             return false;
         }
+
+
+        public bool AreMaterialsExclusive(IList<Asset> assets)
+        {
+            if (ContainerAssetType == AssetType.PBIND)
+            {
+                foreach (var material in EMP_File.GetUsedMaterials(assets))
+                {
+                    if (IsMaterialUsedInternal(material, assets))
+                        return false;
+                }
+            }
+            else if (ContainerAssetType == AssetType.TBIND)
+            {
+                foreach (var asset in assets)
+                {
+                    foreach (var node in asset.Files[0].EtrFile.Nodes)
+                    {
+                        if (node.MaterialRef != null && IsMaterialUsedInternal(node.MaterialRef, assets))
+                            return false;
+                    }
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("AreMaterialsExclusive: AssetType is not PBIND or TBIND, cannot continue.");
+            }
+
+            return true;
+        }
+
+        public List<IUndoRedo> MakeMaterialsExclusive(IList<Asset> assets, List<IUndoRedo> undos)
+        {
+            if(ContainerAssetType == AssetType.PBIND)
+            {
+                return PBIND_MakeMaterialsExclusiveInternal(assets, null, EMP_File.GetUsedMaterials(assets), undos);
+            }
+            else if(ContainerAssetType == AssetType.TBIND)
+            {
+                undos ??= new List<IUndoRedo>();
+
+                foreach (var asset in assets)
+                {
+                    foreach (var node in asset.Files[0].EtrFile.Nodes)
+                    {
+                        if (node.MaterialRef != null && IsMaterialUsedInternal(node.MaterialRef, assets))
+                        {
+                            EmmMaterial newMaterial = node.MaterialRef.Copy();
+                            newMaterial.Name = File2_Ref.GetUnusedName(newMaterial.Name);
+                            File2_Ref.Materials.Add(newMaterial);
+                            undos?.Add(new UndoableListAdd<EmmMaterial>(File2_Ref.Materials, newMaterial));
+
+                            RefactorMaterialRef(node.MaterialRef, newMaterial, undos);
+                        }
+                    }
+                }
+
+                return undos;
+            }
+            else
+            {
+                throw new InvalidOperationException("MakeMaterialsExclusive: AssetType is not PBIND or TBIND, cannot continue.");
+            }
+        }
+
+        public bool AreMaterialsExclusive(ParticleNode node)
+        {
+            if (ContainerAssetType != AssetType.PBIND)
+                throw new InvalidOperationException("PBIND_AreMaterialsExclusive: AssetType is not PBIND, cannot continue.");
+
+            foreach(var material in node.GetUsedMaterials())
+            {
+                if (IsMaterialUsedInternal(material, excludedParticleNode: node))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public bool AreMaterialsExclusive(IList<ETR_Node> nodes)
+        {
+            foreach(var node in nodes)
+            {
+                if (node.MaterialRef != null && IsMaterialUsedInternal(node.MaterialRef, excludedEtrNodes: nodes))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public List<IUndoRedo> MakeMaterialsExclusive(ParticleNode node, List<IUndoRedo> undos = null)
+        {
+            return PBIND_MakeMaterialsExclusiveInternal(null, node, node.GetUsedMaterials(), undos);
+        }
+
+        private List<IUndoRedo> PBIND_MakeMaterialsExclusiveInternal(IList<Asset> assets, ParticleNode node, List<EmmMaterial> usedMaterials, List<IUndoRedo> undos = null)
+        {
+            if (ContainerAssetType != AssetType.PBIND)
+                throw new InvalidOperationException("PBIND_MakeMaterialsExclusive: AssetType is not PBIND, cannot continue.");
+
+            undos ??= new(usedMaterials.Count);
+
+            foreach (var material in usedMaterials)
+            {
+                if (IsMaterialUsedInternal(material, assets, excludedParticleNode: node))
+                {
+                    EmmMaterial newMaterial = material.Copy();
+                    newMaterial.Name = File2_Ref.GetUnusedName(newMaterial.Name);
+
+                    if(node is not null)
+                    {
+                        List<ParticleNode> temp = new(1) { node };
+                        RefactorMaterialRef_Recursive(temp, material, newMaterial, undos);
+                    }
+                    else if(assets is not null)
+                    {
+                        foreach(var asset in assets)
+                        {
+                            RefactorMaterialRef_Recursive(asset.Files[0].EmpFile.ParticleNodes, material, newMaterial, undos);
+                        }
+                    }
+
+                    undos?.Add(new UndoableListAdd<EmmMaterial>(File2_Ref.Materials, newMaterial));
+                    File2_Ref.Materials.Add(newMaterial);
+
+                }
+            }
+
+            return undos;
+        }
+
+        public List<IUndoRedo> MakeMaterialsExclusive(IList<ETR_Node> nodes, List<IUndoRedo> undos = null)
+        {
+            undos ??= new List<IUndoRedo>();
+
+            foreach(var node in nodes)
+            {
+                if (node.MaterialRef != null && IsMaterialUsedInternal(node.MaterialRef, excludedEtrNodes: nodes))
+                {
+                    EmmMaterial newMaterial = node.MaterialRef.Copy();
+                    newMaterial.Name = File2_Ref.GetUnusedName(newMaterial.Name);
+                    RefactorMaterialRef(node.MaterialRef, newMaterial, undos);
+                    File2_Ref.Materials.Add(newMaterial);
+                    undos?.Add(new UndoableListAdd<EmmMaterial>(File2_Ref.Materials, newMaterial));
+                }
+            }
+
+            return undos;
+        }
+
         #endregion
 
         #region AddAssetFunctions

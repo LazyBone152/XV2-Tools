@@ -11,6 +11,7 @@ using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.Image;
 using Xv2CoreLib.Resource.UndoRedo;
+using System.Windows;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
@@ -106,15 +107,19 @@ namespace Xv2CoreLib.EMB_CLASS
             return entries;
         }
 
-        public async void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        public async Task ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (Entry == null) return;
 
-            foreach (var entry in Entry)
+            //Manipulation of WriteableBitmaps must be done on the main UI thread
+            await Application.Current.Dispatcher.Invoke(async () =>
             {
-                await entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-                entry.SaveDds(true, undos);
-            }
+                foreach (var entry in Entry)
+                {
+                    await entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                    entry.SaveDds(true, undos);
+                }
+            });
         }
         #endregion
 

@@ -204,7 +204,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueAdjustment()
         {
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, false);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(AssetContainer, SelectedNode, false);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -215,7 +215,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueSet()
         {
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, true);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(AssetContainer, SelectedNode, true);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();

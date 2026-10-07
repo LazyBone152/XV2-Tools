@@ -39,15 +39,8 @@ namespace EEPK_Organiser.View.Editors.EMP
                 SetValue(NodeProperty, value);
             }
         }
-        public EmpNodeViewModel NodeViewModel
-        {
-            get
-            {
-                if (Node != null) return _nodeViewModel;
-                return null;
-            }
-        }
-        private EmpNodeViewModel _nodeViewModel = new EmpNodeViewModel();
+        public EmpNodeViewModel NodeViewModel => Node != null ? _nodeViewModel : null;
+        private EmpNodeViewModel _nodeViewModel;
 
 
         public static readonly DependencyProperty EmpFileProperty = DependencyProperty.Register(nameof(EmpFile), typeof(EMP_File), typeof(EmpNodeView), new PropertyMetadata(null));
@@ -155,9 +148,15 @@ namespace EEPK_Organiser.View.Editors.EMP
         {
             DataContext = this;
             InitializeComponent();
+            Loaded += EmpNodeView_Loaded;
+        }
+
+        private void EmpNodeView_Loaded(object sender, RoutedEventArgs e)
+        {
+            _nodeViewModel = new EmpNodeViewModel(AssetContainer.File2_Ref);
+            _nodeViewModel.PropertyChanged += NodeViewModel_PropertyChanged;
             DpChanged += NodeChanged;
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
-            _nodeViewModel.PropertyChanged += NodeViewModel_PropertyChanged;
             SelectedShapeDrawPoint.PropertyChanged += SelectedShapeDrawPoint_PropertyChanged;
         }
 
@@ -186,7 +185,6 @@ namespace EEPK_Organiser.View.Editors.EMP
                 if (e.UndoContext is ParticleNode node)
                 {
                     node.UpdatePreviewBrush(true);
-                    return;
                 }
                 else if (e.UndoContext is IList<Asset> assets)
                 {
@@ -203,6 +201,7 @@ namespace EEPK_Organiser.View.Editors.EMP
                     }
                 }
 
+                NodeViewModel?.UpdateProperties();
                 return;
             }
 

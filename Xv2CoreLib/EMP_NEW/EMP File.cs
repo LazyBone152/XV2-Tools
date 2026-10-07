@@ -11,6 +11,7 @@ using Xv2CoreLib.EMP_NEW.Keyframes;
 using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.EffectContainer;
 
 namespace Xv2CoreLib.EMP_NEW
 {
@@ -424,28 +425,23 @@ namespace Xv2CoreLib.EMP_NEW
 
             foreach (var particleEffect in ParticleNodes)
             {
-                AddUsedMaterials(particleEffect, materials);
+                ParticleNode.GetUsedMaterials(particleEffect, materials);
             }
 
             return materials;
         }
 
-        private void AddUsedMaterials(ParticleNode particleEffect, List<EmmMaterial> materials)
+        public static List<EmmMaterial> GetUsedMaterials(IList<Asset> assets)
         {
-            if (particleEffect.NodeType == ParticleNodeType.Emission &&
-                particleEffect.EmissionNode?.Texture?.MaterialRef != null &&
-                !materials.Contains(particleEffect.EmissionNode.Texture.MaterialRef))
+            List<EmmMaterial> materials = new List<EmmMaterial>();
+            if (assets == null || assets.Count == 0 || assets[0].AssetType != EEPK.AssetType.PBIND) return materials;
+
+            foreach (var asset in assets)
             {
-                materials.Add(particleEffect.EmissionNode.Texture.MaterialRef);
+                materials.AddRange(asset.Files[0].EmpFile.GetUsedMaterials());
             }
 
-            if (particleEffect.ChildParticleNodes == null)
-                return;
-
-            foreach (var childParticle in particleEffect.ChildParticleNodes)
-            {
-                AddUsedMaterials(childParticle, materials);
-            }
+            return materials;
         }
 
         private List<ParticleTexture> GetTexturePartsThatUseMaterialRef_Recursive(EmmMaterial materialRef, List<ParticleTexture> textureParts, AsyncObservableCollection<ParticleNode> particleEffects)
@@ -556,7 +552,7 @@ namespace Xv2CoreLib.EMP_NEW
             return accumulator.AverageColor;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = false)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (ParticleNodes == null) return;
             if (undos == null) undos = new List<IUndoRedo>();
@@ -564,14 +560,6 @@ namespace Xv2CoreLib.EMP_NEW
             foreach (var particleEffects in ParticleNodes)
             {
                 particleEffects.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-            }
-
-            if (shiftGlareColor)
-            {
-                foreach (var material in GetUsedMaterials())
-                {
-                    material.ChangeHsl(hue, saturation, lightness, undos, hueSet, variance, true);
-                }
             }
         }
 
@@ -1245,6 +1233,31 @@ namespace Xv2CoreLib.EMP_NEW
             foreach(var node in ChildParticleNodes)
             {
                 node.RemoveMaterialRef(materialRefToRemove, undos);
+            }
+        }
+
+        public List<EmmMaterial> GetUsedMaterials()
+        {
+            List<EmmMaterial> materials = new List<EmmMaterial>();
+            GetUsedMaterials(this, materials);
+            return materials;
+        }
+
+        internal static void GetUsedMaterials(ParticleNode particleEffect, List<EmmMaterial> materials)
+        {
+            if (particleEffect.NodeType == ParticleNodeType.Emission &&
+                particleEffect.EmissionNode?.Texture?.MaterialRef != null &&
+                !materials.Contains(particleEffect.EmissionNode.Texture.MaterialRef))
+            {
+                materials.Add(particleEffect.EmissionNode.Texture.MaterialRef);
+            }
+
+            if (particleEffect.ChildParticleNodes == null)
+                return;
+
+            foreach (var childParticle in particleEffect.ChildParticleNodes)
+            {
+                GetUsedMaterials(childParticle, materials);
             }
         }
     }
