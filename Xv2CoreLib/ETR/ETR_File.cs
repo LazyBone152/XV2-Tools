@@ -15,7 +15,7 @@ using FastCloner.Code;
 namespace Xv2CoreLib.ETR
 {
     [Serializable]
-    public class ETR_File : ITexture
+    public class ETR_File : ITexture, IPreviewUpdate
     {
         private const int ETR_SIGNATURE = 1381254435;
 
@@ -381,7 +381,7 @@ namespace Xv2CoreLib.ETR
             }
         }
    
-        public void UpdateBrushPreview()
+        public void UpdatePreviewBrush()
         {
             foreach(ETR_Node node in Nodes)
             {
@@ -402,7 +402,7 @@ namespace Xv2CoreLib.ETR
     }
 
     [Serializable]
-    public class ETR_Node : INotifyPropertyChanged, ISelectedKeyframedValue, ITextureRef
+    public class ETR_Node : INotifyPropertyChanged, ISelectedKeyframedValue, ITextureRef, IPreviewUpdate
     {
         #region NotifyPropChanged
         [field: NonSerialized]

@@ -69,7 +69,7 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class EMP_File : ITexture, INotifyPropertyChanged
+    public class EMP_File : ITexture, INotifyPropertyChanged, IPreviewUpdate
     {
         #region INotifyPropChanged
         [field: NonSerialized]
@@ -600,7 +600,7 @@ namespace Xv2CoreLib.EMP_NEW
             return undos;
         }
 
-        public void UpdateBrushPreview()
+        public void UpdatePreviewBrush()
         {
             foreach(ParticleNode node in ParticleNodes)
             {
@@ -663,7 +663,7 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class ParticleNode : INotifyPropertyChanged, IName, ISelectedKeyframedValue
+    public class ParticleNode : INotifyPropertyChanged, IName, ISelectedKeyframedValue, IPreviewUpdate
     {
         public const int ENTRY_SIZE = 160;
 
@@ -1207,6 +1207,11 @@ namespace Xv2CoreLib.EMP_NEW
             }
         }
     
+        public void UpdatePreviewBrush()
+        {
+            UpdatePreviewBrush(true);
+        }
+
         public void UpdatePreviewBrush(bool recursive = false)
         {
             NotifyPropertyChanged(nameof(PreviewBrush));

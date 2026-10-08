@@ -99,45 +99,6 @@ namespace EEPK_Organiser.View.Editors
 
         private void Instance_UndoOrRedoCalled(object source, UndoEventRaisedEventArgs e)
         {
-            //Update PreviewBrush when color has been changed externally
-            if (e.UndoGroup == UndoGroup.ColorControl)
-            {
-                if (e.UndoContext is ETR_Node _node)
-                {
-                    _node.UpdatePreviewBrush();
-                }
-                else if (e.UndoContext is IList<ETR_Node> nodes)
-                {
-                    foreach(var node in nodes)
-                    {
-                        node.UpdatePreviewBrush();
-                    }
-                }
-                else if (e.UndoContext is Asset asset)
-                {
-                    if (asset.AssetType == Xv2CoreLib.EEPK.AssetType.TBIND && asset.Files[0].EtrFile == EtrFile)
-                    {
-                        EtrFile.UpdateBrushPreview();
-                    }
-                }
-                else if (e.UndoContext is IList<Asset> assets)
-                {
-                    if(assets.Any(x => x.AssetType == Xv2CoreLib.EEPK.AssetType.TBIND && x.Files[0].EtrFile == EtrFile))
-                    {
-                        EtrFile.UpdateBrushPreview();
-                    }
-                }
-                else if (e.UndoContext is EffectContainerFile eepk)
-                {
-                    if (eepk.Tbind == AssetContainer)
-                    {
-                        EtrFile.UpdateBrushPreview();
-                    }
-                }
-
-                return;
-            }
-
             ViewModel?.UpdateProperties();
             NotifyPropertyChanged(nameof(IsNodeEnabled));
         }

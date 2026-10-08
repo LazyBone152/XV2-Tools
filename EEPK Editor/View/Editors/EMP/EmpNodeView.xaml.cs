@@ -179,32 +179,6 @@ namespace EEPK_Organiser.View.Editors.EMP
 
         private void Instance_UndoOrRedoCalled(object source, UndoEventRaisedEventArgs e)
         {
-            //Update PreviewBrush when color has been changed externally
-            if(e.UndoGroup == UndoGroup.ColorControl)
-            {
-                if (e.UndoContext is ParticleNode node)
-                {
-                    node.UpdatePreviewBrush(true);
-                }
-                else if (e.UndoContext is IList<Asset> assets)
-                {
-                    if(assets.Any(x => x.AssetType == Xv2CoreLib.EEPK.AssetType.PBIND && x.Files[0].EmpFile == EmpFile))
-                    {
-                        EmpFile.UpdateBrushPreview();
-                    }
-                }
-                else if(e.UndoContext is EffectContainerFile eepk)
-                {
-                    if(eepk.Pbind == AssetContainer)
-                    {
-                        EmpFile.UpdateBrushPreview();
-                    }
-                }
-
-                NodeViewModel?.UpdateProperties();
-                return;
-            }
-
             UpdateVisibilities();
             NodeViewModel?.UpdateProperties();
         }

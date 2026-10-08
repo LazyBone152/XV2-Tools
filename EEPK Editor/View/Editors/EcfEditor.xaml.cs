@@ -1,15 +1,16 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Input;
+using EEPK_Organiser.ViewModel;
+using LB_Common.Mvvm;
+using LB_Common.Utils;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using CommunityToolkit.Mvvm.Input;
-using LB_Common.Mvvm;
-using LB_Common.Utils;
+using Xv2CoreLib;
 using Xv2CoreLib.ECF;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.UndoRedo;
-using EEPK_Organiser.ViewModel;
 
 namespace EEPK_Organiser.View.Editors
 {
@@ -77,38 +78,6 @@ namespace EEPK_Organiser.View.Editors
 
         private void Instance_UndoOrRedoCalled(object source, UndoEventRaisedEventArgs e)
         {
-            //Update PreviewBrush when color has been changed externally
-            if (e.UndoGroup == UndoGroup.ColorControl)
-            {
-                if (e.UndoContext is ECF_Node node)
-                {
-                    node.UpdatePreviewBrush();
-                }
-                else if (e.UndoContext is IList<ECF_Node> nodes)
-                {
-                    foreach(var _node in nodes)
-                    {
-                        _node.UpdatePreviewBrush();
-                    }
-                }
-                else if (e.UndoContext is Asset asset)
-                {
-                    if (asset.AssetType == Xv2CoreLib.EEPK.AssetType.CBIND && asset.Files[0].EcfFile == EcfFile)
-                    {
-                        EcfFile.UpdatePreviewBrush();
-                    }
-                }
-                else if (e.UndoContext is IList<Asset> assets)
-                {
-                    if (assets.Any(x => x.AssetType == Xv2CoreLib.EEPK.AssetType.CBIND && x.Files[0].EcfFile == EcfFile))
-                    {
-                        EcfFile.UpdatePreviewBrush();
-                    }
-                }
-
-                return;
-            }
-
             ViewModel?.UpdateProperties();
             NotifyPropertyChanged(nameof(IsNodeEnabled));
         }

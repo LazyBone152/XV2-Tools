@@ -14,7 +14,7 @@ namespace Xv2CoreLib.EMM
 {
     [Serializable]
     [YAXSerializeAs("EMM")]
-    public class EMM_File
+    public class EMM_File : IPreviewUpdate
     {
         public event EventHandler MaterialsChanged;
 
@@ -263,11 +263,18 @@ namespace Xv2CoreLib.EMM
             }
         }
 
+        public void UpdatePreviewBrush()
+        {
+            foreach(var material in Materials)
+            {
+                material.UpdatePreviewBrush();
+            }
+        }
     }
 
     [Serializable]
     [YAXSerializeAs("Material")]
-    public class EmmMaterial : INotifyPropertyChanged
+    public class EmmMaterial : INotifyPropertyChanged, IPreviewUpdate
     {
         #region NotifyPropChanged
         [field: NonSerialized]

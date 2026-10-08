@@ -12,7 +12,7 @@ namespace Xv2CoreLib.ECF
 {
 
     [Serializable]
-    public class ECF_File
+    public class ECF_File : IPreviewUpdate
     {
         public ushort I_12 { get; set; }
         //followed by 12 zero bytes
@@ -75,7 +75,7 @@ namespace Xv2CoreLib.ECF
     }
 
     [Serializable]
-    public class ECF_Node : INotifyPropertyChanged, ISelectedKeyframedValue
+    public class ECF_Node : INotifyPropertyChanged, ISelectedKeyframedValue, IPreviewUpdate
     {
         #region INotifyPropChanged
         [field: NonSerialized]

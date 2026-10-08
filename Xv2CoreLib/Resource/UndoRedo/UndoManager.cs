@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 
-
 #if Xv2CoreLib
 using CommunityToolkit.Mvvm.Input;
+using Xv2CoreLib.Color;
 #endif
 
 namespace Xv2CoreLib.Resource.UndoRedo
@@ -61,6 +61,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
         {
             undoStack = new LimitedStack<IUndoRedo>(Capacity);
             redoStack = new LimitedStack<IUndoRedo>(Capacity);
+            UndoOrRedoCalled += UndoManager_UndoOrRedoCalled;
         }
 
         public void AddUndo(IUndoRedo undo)
@@ -219,8 +220,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
             });
         }
 
-
-        private UndoGroup GetUndoGroup(IUndoRedo undo)
+        private static UndoGroup GetUndoGroup(IUndoRedo undo)
         {
             var prop = undo.GetType().GetProperty(nameof(CompositeUndo.UndoGroup));
 
@@ -232,7 +232,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
             return UndoGroup.Default;
         }
 
-        private string GetUndoArg(IUndoRedo undo)
+        private static string GetUndoArg(IUndoRedo undo)
         {
             var prop = undo.GetType().GetProperty(nameof(CompositeUndo.UndoArg));
 
@@ -244,7 +244,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
             return null;
         }
 
-        private object GetUndoContext(IUndoRedo undo)
+        private static object GetUndoContext(IUndoRedo undo)
         {
             var prop = undo.GetType().GetProperty(nameof(CompositeUndo.UndoContext));
 
@@ -254,6 +254,26 @@ namespace Xv2CoreLib.Resource.UndoRedo
             }
 
             return null;
+        }
+
+        private void UndoManager_UndoOrRedoCalled(object source, UndoEventRaisedEventArgs e)
+        {
+            #if Xv2CoreLib
+            if (e.UndoGroup == UndoGroup.ColorControl)
+            {
+                if (e.UndoContext is IPreviewUpdate preview)
+                {
+                    preview.UpdatePreviewBrush();
+                }
+                else if (e.UndoContext is IEnumerable<IPreviewUpdate> previewCol)
+                {
+                    foreach (var previewEntry in previewCol)
+                    {
+                        previewEntry?.UpdatePreviewBrush();
+                    }
+                }
+            }
+            #endif
         }
     }
 

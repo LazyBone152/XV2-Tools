@@ -435,8 +435,18 @@ namespace EEPK_Organiser.Forms
             }
         }
 
-        private void UndoRecolorOperation()
+        private void UndoRecolorOperation(bool undoInit = false)
         {
+            if (undoInit && initUndos.Count > 0)
+            {
+                for (int i = initUndos.Count - 1; i >= 0; i--)
+                {
+                    initUndos[i].Undo();
+                }
+
+                initUndos.Clear();
+            }
+
             if (recolorUndos.Count == 0) return; //Nothing to undo
 
             for(int i = recolorUndos.Count - 1; i >= 0; i--)
@@ -614,12 +624,6 @@ namespace EEPK_Organiser.Forms
             }
         }
 
-        private bool IsRecolorValid()
-        {
-            if (recolorUndos.Count == 0) return false;
-            return HaveRecolorValuesChanged();
-        }
-
         private bool HaveRecolorValuesChanged()
         {
             return !MathHelpers.FloatEquals(Hue, lastRecolorHue) || !MathHelpers.FloatEquals(Saturation, lastRecolorSaturation) || !MathHelpers.FloatEquals(Lightness, lastRecolorLightness)
@@ -636,9 +640,12 @@ namespace EEPK_Organiser.Forms
                 UndoManager.Instance.ForceEventCall(UndoGroup.ColorControl, null, GetContext());
             }
 
-            initUndos.AddRange(recolorUndos);
-            UndoManager.Instance.AddUndo(new CompositeUndo(initUndos, "Hue Adjustment"), UndoGroup.ColorControl, null, GetContext());
+            List<IUndoRedo> undos = new List<IUndoRedo>(initUndos.Count + recolorUndos.Count);
+            undos.AddRange(initUndos);
+            undos.AddRange(recolorUndos);
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Adjustment"), UndoGroup.ColorControl, null, GetContext());
             recolorUndos.Clear(); //Important to clear this - if undos exist when the window is closed, they will be undone
+            initUndos.Clear();
             Close();
         }
 
@@ -649,9 +656,9 @@ namespace EEPK_Organiser.Forms
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            if (recolorUndos.Count > 0)
+            if (recolorUndos.Count > 0 || initUndos.Count > 0)
             {
-                UndoRecolorOperation();
+                UndoRecolorOperation(true);
             }
         }
 

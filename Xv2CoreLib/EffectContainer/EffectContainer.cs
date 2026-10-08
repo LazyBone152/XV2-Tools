@@ -30,7 +30,7 @@ namespace Xv2CoreLib.EffectContainer
     }
 
     [Serializable]
-    public class EffectContainerFile : INotifyPropertyChanged, IIsNull
+    public class EffectContainerFile : INotifyPropertyChanged, IIsNull, IPreviewUpdate
     {
         #region NotifyPropertyChanged
         [field: NonSerialized]
@@ -2589,10 +2589,19 @@ namespace Xv2CoreLib.EffectContainer
         {
             return (Effects.Count == 0);
         }
+    
+        public void UpdatePreviewBrush()
+        {
+            Pbind?.UpdatePreviewBrush();
+            Tbind?.UpdatePreviewBrush();
+            Cbind?.UpdatePreviewBrush();
+            Emo?.UpdatePreviewBrush();
+            LightEma?.UpdatePreviewBrush();
+        }
     }
 
     [Serializable]
-    public class AssetContainerTool : INotifyPropertyChanged
+    public class AssetContainerTool : INotifyPropertyChanged, IPreviewUpdate
     {
         #region NotifyPropertyChanged
         [field: NonSerialized]
@@ -4055,10 +4064,17 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
+        public void UpdatePreviewBrush()
+        {
+            foreach(var asset in Assets)
+            {
+                asset.UpdatePreviewBrush();
+            }
+        }
     }
 
     [Serializable]
-    public class Asset : INotifyPropertyChanged
+    public class Asset : INotifyPropertyChanged, IPreviewUpdate
     {
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
@@ -4426,10 +4442,17 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
+        public void UpdatePreviewBrush()
+        {
+            foreach(var file in Files)
+            {
+                file?.UpdatePreviewBrush();
+            }
+        }
     }
 
     [Serializable]
-    public class EffectFile : INotifyPropertyChanged
+    public class EffectFile : INotifyPropertyChanged, IPreviewUpdate
     {
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
@@ -4716,6 +4739,25 @@ namespace Xv2CoreLib.EffectContainer
                     return Bytes;
                 default:
                     throw new Exception(string.Format("EffectFile.GetBytes(): Unknown fileType = {0}", fileType));
+            }
+        }
+    
+        public void UpdatePreviewBrush()
+        {
+            switch (fileType)
+            {
+                case FileType.EMM:
+                    EmmFile?.UpdatePreviewBrush();
+                    break;
+                case FileType.EMP:
+                    EmpFile?.UpdatePreviewBrush();
+                    break;
+                case FileType.ETR:
+                    EtrFile?.UpdatePreviewBrush();
+                    break;
+                case FileType.ECF:
+                    EcfFile?.UpdatePreviewBrush();
+                    break;
             }
         }
     }
