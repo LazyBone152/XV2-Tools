@@ -7,12 +7,13 @@ using Xv2CoreLib.EMP_NEW.Keyframes;
 using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
+using System.Threading.Tasks;
 
 namespace Xv2CoreLib.ECF
 {
 
     [Serializable]
-    public class ECF_File : IPreviewUpdate
+    public class ECF_File : IPreviewUpdate, IHueAdjustment
     {
         public ushort I_12 { get; set; }
         //followed by 12 zero bytes
@@ -55,13 +56,13 @@ namespace Xv2CoreLib.ECF
             return accumulator.AverageColor;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
             if (Nodes == null) return;
 
             foreach (var entry in Nodes)
             {
-                entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                await entry.ApplyHueAdjustment(input);
             }
         }
         
@@ -75,7 +76,7 @@ namespace Xv2CoreLib.ECF
     }
 
     [Serializable]
-    public class ECF_Node : INotifyPropertyChanged, ISelectedKeyframedValue, IPreviewUpdate
+    public class ECF_Node : INotifyPropertyChanged, ISelectedKeyframedValue, IPreviewUpdate, IHueAdjustment
     {
         #region INotifyPropChanged
         [field: NonSerialized]
@@ -193,11 +194,11 @@ namespace Xv2CoreLib.ECF
             return accumulator.AverageColor;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
-            MultiColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-            RimColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-            AddColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+            MultiColor.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance);
+            RimColor.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance);
+            AddColor.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance);
         }
 
         public EMP_KeyframedValue[] GetKeyframedValues(int parameter, params int[] components)

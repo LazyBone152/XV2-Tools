@@ -16,7 +16,7 @@ using System.Windows;
 namespace Xv2CoreLib.EMB_CLASS
 {
     [Serializable]
-    public class EMB_TextureFile : EMB_BaseFile<EMB_TextureEntry>
+    public class EMB_TextureFile : EMB_BaseFile<EMB_TextureEntry>, IHueAdjustment
     {
         public event EventHandler TexturesChanged;
 
@@ -91,7 +91,7 @@ namespace Xv2CoreLib.EMB_CLASS
         {
             foreach (var entry in Entry)
             {
-                entry.AccumulateUsedColor(accumulator);
+                entry.AccumulateUsedColors(accumulator);
             }
         }
 
@@ -107,7 +107,7 @@ namespace Xv2CoreLib.EMB_CLASS
             return entries;
         }
 
-        public async Task ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
             if (Entry == null) return;
 
@@ -116,8 +116,8 @@ namespace Xv2CoreLib.EMB_CLASS
             {
                 foreach (var entry in Entry)
                 {
-                    await entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-                    entry.SaveDds(true, undos);
+                    await entry.ApplyHueAdjustment(input);
+                    entry.SaveDds(true, input.Undos);
                 }
             });
         }
@@ -165,7 +165,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
 
     [Serializable]
-    public class EMB_TextureEntry : EmbEntry, INotifyPropertyChanged
+    public class EMB_TextureEntry : EmbEntry, INotifyPropertyChanged, IHueAdjustment
     {
         #region NotifyPropChanged
         [field: NonSerialized]
@@ -405,35 +405,35 @@ namespace Xv2CoreLib.EMB_CLASS
 
         }
 
-        public async Task ChangeHue(double hue, double _saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
             if (Texture == null)
                 return;
 
             WriteableBitmapEditOperation editOperation = new WriteableBitmapEditOperation(Texture);
+            int hue = (int)input.Hue;
 
-            if (hueSet)
+            if (input.HueSet)
             {
-                if (variance != 0)
-                    hue += Random.Range(-variance, variance);
+                if (input.Variance != 0 && input.TextureVariance)
+                    hue += Random.Range(-input.Variance, input.Variance);
 
-                await editOperation.AsyncApplyHueSet((int)hue);
+                await editOperation.AsyncApplyHueSet(hue);
             }
             else
             {
-                float brightness = (float)lightness / 5f;
-                float saturation = (float)_saturation;
-                await editOperation.AsyncApplyHueAdjust((int)hue, saturation, brightness);
+                float brightness = (float)input.Lightness / 5f;
+                float saturation = (float)input.Saturation;
+                await editOperation.AsyncApplyHueAdjust(hue, saturation, brightness);
             }
 
             wasEdited = true;
             Texture = editOperation.OutputBitmap;
 
-            if (undos != null)
-                undos.Add(new UndoableProperty<EmbEntry>(nameof(Texture), this, editOperation.SourceBitmap, editOperation.OutputBitmap));
+            input.Undos?.Add(new UndoableProperty<EmbEntry>(nameof(Texture), this, editOperation.SourceBitmap, editOperation.OutputBitmap));
         }
 
-        public void AccumulateUsedColor(Xv2ColorAccumulator accumulator)
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
             if (Texture == null) throw new InvalidOperationException("AccumulateUsedColor: DdsImage was null.");
             accumulator.AddBitmap(Texture);

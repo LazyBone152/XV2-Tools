@@ -14,7 +14,6 @@ namespace EEPK_Organiser.ViewModel
     {
         private EMP_File empFile;
         private ParticleNode node;
-        private readonly EMM_File EmmFile;
 
         public string Name
         {
@@ -971,22 +970,16 @@ namespace EEPK_Organiser.ViewModel
             get => node.EmissionNode.Texture.MaterialRef;
             set
             {
-                //Prevent the ComboBox from pushing a null value when the SelectedItem is removed from its ItemsSource
-                if (value == null && node.EmissionNode.Texture.MaterialRef != null && !EmmFile.Materials.Contains(node.EmissionNode.Texture.MaterialRef))
+                if (UndoManager.Instance.HasRecentUndo)
                     return;
 
-                if(node.EmissionNode.Texture.MaterialRef != value)
+                if (node.EmissionNode.Texture.MaterialRef != value)
                 {
                     UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.MaterialRef), node.EmissionNode.Texture, node.EmissionNode.Texture.MaterialRef, value, "ETR -> Material"));
                     node.EmissionNode.Texture.MaterialRef = value;
                     RaisePropertyChanged(nameof(MaterialRef));
                 }
             }
-        }
-
-        public EmpNodeViewModel(EMM_File materials)
-        {
-            this.EmmFile = materials;
         }
 
         public void SetContext(ParticleNode node, EMP_File empFile)
@@ -1108,6 +1101,11 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(Node_I_128));
             RaisePropertyChanged(nameof(Node_F_132));
 
+        }
+
+        public void UpdateMaterialRef()
+        {
+            RaisePropertyChanged(nameof(MaterialRef));
         }
 
         private void SetNodeFlags(NodeFlags1 flag, bool state)

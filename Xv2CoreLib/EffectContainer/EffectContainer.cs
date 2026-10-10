@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -30,7 +31,7 @@ namespace Xv2CoreLib.EffectContainer
     }
 
     [Serializable]
-    public class EffectContainerFile : INotifyPropertyChanged, IIsNull, IPreviewUpdate
+    public class EffectContainerFile : INotifyPropertyChanged, IIsNull, IPreviewUpdate, IHueAdjustment
     {
         #region NotifyPropertyChanged
         [field: NonSerialized]
@@ -2598,10 +2599,28 @@ namespace Xv2CoreLib.EffectContainer
             Emo?.UpdatePreviewBrush();
             LightEma?.UpdatePreviewBrush();
         }
+    
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
+        {
+            Pbind?.AccumulateUsedColors(accumulator);
+            Tbind?.AccumulateUsedColors(accumulator);
+            Cbind?.AccumulateUsedColors(accumulator);
+            Emo?.AccumulateUsedColors(accumulator);
+            LightEma?.AccumulateUsedColors(accumulator);
+        }
+
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
+        {
+            await Pbind?.ApplyHueAdjustment(input);
+            await Tbind?.ApplyHueAdjustment(input);
+            await Cbind?.ApplyHueAdjustment(input);
+            await Emo?.ApplyHueAdjustment(input);
+            await LightEma?.ApplyHueAdjustment(input);
+        }
     }
 
     [Serializable]
-    public class AssetContainerTool : INotifyPropertyChanged, IPreviewUpdate
+    public class AssetContainerTool : INotifyPropertyChanged, IPreviewUpdate, IHueAdjustment
     {
         #region NotifyPropertyChanged
         [field: NonSerialized]
@@ -4071,10 +4090,26 @@ namespace Xv2CoreLib.EffectContainer
                 asset.UpdatePreviewBrush();
             }
         }
+   
+        public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
+        {
+            foreach(var asset in Assets)
+            {
+                asset.AccumulateUsedColors(accumulator);
+            }
+        }
+
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
+        {
+            foreach(var asset in Assets)
+            {
+                await asset.ApplyHueAdjustment(input);
+            }
+        }
     }
 
     [Serializable]
-    public class Asset : INotifyPropertyChanged, IPreviewUpdate
+    public class Asset : INotifyPropertyChanged, IPreviewUpdate, IHueAdjustment
     {
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
@@ -4447,6 +4482,43 @@ namespace Xv2CoreLib.EffectContainer
             foreach(var file in Files)
             {
                 file?.UpdatePreviewBrush();
+            }
+        }
+        
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
+        {
+            switch (AssetType)
+            {
+                case AssetType.PBIND:
+                    await Files[0].EmpFile.ApplyHueAdjustment(input);
+                    break;
+                case AssetType.TBIND:
+                    await Files[0].EtrFile.ApplyHueAdjustment(input);
+                    break;
+                case AssetType.CBIND:
+                    await Files[0].EcfFile.ApplyHueAdjustment(input);
+                    break;
+                case AssetType.LIGHT:
+                    Files[0].EmaFile.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance);
+                    break;
+                case AssetType.EMO:
+                    foreach (EffectFile file in Files)
+                    {
+                        switch (file.Extension)
+                        {
+                            case ".emb":
+                                await file.EmbFile.ApplyHueAdjustment(input);
+                                break;
+                            case ".emm":
+                                await file.EmmFile.ApplyHueAdjustment(input);
+                                break;
+                            case ".mat.ema":
+                                EMM_File emmFile = Files.FirstOrDefault(x => x.fileType == EffectFile.FileType.EMM)?.EmmFile;
+                                file.EmaFile.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance, emmFile);
+                                break;
+                        }
+                    }
+                    break;
             }
         }
     }

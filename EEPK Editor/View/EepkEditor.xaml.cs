@@ -702,7 +702,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsFileLoaded))]
         private void ToolMenu_HueAdjust()
         {
-            RecolorAll recolor = new RecolorAll(effectContainerFile, false);
+            RecolorAll recolor = new RecolorAll(effectContainerFile, false, "Global");
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -711,7 +711,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsFileLoaded))]
         private void ToolMenu_HueSet()
         {
-            RecolorAll recolor = new RecolorAll(effectContainerFile, true);
+            RecolorAll recolor = new RecolorAll(effectContainerFile, true, "Global");
 
             if (recolor.Initialize())
                 recolor.ShowDialog();

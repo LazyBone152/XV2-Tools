@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Timers;
 using System.Windows;
 
 #if Xv2CoreLib
@@ -31,10 +32,15 @@ namespace Xv2CoreLib.Resource.UndoRedo
 
         //Event
         public event UndoEventRaisedEventHandler UndoOrRedoCalled;
+        /// <summary>
+        /// Raised shortly after an Undo or Redo has been requested. The timer for it to be raised resets upon every Undo or Redo, meaning if a large number of Undo or Redo events occur in a short period of time, only one <see cref="RecentUndoOrRedo"/> will be raised for them.
+        /// </summary>
+        /// <remarks>This event carries no information about the Undo or Redo that occured - it just exists to inform the subscriber that one DID occur. If you need to know about the actual undo event, use <see cref="UndoOrRedoCalled"/>.</remarks>
+        public event EventHandler RecentUndoOrRedo;
 
         //Instance
-        private LimitedStack<IUndoRedo> undoStack;
-        private LimitedStack<IUndoRedo> redoStack;
+        private readonly LimitedStack<IUndoRedo> undoStack;
+        private readonly LimitedStack<IUndoRedo> redoStack;
         private int Capacity = DefaultMaxCapacity;
         private DateTime LastAddition = DateTime.MinValue;
         private readonly TimeSpan MergeAdditionTimeSpan = new TimeSpan(0, 0, 1);
@@ -55,13 +61,23 @@ namespace Xv2CoreLib.Resource.UndoRedo
                 return $"Redo | {redoStack.First.Value.Message}";
             }
         }
-        public bool IsUndoing { get; private set; }
+       private bool IsUndoingInternal = false;
+        
+        /// <summary>
+        /// Indicates whether an undo or redo was recently requested (last 1 second).
+        /// </summary>
+        public bool HasRecentUndo { get; private set; }
+        private DateTime LastUndo = DateTime.MinValue;
+        private readonly TimeSpan UndoDuration = new TimeSpan(0, 0, 1); //"HasRecentUndo" will be true for 1 second after an Undo/Redo 
+        private readonly Timer IsUndoingTimer = new Timer(100);
+
 
         private UndoManager()
         {
             undoStack = new LimitedStack<IUndoRedo>(Capacity);
             redoStack = new LimitedStack<IUndoRedo>(Capacity);
             UndoOrRedoCalled += UndoManager_UndoOrRedoCalled;
+            IsUndoingTimer.Elapsed += IsUndoingTimer_Elapsed;
         }
 
         public void AddUndo(IUndoRedo undo)
@@ -134,14 +150,17 @@ namespace Xv2CoreLib.Resource.UndoRedo
 
             try
             {
-                IsUndoing = true;
+                IsUndoingInternal = true;
+                HasRecentUndo = true;
                 action.Undo();
                 redoStack.Push(action);
                 RefreshUndoRedoState();
             }
             finally
             {
-                IsUndoing = false;
+                IsUndoingInternal = false;
+                LastUndo = DateTime.UtcNow;
+                IsUndoingTimer.Start();
                 UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action), GetUndoArg(action), GetUndoContext(action)));
             }
 
@@ -157,14 +176,17 @@ namespace Xv2CoreLib.Resource.UndoRedo
             IUndoRedo action = redoStack.Pop();
             try
             {
-                IsUndoing = true;
+                IsUndoingInternal = true;
+                HasRecentUndo = true;
                 action.Redo();
                 undoStack.Push(action);
                 RefreshUndoRedoState();
             }
             finally
             {
-                IsUndoing = false;
+                IsUndoingInternal = false;
+                LastUndo = DateTime.UtcNow;
+                IsUndoingTimer.Start();
                 UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action), GetUndoArg(action), GetUndoContext(action)));
             }
 
@@ -274,6 +296,22 @@ namespace Xv2CoreLib.Resource.UndoRedo
                 }
             }
             #endif
+        }
+
+        private void IsUndoingTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (HasRecentUndo)
+            {
+                if(DateTime.UtcNow - LastUndo >= UndoDuration && !IsUndoingInternal)
+                {
+                    HasRecentUndo = false;
+                    Application.Current.Dispatcher.Invoke(() => RecentUndoOrRedo?.Invoke(this, EventArgs.Empty));
+                }
+            }
+            else
+            {
+                IsUndoingTimer.Stop();
+            }
         }
     }
 

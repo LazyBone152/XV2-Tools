@@ -159,7 +159,7 @@ namespace EEPK_Organiser.View.Editors
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueAdjustment()
         {
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNodes, false);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNodes, false, "Color Fade Node");
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -168,8 +168,8 @@ namespace EEPK_Organiser.View.Editors
         [RelayCommand(CanExecute = nameof(IsNodeSelected))]
         private void HueSet()
         {
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNodes, true);
-
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNodes, true, "Color Fade Node");
+            
             if (recolor.Initialize())
                 recolor.ShowDialog();
         }

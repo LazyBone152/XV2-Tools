@@ -11,11 +11,12 @@ using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Color;
 using LB_Common.Numbers;
 using FastCloner.Code;
+using System.Threading.Tasks;
 
 namespace Xv2CoreLib.ETR
 {
     [Serializable]
-    public class ETR_File : ITexture, IPreviewUpdate
+    public class ETR_File : ITexture, IPreviewUpdate, IHueAdjustment
     {
         private const int ETR_SIGNATURE = 1381254435;
 
@@ -303,13 +304,11 @@ namespace Xv2CoreLib.ETR
             return accumulator.AverageColor;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
-            if (undos == null) undos = new List<IUndoRedo>();
-
             foreach (ETR_Node node in Nodes)
             {
-                node.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                await node.ApplyHueAdjustment(input);
             }
         }
 
@@ -399,10 +398,23 @@ namespace Xv2CoreLib.ETR
                 node.MaterialRef = null;
             }
         }
+    
+        public List<EmmMaterial> GetUsedMaterials()
+        {
+            List<EmmMaterial> materials = new List<EmmMaterial>();
+
+            foreach(var node in Nodes)
+            {
+                if (node.MaterialRef != null)
+                    materials.Add(node.MaterialRef);
+            }
+
+            return materials;
+        }
     }
 
     [Serializable]
-    public class ETR_Node : INotifyPropertyChanged, ISelectedKeyframedValue, ITextureRef, IPreviewUpdate
+    public class ETR_Node : INotifyPropertyChanged, ISelectedKeyframedValue, ITextureRef, IPreviewUpdate, IHueAdjustment
     {
         #region NotifyPropChanged
         [field: NonSerialized]
@@ -845,10 +857,10 @@ namespace Xv2CoreLib.ETR
             return accumulator.AverageColor;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
-            Color1.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-            Color2.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+            Color1.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance);
+            Color2.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance);
         }
 
         public static ETR_Node GetNew()

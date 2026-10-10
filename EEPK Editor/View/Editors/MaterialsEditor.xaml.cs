@@ -77,8 +77,6 @@ namespace EEPK_Organiser.View
         //ViewModel
         public MaterialViewModel MaterialViewModel { get; set; } = new MaterialViewModel();
 
-        public bool ShiftGlareColor { get; set; } = true;
-
         public string SelectedMaterialName
         {
             get => _selectedMaterial?.Name;
@@ -542,7 +540,7 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll recolor = new RecolorAll(SelectedMaterials.ToList(), false, ShiftGlareColor);
+                RecolorAll recolor = new RecolorAll(SelectedMaterials.ToList(), false, "Material");
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
@@ -556,7 +554,7 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll recolor = new RecolorAll(SelectedMaterials.ToList(), true, ShiftGlareColor);
+                RecolorAll recolor = new RecolorAll(SelectedMaterials.ToList(), true, "Material");
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();

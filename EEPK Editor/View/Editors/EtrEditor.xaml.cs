@@ -72,8 +72,7 @@ namespace EEPK_Organiser.View.Editors
         {
             DataContext = this;
             InitializeComponent();
-            UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
-            Unloaded += EcfEditor_Unloaded;
+            Unloaded += EtrEditor_Unloaded;
             Loaded += EtrEditor_Loaded;
             SelectedShapePoint.PropertyChanged += SelectedShapePoint_PropertyChanged;
         }
@@ -88,13 +87,17 @@ namespace EEPK_Organiser.View.Editors
 
         private void EtrEditor_Loaded(object sender, RoutedEventArgs e)
         {
+            UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
+            UndoManager.Instance.RecentUndoOrRedo += Instance_RecentUndoOrRedo;
+
             if (EtrFile?.Nodes?.Count > 0)
                 SelectedNode = EtrFile.Nodes[0];
         }
 
-        private void EcfEditor_Unloaded(object sender, RoutedEventArgs e)
+        private void EtrEditor_Unloaded(object sender, RoutedEventArgs e)
         {
             UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
+            UndoManager.Instance.RecentUndoOrRedo -= Instance_RecentUndoOrRedo;
         }
 
         private void Instance_UndoOrRedoCalled(object source, UndoEventRaisedEventArgs e)
@@ -103,6 +106,10 @@ namespace EEPK_Organiser.View.Editors
             NotifyPropertyChanged(nameof(IsNodeEnabled));
         }
 
+        private void Instance_RecentUndoOrRedo(object sender, EventArgs e)
+        {
+            ViewModel?.UpdateMaterialRef();
+        }
         #region Commands
 
         [RelayCommand(CanExecute = nameof(IsETRLoaded))]

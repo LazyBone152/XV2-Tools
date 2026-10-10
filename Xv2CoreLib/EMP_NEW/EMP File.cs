@@ -12,6 +12,7 @@ using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.EffectContainer;
+using System.Threading.Tasks;
 
 namespace Xv2CoreLib.EMP_NEW
 {
@@ -69,7 +70,7 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class EMP_File : ITexture, INotifyPropertyChanged, IPreviewUpdate
+    public class EMP_File : ITexture, INotifyPropertyChanged, IPreviewUpdate, IHueAdjustment
     {
         #region INotifyPropChanged
         [field: NonSerialized]
@@ -552,14 +553,13 @@ namespace Xv2CoreLib.EMP_NEW
             return accumulator.AverageColor;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
             if (ParticleNodes == null) return;
-            if (undos == null) undos = new List<IUndoRedo>();
 
             foreach (var particleEffects in ParticleNodes)
             {
-                particleEffects.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                await particleEffects.ApplyHueAdjustment(input);
             }
         }
 
@@ -663,7 +663,7 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class ParticleNode : INotifyPropertyChanged, IName, ISelectedKeyframedValue, IPreviewUpdate
+    public class ParticleNode : INotifyPropertyChanged, IName, ISelectedKeyframedValue, IPreviewUpdate, IHueAdjustment
     {
         public const int ENTRY_SIZE = 160;
 
@@ -1071,16 +1071,16 @@ namespace Xv2CoreLib.EMP_NEW
             return accumulator.AverageColor;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
             if(NodeType == ParticleNodeType.Emission)
             {
                 //Invert color if AlphaBlendType 2 (Subtractive) is used for this node.
                 bool invertColor = EmissionNode.Texture.MaterialRef?.DecompiledParameters.AlphaBlendType == 2;
 
-                EmissionNode.Texture.Color1.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
-                EmissionNode.Texture.Color2.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
-                EmissionNode.Texture.Color_Variance.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
+                EmissionNode.Texture.Color1.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance, invertColor);
+                EmissionNode.Texture.Color2.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance, invertColor);
+                EmissionNode.Texture.Color_Variance.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance, invertColor);
 
                 NotifyPropertyChanged(nameof(PreviewBrush));
             }
@@ -1090,7 +1090,7 @@ namespace Xv2CoreLib.EMP_NEW
             {
                 foreach (var child in ChildParticleNodes)
                 {
-                    child.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                    await child.ApplyHueAdjustment(input);
                 }
             }
         }

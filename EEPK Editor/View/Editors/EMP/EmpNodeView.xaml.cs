@@ -40,7 +40,7 @@ namespace EEPK_Organiser.View.Editors.EMP
             }
         }
         public EmpNodeViewModel NodeViewModel => Node != null ? _nodeViewModel : null;
-        private EmpNodeViewModel _nodeViewModel;
+        private EmpNodeViewModel _nodeViewModel = new EmpNodeViewModel();
 
 
         public static readonly DependencyProperty EmpFileProperty = DependencyProperty.Register(nameof(EmpFile), typeof(EMP_File), typeof(EmpNodeView), new PropertyMetadata(null));
@@ -149,15 +149,29 @@ namespace EEPK_Organiser.View.Editors.EMP
             DataContext = this;
             InitializeComponent();
             Loaded += EmpNodeView_Loaded;
+            Unloaded += EmpNodeView_Unloaded;
         }
 
         private void EmpNodeView_Loaded(object sender, RoutedEventArgs e)
         {
-            _nodeViewModel = new EmpNodeViewModel(AssetContainer.File2_Ref);
             _nodeViewModel.PropertyChanged += NodeViewModel_PropertyChanged;
             DpChanged += NodeChanged;
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
+            UndoManager.Instance.RecentUndoOrRedo += Instance_RecentUndoOrRedo;
             SelectedShapeDrawPoint.PropertyChanged += SelectedShapeDrawPoint_PropertyChanged;
+        }
+
+        private void EmpNodeView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            DpChanged -= NodeChanged;
+            UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
+            UndoManager.Instance.RecentUndoOrRedo -= Instance_RecentUndoOrRedo;
+            SelectedShapeDrawPoint.PropertyChanged -= SelectedShapeDrawPoint_PropertyChanged;
+        }
+
+        private void Instance_RecentUndoOrRedo(object sender, EventArgs e)
+        {
+            NodeViewModel?.UpdateMaterialRef();
         }
 
         private void SelectedShapeDrawPoint_PropertyChanged(object sender, PropertyChangedEventArgs e)

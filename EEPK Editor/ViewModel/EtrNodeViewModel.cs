@@ -1,6 +1,7 @@
 ﻿using LB_Common.Mvvm;
 using LB_Common.Numbers;
 using Xv2CoreLib;
+using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW.Keyframes;
 using Xv2CoreLib.ETR;
@@ -297,12 +298,17 @@ namespace EEPK_Organiser.ViewModel
             get => node.MaterialRef;
             set
             {
-                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.MaterialRef), node, node.MaterialRef, value, "ETR -> Material"));
-                node.MaterialRef = value;
-                RaisePropertyChanged(nameof(MaterialRef));
+                if (UndoManager.Instance.HasRecentUndo)
+                    return;
+
+                if(value != node.MaterialRef)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.MaterialRef), node, node.MaterialRef, value, "ETR -> Material"));
+                    node.MaterialRef = value;
+                    RaisePropertyChanged(nameof(MaterialRef));
+                }
             }
         }
-
 
         public void SetContext(ETR_Node node)
         {
@@ -350,6 +356,12 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(Flag_UVPauseOnHold));
             RaisePropertyChanged(nameof(Flag_Unk17));
             RaisePropertyChanged(nameof(Flag_Unk18));
+        }
+
+        public void UpdateMaterialRef()
+        {
+            if (node == null) return;
+            RaisePropertyChanged(nameof(MaterialRef));
         }
 
         private void SetNodeFlags(ETR_Node.ExtrudeFlags flag, bool state, UndoGroup undoGroup = UndoGroup.Default)

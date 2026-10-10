@@ -539,13 +539,12 @@ namespace EEPK_Organiser.View
         {
             if (selectedAssets?.Count > 0)
             {
-                RecolorAll recolor = new RecolorAll(effectContainerFile.GetAssetContainer(assetType), assetType, selectedAssets, hueSet);
+                RecolorAll recolor = new RecolorAll(effectContainerFile.GetAssetContainer(assetType), selectedAssets, hueSet);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
             }
         }
-
         #endregion
 
         #region Pbind

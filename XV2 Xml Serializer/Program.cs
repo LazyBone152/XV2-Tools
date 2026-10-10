@@ -103,7 +103,7 @@ namespace XV2_Xml_Serializer
                                     new Xv2CoreLib.TNL.Parser(fileLocation, true);
                                     break;
                                 case ".emp":
-                                    new Xv2CoreLib.EMP.Parser(fileLocation, true);
+                                    new Xv2CoreLib.EMP_XML.Parser(fileLocation, true);
                                     break;
                                 case ".ecf":
                                     new Xv2CoreLib.ECF_XML.Parser(fileLocation, true);
@@ -425,7 +425,7 @@ namespace XV2_Xml_Serializer
                         new Xv2CoreLib.TNL.Deserializer(fileLocation);
                         break;
                     case ".emp":
-                        new Xv2CoreLib.EMP.Deserializer(fileLocation);
+                        new Xv2CoreLib.EMP_XML.Deserializer(fileLocation);
                         break;
                     case ".ecf":
                         new Xv2CoreLib.ECF_XML.Deserializer(fileLocation);

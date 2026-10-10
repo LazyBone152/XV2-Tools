@@ -20,33 +20,25 @@ using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
 {
-    /// <summary>
-    /// Interaction logic for RecolorAll.xaml
-    /// </summary>
     public partial class RecolorAll : AutoObservableWindow
     {
         private enum Mode
         {
-            Asset,
-            Material,
-            Global,
-            ParticleNode,
-            TraceNode,
-            ColorFadeNode
+            Default,
+            AssetContainer,
         }
 
-        private readonly AssetType AssetType = AssetType.EMO;
-        private readonly IList<Asset> Assets = null;
-        private readonly IList<EmmMaterial> Materials = null;
-        private readonly EffectContainerFile effectContainerFile = null;
+        private readonly IEnumerable<IHueAdjustment> RecolorItems = null;
         private readonly AssetContainerTool AssetContainer = null;
-        private readonly ParticleNode particleNode = null;
-        private readonly IList<ETR_Node> etrNodes = null;
-        private readonly IList<ECF_Node> ecfNodes = null;
+        private readonly AssetType AssetType = AssetType.EMO;
+        private readonly bool IsGlobal = false;
+        private readonly bool IsMaterial = false;
+        private List<EmmMaterial> UsedMaterials = null;
 
 
-        private readonly Mode CurrentMode = Mode.Asset;
-        private readonly bool isHueSet = false;
+        private readonly Mode CurrentMode = Mode.AssetContainer;
+        private readonly bool IsHueSet = false;
+        private readonly string RecolorItemName;
 
         private readonly List<IUndoRedo> initUndos = new List<IUndoRedo>();
         private readonly List<IUndoRedo> recolorUndos = new List<IUndoRedo>();
@@ -98,7 +90,7 @@ namespace EEPK_Organiser.Forms
         }
 
         public Visibility IncludeGlareColorVisibility =>
-            CurrentMode == Mode.Material || CurrentMode == Mode.Global || ((CurrentMode == Mode.Asset && AssetType == AssetType.EMO) || AssetType == AssetType.TBIND || AssetType == AssetType.PBIND)
+            IsMaterial || IsGlobal || ((CurrentMode == Mode.AssetContainer && AssetType == AssetType.EMO) || AssetType == AssetType.TBIND || AssetType == AssetType.PBIND)
                 ? Visibility.Visible : Visibility.Collapsed;
 
         public Visibility IncludeMaterialsVisibility =>
@@ -152,92 +144,92 @@ namespace EEPK_Organiser.Forms
         #endregion
 
         #region Constructor
-        /// <summary>
-        /// Hue shift a asset.
-        /// </summary>
-        public RecolorAll(AssetContainerTool assetContainer, AssetType _assetType, IList<Asset> assets, bool isHueSet)
+        public RecolorAll(IHueAdjustment recolorItem, bool isHueSet, string recolorItemName)
         {
-            this.isHueSet = isHueSet;
-            CurrentMode = Mode.Asset;
-            AssetType = _assetType;
-            Assets = assets;
+            RecolorItemName = recolorItemName;
+            IsHueSet = isHueSet;
+            CurrentMode = Mode.Default;
+            RecolorItems = new IHueAdjustment[] { recolorItem };
+            IsGlobal = recolorItem is EffectContainerFile;
+
+            InitializeComponent();
+            DataContext = this;
+        }
+
+        public RecolorAll(IEnumerable<IHueAdjustment> recolorItems, bool isHueSet, string recolorItemName)
+        {
+            RecolorItemName = recolorItemName;
+            CurrentMode = Mode.Default;
+            RecolorItems = recolorItems;
+            IsHueSet = isHueSet;
+
+            foreach(var item in recolorItems)
+            {
+                IsMaterial = item is EmmMaterial;
+                break;
+            }
+
+            InitializeComponent();
+            DataContext = this;
+        }
+
+        public RecolorAll(AssetContainerTool assetContainer, ParticleNode recolorItem, bool isHueSet)
+        {
+            IsHueSet = isHueSet;
+            CurrentMode = Mode.AssetContainer;
+            AssetType = assetContainer.ContainerAssetType;
             AssetContainer = assetContainer;
+            RecolorItems = new List<ParticleNode>(1) { recolorItem };
+            UsedMaterials = GetUsedMaterials();
+            RecolorItemName = GetContainerItemName();
 
             InitializeComponent();
             DataContext = this;
         }
 
-        /// <summary>
-        /// Hue shift a material.
-        /// </summary>
-        /// <param name="_material"></param>
-        public RecolorAll(IList<EmmMaterial> _materials, bool isHueSet, bool shiftGlareColor)
+        public RecolorAll(AssetContainerTool assetContainer, IEnumerable<IHueAdjustment> recolorItems, bool isHueSet)
         {
-            this.isHueSet = isHueSet;
-            CurrentMode = Mode.Material;
-            Materials = _materials;
-            ShiftGlareColor = shiftGlareColor;
-
-            InitializeComponent();
-            DataContext = this;
-        }
-
-        /// <summary>
-        /// Hue shift all assets, materials and textures in a EffectContainerFile.
-        /// </summary>
-        public RecolorAll(EffectContainerFile _effectContainerFile, bool isHueSet)
-        {
-            this.isHueSet = isHueSet;
-            CurrentMode = Mode.Global;
-            effectContainerFile = _effectContainerFile;
-            InitializeComponent();
-            DataContext = this;
-        }
-
-        /// <summary>
-        /// Hue shift a ParticleEffect.
-        /// </summary>
-        public RecolorAll(AssetContainerTool assetContainer, ParticleNode node, bool isHueSet)
-        {
-            this.isHueSet = isHueSet;
-            CurrentMode = Mode.ParticleNode;
-            AssetType = AssetType.PBIND;
-            particleNode = node;
+            IsHueSet = isHueSet;
+            CurrentMode = Mode.AssetContainer;
+            AssetType = assetContainer.ContainerAssetType;
             AssetContainer = assetContainer;
+            RecolorItems = recolorItems;
+            UsedMaterials = GetUsedMaterials();
+            RecolorItemName = GetContainerItemName();
 
             InitializeComponent();
             DataContext = this;
         }
 
-        public RecolorAll(AssetContainerTool assetContainer, IList<ETR_Node> nodes, bool isHueSet)
+        private string GetContainerItemName()
         {
-            this.isHueSet = isHueSet;
-            CurrentMode = Mode.TraceNode;
-            AssetType = AssetType.TBIND;
-            etrNodes = nodes;
-            AssetContainer = assetContainer;
+            foreach(var item in RecolorItems)
+            {
+                if(item is Asset)
+                {
+                    return $"{AssetType} Asset";
+                }
+                break;
+            }
 
-            InitializeComponent();
-            DataContext = this;
+            switch (AssetType)
+            {
+                case AssetType.PBIND:
+                    return "Particle Node";
+                case AssetType.TBIND:
+                    return "Trace Node";
+                case AssetType.CBIND:
+                    return "Color Fade Node";
+            }
+
+            return "";
         }
-
-        public RecolorAll(IList<ECF_Node> nodes, bool isHueSet)
-        {
-            this.isHueSet = isHueSet;
-            CurrentMode = Mode.ColorFadeNode;
-            AssetType = AssetType.CBIND;
-            ecfNodes = nodes;
-
-            InitializeComponent();
-            DataContext = this;
-        }
-
         #endregion
 
         #region Setup
         public bool Initialize()
         {
-            if (isHueSet)
+            if (IsHueSet)
             {
                 helpTextBlock.Text = "Sets the hue value to the desired amount, keeping the saturation and lightness values the same. This will result in everything being different shades of the same color.";
                 saturationGrid.Visibility = Visibility.Collapsed;
@@ -247,41 +239,16 @@ namespace EEPK_Organiser.Forms
             }
             else
             {
-                helpTextBlock.Text = "Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount. This recolors the effect while preserving any color variation.";
+                helpTextBlock.Text = "Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount while preserving any color variation.";
                 saturationGrid.Visibility = Visibility.Visible;
                 lightnessGrid.Visibility = Visibility.Visible;
                 varianceGrid.Visibility = Visibility.Collapsed;
                 Title = "Hue Adjustment";
             }
 
-            if (((CurrentMode == Mode.Asset && AssetType == AssetType.EMO) || CurrentMode == Mode.Global) && !SettingsManager.Instance.LoadTextures)
-            {
-                MessagePrompt.Show("This option is not available while textures are turned off. Enable Load Textures in the settings to use this option.", "Not Available", MessagePromptButtons.OK, MessagePromptIcon.Warning);
-                return false;
-            }
+            int count = RecolorItems.Count();
+            Title += count > 1 ? $" ({count} {RecolorItemName}s)" : $" ({RecolorItemName})";
 
-            //Set window name based on type and number being recolored 
-            switch (CurrentMode)
-            {
-                case Mode.Global:
-                    Title += $" (Global)";
-                    break;
-                case Mode.Asset:
-                    Title += Assets.Count > 1 ? $" ({Assets.Count} {AssetType} Assets)" : $" (1 {AssetType} Asset)";
-                    break;
-                case Mode.Material:
-                    Title += Materials.Count > 1 ? $" ({Materials.Count} Materials)" : " (1 Material)";
-                    break;
-                case Mode.ParticleNode:
-                    Title += $" (1 Particle Node)";
-                    break;
-                case Mode.TraceNode:
-                    Title += etrNodes.Count > 1 ? $" ({etrNodes.Count} Trace Nodes)" : " (1 Trace Node)";
-                    break;
-                case Mode.ColorFadeNode:
-                    Title += ecfNodes.Count > 1 ? $" ({ecfNodes.Count} Color Fade Nodes)" : " (1 Color Fade Node)";
-                    break;
-            }
 
             if (CalculatePreviewBrushColor() > 0)
             {
@@ -325,27 +292,27 @@ namespace EEPK_Organiser.Forms
             const string NotExclusiveMessage = "Some materials are shared with other assets. If you continue, the tool can copy them so they’re exclusive to the recolored assets, and not affected by the recoloring process.\n\n" +
                 "Would you like to make copies of the shared materials?";
 
-            if ((AssetType == AssetType.PBIND || AssetType == AssetType.TBIND) && CurrentMode == Mode.Asset)
+            if (RecolorItems is IList<Asset> assets)
             {
-                if (!AssetContainer.AreMaterialsExclusive(Assets))
+                if (!AssetContainer.AreMaterialsExclusive(assets))
                 {
                     if (MessagePrompt.Show(NotExclusiveMessage, "Materials Not Exclusive", MessagePromptButtons.AffirmativeNegative, MessagePromptIcon.Question, "Make Copies", "Ignore") == MessagePromptResult.Affirmative)
                     {
-                        AssetContainer.MakeMaterialsExclusive(Assets, initUndos);
+                        AssetContainer.MakeMaterialsExclusive(assets, initUndos);
                     }
                 }
             }
-            else if(CurrentMode == Mode.ParticleNode)
+            else if(RecolorItems is IList<ParticleNode> particleNodes)
             {
-                if (!AssetContainer.AreMaterialsExclusive(particleNode))
+                if (!AssetContainer.AreMaterialsExclusive(particleNodes[0]))
                 {
                     if (MessagePrompt.Show(NotExclusiveMessage, "Materials Not Exclusive", MessagePromptButtons.AffirmativeNegative, MessagePromptIcon.Question, "Make Copies", "Ignore") == MessagePromptResult.Affirmative)
                     {
-                        AssetContainer.MakeMaterialsExclusive(particleNode, initUndos);
+                        AssetContainer.MakeMaterialsExclusive(particleNodes[0], initUndos);
                     }
                 }
             }
-            else if(CurrentMode == Mode.TraceNode)
+            else if(RecolorItems is IList<ETR_Node> etrNodes)
             {
                 if (!AssetContainer.AreMaterialsExclusive(etrNodes))
                 {
@@ -356,6 +323,7 @@ namespace EEPK_Organiser.Forms
                 }
             }
 
+            UsedMaterials = GetUsedMaterials();
         }
 
         private long CalculatePreviewBrushColor()
@@ -363,76 +331,21 @@ namespace EEPK_Organiser.Forms
             ColorAccumulator ??= new Xv2ColorAccumulator();
             ColorAccumulator.Clear();
 
-            switch (CurrentMode)
+            foreach(var recolorItem in RecolorItems)
             {
-                case Mode.Global:
-                    GetUsedColorsByEverything(ColorAccumulator);
-                    break;
-                case Mode.Asset:
-                    GetUsedColorsForAssets(Assets, ColorAccumulator);
-                    break;
-                case Mode.Material:
-                    foreach (var material in Materials)
-                    {
-                        material.AccumulateUsedColors(ColorAccumulator);
-                    }
-                    break;
-                case Mode.ParticleNode:
-                    particleNode.AccumulateUsedColors(ColorAccumulator);
+                recolorItem.AccumulateUsedColors(ColorAccumulator);
+            }
 
-                    if (IncludeMaterials)
-                    {
-                        foreach (var material in particleNode.GetUsedMaterials())
-                        {
-                            material.AccumulateUsedColors(ColorAccumulator);
-                        }
-                    }
-                    break;
-                case Mode.TraceNode:
-                    foreach (var node in etrNodes)
-                    {
-                        node.AccumulateUsedColors(ColorAccumulator);
-                    }
-                    break;
-                case Mode.ColorFadeNode:
-                    foreach (var node in ecfNodes)
-                    {
-                        node.AccumulateUsedColors(ColorAccumulator);
-                    }
-                    break;
+            if (IncludeMaterials && UsedMaterials != null)
+            {
+                foreach(var material in UsedMaterials)
+                {
+                    material.AccumulateUsedColors(ColorAccumulator);
+                }
             }
 
             PreviewColor = ColorAccumulator.ToCustomColor();
             return ColorAccumulator.NumColors;
-        }
-
-        private void GetUsedColorsByEverything(Xv2ColorAccumulator accumulator)
-        {
-            GetUsedColorsForAssets(effectContainerFile.Pbind.Assets, accumulator);
-            GetUsedColorsForAssets(effectContainerFile.Tbind.Assets, accumulator);
-            GetUsedColorsForAssets(effectContainerFile.Cbind.Assets, accumulator);
-            GetUsedColorsForAssets(effectContainerFile.LightEma.Assets, accumulator);
-            GetUsedColorsForAssets(effectContainerFile.Emo.Assets, accumulator);
-            effectContainerFile.Pbind.File3_Ref.AccumulateUsedColors(accumulator);
-            effectContainerFile.Tbind.File3_Ref.AccumulateUsedColors(accumulator);
-            effectContainerFile.Pbind.File2_Ref.AccumulateUsedColors(accumulator);
-            effectContainerFile.Tbind.File2_Ref.AccumulateUsedColors(accumulator);
-        }
-
-        private void GetUsedColorsForAssets(IList<Asset> _assets, Xv2ColorAccumulator accumulator)
-        {
-            foreach (var _asset in _assets)
-            {
-                _asset.AccumulateUsedColors(accumulator);
-
-                if (IncludeMaterials && AssetType == AssetType.PBIND)
-                {
-                    foreach (var material in _asset.Files[0].EmpFile.GetUsedMaterials())
-                    {
-                        material.AccumulateUsedColors(accumulator);
-                    }
-                }
-            }
         }
 
         private void UndoRecolorOperation(bool undoInit = false)
@@ -460,25 +373,33 @@ namespace EEPK_Organiser.Forms
 
         private object GetContext()
         {
-            //The UndoContext / Group system will be simplified soon...
+            return RecolorItems;
+        }
+        
+        private List<EmmMaterial> GetUsedMaterials()
+        {
+            List<EmmMaterial> materials = new List<EmmMaterial>(RecolorItems.Count());
 
-            switch (CurrentMode)
+            foreach(var recolorItem in RecolorItems)
             {
-                case Mode.Asset:
-                    return Assets;
-                case Mode.Material:
-                    return Materials;
-                case Mode.Global:
-                    return effectContainerFile;
-                case Mode.ParticleNode:
-                    return particleNode;
-                case Mode.TraceNode:
-                    return etrNodes;
-                case Mode.ColorFadeNode:
-                    return ecfNodes;
-                default:
-                    return null;
+                if (recolorItem is ParticleNode particleNode)
+                {
+                    materials.AddRange(particleNode.GetUsedMaterials());
+                }
+                else if (recolorItem is ETR_Node etrNode && etrNode.MaterialRef != null)
+                {
+                    materials.Add(etrNode.MaterialRef);
+                }
+                else if (recolorItem is Asset asset)
+                {
+                    if (asset.AssetType == AssetType.PBIND)
+                        materials.AddRange(asset.Files[0].EmpFile.GetUsedMaterials());
+                    else if (asset.AssetType == AssetType.TBIND)
+                        materials.AddRange(asset.Files[0].EtrFile.GetUsedMaterials());
+                }
             }
+
+            return materials.Distinct().ToList();
         }
         #endregion
 
@@ -497,131 +418,27 @@ namespace EEPK_Organiser.Forms
             lastRecolorVariance = _variance;
             lastRecolorTextureVariance = _textureVariance;
 
-            hueChange = isHueSet ? lastRecolorHue : lastRecolorHue - initialHue;
+            hueChange = IsHueSet ? lastRecolorHue : lastRecolorHue - initialHue;
             saturationChange = lastRecolorSaturation - initialSaturation;
             lightnessChange = lastRecolorLightness - initialLightness;
 
-            List<IUndoRedo> undos = new List<IUndoRedo>(CurrentMode == Mode.Global ? 2048 : 64);
+            HueAdjustmentInput input = new HueAdjustmentInput(hueChange, saturationChange, lightnessChange, recolorUndos, IsHueSet, TextureVariance, Variance, 0, ShiftGlareColor);
 
-            if (CurrentMode == Mode.Asset)
+            foreach(var recolorItem in RecolorItems)
             {
-                await ChangeHueForAssets(Assets, undos);
+                await recolorItem.ApplyHueAdjustment(input);
             }
-            else if (CurrentMode == Mode.Material)
-            {
-                ChangeHueForMaterials(Materials, undos);
-            }
-            else if (CurrentMode == Mode.Global)
-            {
-                await ChangeHueForEverything(undos);
-            }
-            else if (CurrentMode == Mode.ParticleNode)
-            {
-                particleNode.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
 
-                if (IncludeMaterials)
+            if (IncludeMaterials && UsedMaterials != null)
+            {
+                foreach(var material in UsedMaterials)
                 {
-                    ChangeHueForMaterials(particleNode.GetUsedMaterials(), undos);
-                }
-            }
-            else if (CurrentMode == Mode.TraceNode)
-            {
-                foreach (var node in etrNodes)
-                {
-                    node.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance);
-
-                    if (IncludeMaterials && node.MaterialRef != null)
-                    {
-                        node.MaterialRef.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance, ShiftGlareColor);
-                    }
-
-                }
-            }
-            else if (CurrentMode == Mode.ColorFadeNode)
-            {
-                foreach (var node in ecfNodes)
-                {
-                    node.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance);
+                    await material.ApplyHueAdjustment(input);
                 }
             }
 
-            recolorUndos.AddRange(undos);
             //UndoManager.Instance.ForceEventCall(UndoGroup.ColorControl, null, GetContext());
 
-        }
-        
-        private async Task ChangeHueForAsset(Asset _asset, List<IUndoRedo> undos)
-        {
-            double saturationChange = CurrentMode == Mode.Global ? SaturationChangeMulti : this.saturationChange;
-
-            switch (_asset.AssetType)
-            {
-                case AssetType.PBIND:
-                    _asset.Files[0].EmpFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance);
-
-                    if (IncludeMaterials)
-                    {
-                        ChangeHueForMaterials(_asset.Files[0].EmpFile.GetUsedMaterials(), undos);
-                    }
-                    break;
-                case AssetType.TBIND:
-                    _asset.Files[0].EtrFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance);
-                    break;
-                case AssetType.CBIND:
-                    _asset.Files[0].EcfFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance);
-                    break;
-                case AssetType.LIGHT:
-                    _asset.Files[0].EmaFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance);
-                    break;
-                case AssetType.EMO:
-                    foreach (EffectFile file in _asset.Files)
-                    {
-                        switch (file.Extension)
-                        {
-                            case ".emb":
-                                await file.EmbFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorTextureVariance ? lastRecolorVariance : 0); //No lightness change
-                                break;
-                            case ".emm":
-                                file.EmmFile.ChangeHsl(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance, ShiftGlareColor);
-                                break;
-                            case ".mat.ema":
-                                EMM_File emmFile = _asset.Files.FirstOrDefault(x => x.fileType == EffectFile.FileType.EMM)?.EmmFile;
-                                file.EmaFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance, emmFile);
-                                break;
-                        }
-                    }
-                    break;
-            }
-
-        }
-
-        private async Task ChangeHueForEverything(List<IUndoRedo> undos)
-        {
-            await ChangeHueForAssets(effectContainerFile.Pbind.Assets, undos);
-            await ChangeHueForAssets(effectContainerFile.Tbind.Assets, undos);
-            await ChangeHueForAssets(effectContainerFile.Cbind.Assets, undos);
-            await ChangeHueForAssets(effectContainerFile.Emo.Assets, undos);
-            await ChangeHueForAssets(effectContainerFile.LightEma.Assets, undos);
-            await effectContainerFile.Pbind.File3_Ref.ChangeHue(hueChange, SaturationChangeMulti, lightnessChange, undos, isHueSet, lastRecolorTextureVariance ? lastRecolorVariance : 0);
-            await effectContainerFile.Tbind.File3_Ref.ChangeHue(hueChange, SaturationChangeMulti, lightnessChange, undos, isHueSet, lastRecolorTextureVariance ? lastRecolorVariance : 0);
-            effectContainerFile.Pbind.File2_Ref.ChangeHsl(hueChange, SaturationChangeMulti, lightnessChange, undos, isHueSet, lastRecolorVariance, ShiftGlareColor);
-            effectContainerFile.Tbind.File2_Ref.ChangeHsl(hueChange, SaturationChangeMulti, lightnessChange, undos, isHueSet, lastRecolorVariance, ShiftGlareColor);
-        }
-
-        private async Task ChangeHueForAssets(IList<Asset> assets, List<IUndoRedo> undos)
-        {
-            foreach (Asset _asset in assets)
-            {
-                await ChangeHueForAsset(_asset, undos);
-            }
-        }
-
-        private void ChangeHueForMaterials(IList<EmmMaterial> materials, List<IUndoRedo> undos)
-        {
-            foreach (var material in materials)
-            {
-                material.ChangeHue(hueChange, saturationChange, lightnessChange, undos, isHueSet, lastRecolorVariance, ShiftGlareColor);
-            }
         }
 
         private bool HaveRecolorValuesChanged()

@@ -9,12 +9,13 @@ using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
+using System.Threading.Tasks;
 
 namespace Xv2CoreLib.EMM
 {
     [Serializable]
     [YAXSerializeAs("EMM")]
-    public class EMM_File : IPreviewUpdate
+    public class EMM_File : IPreviewUpdate, IHueAdjustment
     {
         public event EventHandler MaterialsChanged;
 
@@ -226,14 +227,13 @@ namespace Xv2CoreLib.EMM
             return null;
         }
 
-        public void ChangeHsl(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = true)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
             if (Materials == null) return;
-            if (undos == null) undos = new List<IUndoRedo>();
 
             foreach (var mat in Materials)
             {
-                mat.ChangeHue(hue, saturation, lightness, undos, hueSet: hueSet, variance: variance, shiftGlareColor: shiftGlareColor);
+                await mat.ApplyHueAdjustment(input);
             }
         }
     
@@ -274,7 +274,7 @@ namespace Xv2CoreLib.EMM
 
     [Serializable]
     [YAXSerializeAs("Material")]
-    public class EmmMaterial : INotifyPropertyChanged, IPreviewUpdate
+    public class EmmMaterial : INotifyPropertyChanged, IPreviewUpdate, IHueAdjustment
     {
         #region NotifyPropChanged
         [field: NonSerialized]
@@ -432,7 +432,7 @@ namespace Xv2CoreLib.EMM
             return mat;
         }
 
-        public void ChangeHue(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = true)
+        public async Task ApplyHueAdjustment(HueAdjustmentInput input)
         {
             if (Parameters == null) return;
 
@@ -440,12 +440,12 @@ namespace Xv2CoreLib.EMM
 
             foreach (var param in DecompiledMaterial.ColorParameters)
             {
-                if (param == "GlareCol" && !shiftGlareColor)
+                if (param == "GlareCol" && !input.IncludeGlareCol)
                     continue;
 
                 CustomColor col = DecompiledParameters.GetColor(param);
 
-                if(col != null && col.ChangeHue(hue, saturation, lightness, undos, hueSet, variance))
+                if(col != null && col.ChangeHue(input.Hue, input.Saturation, input.Lightness, input.Undos, input.HueSet, input.Variance))
                     colorChanged = true;
             }
 
