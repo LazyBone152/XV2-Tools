@@ -2732,7 +2732,7 @@ namespace Xv2CoreLib.EMP_NEW
         public EMP_Modifier(bool isEtr)
         {
             IsEtr = isEtr;
-            if (EffectContainer.EepkToolInterlop.FullDecompile)
+            if (EffectContainer.EepkLoadSettings.FullDecompile)
             {
                 Axis = new KeyframedVector3Value(0, 0, 0, KeyframedValueType.Modifier_Axis, isEtr, true);
                 Axis2 = new KeyframedVector3Value(0, 0, 0, KeyframedValueType.Modifier_Axis2, isEtr, true);

@@ -114,7 +114,7 @@ namespace Xv2CoreLib.ECF
                         ecfFile.Nodes[i].Material = string.Empty;
                     }
 
-                    if (EffectContainer.EepkToolInterlop.FullDecompile)
+                    if (EffectContainer.EepkLoadSettings.FullDecompile)
                     {
                         ecfFile.Nodes[i].MultiColor.DecompileKeyframes(ecfFile.Nodes[i].GetKeyframedValues(0, 0, 1, 2));
                         ecfFile.Nodes[i].RimColor.DecompileKeyframes(ecfFile.Nodes[i].GetKeyframedValues(1, 0, 1, 2));

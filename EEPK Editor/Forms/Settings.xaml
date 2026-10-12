@@ -63,8 +63,6 @@
                         </StackPanel>
 
                     </GroupBox>
-                    <CheckBox ToolTip="Allow textures to be loaded and previewed in the Texture Viewer." IsChecked="{Binding settings.LoadTextures, UpdateSourceTrigger=PropertyChanged}" Content="Load Textures" HorizontalAlignment="Left" Margin="10,87,0,0" VerticalAlignment="Top" Width="242"/>
-
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Asset" Controls:HeaderedControlHelper.HeaderFontSize="14">

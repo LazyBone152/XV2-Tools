@@ -981,14 +981,9 @@ namespace LB_Mod_Installer.Installer
 #endif
             {
                 //Allows the eepk installer to reuse textures and assets by matching names.
-                EepkToolInterlop.TextureImportMatchNames = true;
-                EepkToolInterlop.AssetReuseMatchName = true;
-
-                //Avoids decompiling materials and keyframed values (emp). Not only is that not required for installing, its whole another avenue of potential bugs.
-                EepkToolInterlop.FullDecompile = false;
-
-                //Specific error messages
-                EepkToolInterlop.IsInstaller = true;
+                EepkLoadSettings.TextureImportMatchNames = true;
+                EepkLoadSettings.AssetReuseMatchName = true;
+                EepkLoadSettings.FullDecompile = false; //Not required
 
                 //Load files
                 EffectContainerFile installFile;

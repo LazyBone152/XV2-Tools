@@ -357,9 +357,6 @@ namespace Xv2CoreLib.EMB_CLASS
         /// </summary>
         public void LoadDds()
         {
-            if (!EepkToolInterlop.LoadTextures)
-                return;
-
             try
             {
                 ddsIsLoading = true;

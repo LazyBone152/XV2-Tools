@@ -58,6 +58,8 @@ namespace Xv2CoreLib.EffectContainer
         };
         public const string ZipExtension = ".vfxpackage";
 
+        
+
         //Format
         private SaveFormat _saveFormat = SaveFormat.EEPK;
         public SaveFormat saveFormat
@@ -697,7 +699,7 @@ namespace Xv2CoreLib.EffectContainer
                     switch (file.Extension)
                     {
                         case ".emp":
-                            file.EmpFile = EMP_File.Load(fileBytes, EepkToolInterlop.FullDecompile);
+                            file.EmpFile = EMP_File.Load(fileBytes, EepkLoadSettings.FullDecompile);
                             file.fileType = EffectFile.FileType.EMP;
                             break;
                         case ".etr":
@@ -722,7 +724,7 @@ namespace Xv2CoreLib.EffectContainer
                         case ".obj.ema":
                         case ".ema":
                         ema:
-                            if (EepkToolInterlop.FullDecompile)
+                            if (EepkLoadSettings.FullDecompile)
                             {
                                 file.EmaFile = EMA_File.Load(fileBytes);
 
@@ -737,7 +739,7 @@ namespace Xv2CoreLib.EffectContainer
                             file.fileType = EffectFile.FileType.EMA;
                             break;
                         case ".emo":
-                            if (EepkToolInterlop.FullDecompile)
+                            if (EepkLoadSettings.FullDecompile)
                             {
                                 file.EmoFile = EMO_File.Load(fileBytes);
                             }
@@ -978,7 +980,7 @@ namespace Xv2CoreLib.EffectContainer
                                         SaveFile(file.EmbFile.SaveToBytes(), string.Format("{0}/{1}", Directory, file.FullFileName));
                                         break;
                                     case EffectFile.FileType.EMA:
-                                        if (!EepkToolInterlop.FullDecompile) goto default;
+                                        if (!EepkLoadSettings.FullDecompile) goto default;
 
                                         //Link material animation nodes to the actual materials
                                         if(file.EmaFile.EmaType == EmaType.mat)
@@ -992,7 +994,7 @@ namespace Xv2CoreLib.EffectContainer
                                         SaveFile(file.EmaFile.Write(), string.Format("{0}/{1}", Directory, file.FullFileName));
                                         break;
                                     case EffectFile.FileType.EMO:
-                                        if (!EepkToolInterlop.FullDecompile) goto default;
+                                        if (!EepkLoadSettings.FullDecompile) goto default;
                                         SaveFile(file.EmoFile.Write(), string.Format("{0}/{1}", Directory, file.FullFileName));
                                         break;
                                     default:
@@ -1119,7 +1121,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             //Apparantly long paths (128 characters and above) cannot be read by the game (or patcher?), at least for EEPKs. If a container file has such a long path the game will just hang as it cant find the file.
             //So... best to ensure we dont rename our containers if the final path is gonna be too long for the game to even load
-            bool allowContainerRename = ($"{Directory}/{Name}.xxxxx.xxx".Length >= 128 ? false : true) && EepkToolInterlop.AutoRenameContainers;
+            bool allowContainerRename = ($"{Directory}/{Name}.xxxxx.xxx".Length >= 128 ? false : true) && EepkLoadSettings.AutoRenameContainers;
 
             //Ensure that all containers have a valid name
             //PBIND
@@ -2878,7 +2880,7 @@ namespace Xv2CoreLib.EffectContainer
         public Asset AssetExists(Asset asset)
         {
             //For Installer use. Reuses an asset if it has the same name.
-            if (EepkToolInterlop.AssetReuseMatchName)
+            if (EepkLoadSettings.AssetReuseMatchName)
             {
                 foreach (var _asset in Assets)
                 {
@@ -3432,7 +3434,7 @@ namespace Xv2CoreLib.EffectContainer
                         //An identical texture was found, so use that instead
                         texture.TextureRef = ret;
                     }
-                    else if (entryWithSameName != null && EepkToolInterlop.TextureImportMatchNames)
+                    else if (entryWithSameName != null && EepkLoadSettings.TextureImportMatchNames)
                     {
                         //Use this texture
                         texture.TextureRef = entryWithSameName;
@@ -3510,7 +3512,7 @@ namespace Xv2CoreLib.EffectContainer
                         //An identical texture was found, so use that instead
                         texture.TextureRef = ret;
                     }
-                    else if (entryWithSameName != null && EepkToolInterlop.TextureImportMatchNames)
+                    else if (entryWithSameName != null && EepkLoadSettings.TextureImportMatchNames)
                     {
                         //Use this texture
                         texture.TextureRef = entryWithSameName;
@@ -4349,7 +4351,7 @@ namespace Xv2CoreLib.EffectContainer
                 newFile.Extension = file.Extension;
                 newFile.fileType = file.fileType;
 
-                if (newFile.fileType == EffectFile.FileType.EMO && EepkToolInterlop.FullDecompile)
+                if (newFile.fileType == EffectFile.FileType.EMO && EepkLoadSettings.FullDecompile)
                 {
                     newFile.EmoFile = file.EmoFile.Copy();
                 }
@@ -4375,7 +4377,7 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     newFile.EmmFile = file.EmmFile.Copy();
                 }
-                else if (newFile.fileType == EffectFile.FileType.EMA && EepkToolInterlop.FullDecompile)
+                else if (newFile.fileType == EffectFile.FileType.EMA && EepkLoadSettings.FullDecompile)
                 {
                     newFile.EmaFile = file.EmaFile.Copy();
                 }
@@ -4774,11 +4776,11 @@ namespace Xv2CoreLib.EffectContainer
                     if (EcfFile == null) return false;
                     break;
                 case FileType.EMA:
-                    if (!EepkToolInterlop.FullDecompile) goto default;
+                    if (!EepkLoadSettings.FullDecompile) goto default;
                     if (EmaFile == null) return false;
                     break;
                 case FileType.EMO:
-                    if (!EepkToolInterlop.FullDecompile) goto default;
+                    if (!EepkLoadSettings.FullDecompile) goto default;
                     if (EmoFile == null) return false;
                     break;
                 default:
@@ -4796,7 +4798,7 @@ namespace Xv2CoreLib.EffectContainer
                 case FileType.ECF:
                     return EcfFile.SaveToBytes();
                 case FileType.EMA:
-                    return EepkToolInterlop.FullDecompile ? EmaFile.Write() : Bytes;
+                    return EepkLoadSettings.FullDecompile ? EmaFile.Write() : Bytes;
                 case FileType.EMB:
                     return EmbFile.SaveToBytes();
                 case FileType.EMM:
@@ -4806,7 +4808,7 @@ namespace Xv2CoreLib.EffectContainer
                 case FileType.ETR:
                     return EtrFile.Write();
                 case FileType.EMO:
-                    return EepkToolInterlop.FullDecompile ? EmoFile.Write() : Bytes;
+                    return EepkLoadSettings.FullDecompile ? EmoFile.Write() : Bytes;
                 case FileType.Other:
                     return Bytes;
                 default:

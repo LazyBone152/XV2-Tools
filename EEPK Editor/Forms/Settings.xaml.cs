@@ -38,9 +38,10 @@ namespace EEPK_Organiser.Forms
             Owner = System.Windows.Application.Current.MainWindow;
             DataContext = this;
             SettingsManager.SettingsReloaded += SettingsManager_SettingsReloaded;
+            Closed += Settings_Closed;
         }
 
-        ~Settings()
+        private void Settings_Closed(object sender, EventArgs e)
         {
             SettingsManager.SettingsReloaded -= SettingsManager_SettingsReloaded;
         }

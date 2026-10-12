@@ -93,7 +93,7 @@ namespace Xv2CoreLib.ETR
             {
                 int start = bytes.Count;
 
-                if (EffectContainer.EepkToolInterlop.FullDecompile)
+                if (EffectContainer.EepkLoadSettings.FullDecompile)
                 {
                     node.CompileAllKeyframes();
                 }
@@ -703,7 +703,7 @@ namespace Xv2CoreLib.ETR
                 modifiersOffset += 8;
             }
 
-            if (EffectContainer.EepkToolInterlop.FullDecompile)
+            if (EffectContainer.EepkLoadSettings.FullDecompile)
             {
                 //Decompile keyframes:
                 node.Color1.DecompileKeyframes(node.GetKeyframedValues(0, 0, 1, 2));

@@ -35,7 +35,6 @@ namespace Xv2CoreLib.Resource.App
         //These settings are shared between some applications and so must always be available
 
         public bool TextureImportMatchNames { get { return ReflectionHelper.GetBoolProp(Settings, "TextureReuse_NameMatch", true); } }
-        public bool LoadTextures { get { return ReflectionHelper.GetBoolProp(Settings, "LoadTextures", true); } }
         public bool AutoContainerRename { get { return ReflectionHelper.GetBoolProp(Settings, "AutoContainerRename", false); } }
         public bool AssetReuseMatchName { get { return ReflectionHelper.GetBoolProp(Settings, "AssetReuse_NameMatch", true); } }
 
@@ -207,10 +206,9 @@ namespace Xv2CoreLib.Resource.App
 
         public void UpdateEepkToolInterlop()
         {
-            EffectContainer.EepkToolInterlop.TextureImportMatchNames = TextureImportMatchNames;
-            EffectContainer.EepkToolInterlop.LoadTextures = LoadTextures;
-            EffectContainer.EepkToolInterlop.AutoRenameContainers = AutoContainerRename;
-            EffectContainer.EepkToolInterlop.AssetReuseMatchName = AssetReuseMatchName;
+            EffectContainer.EepkLoadSettings.TextureImportMatchNames = TextureImportMatchNames;
+            EffectContainer.EepkLoadSettings.AutoRenameContainers = AutoContainerRename;
+            EffectContainer.EepkLoadSettings.AssetReuseMatchName = AssetReuseMatchName;
         }
 
         /// <summary>
@@ -410,7 +408,6 @@ namespace Xv2CoreLib.Resource.App
         #endregion
 
         #region EepkOrganiser
-        public bool LoadTextures { get; set; } = true;
         public bool AssetReuse_NameMatch
         {
             get => _assetReuseNameMatch;

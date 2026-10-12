@@ -37,7 +37,7 @@ namespace Xv2CoreLib.ECF
 
                 for (int i = 0; i < ecfFile.Nodes.Count; i++)
                 {
-                    if (EffectContainer.EepkToolInterlop.FullDecompile)
+                    if (EffectContainer.EepkLoadSettings.FullDecompile)
                     {
                         ecfFile.Nodes[i].CompileAllKeyframes();
                     }
