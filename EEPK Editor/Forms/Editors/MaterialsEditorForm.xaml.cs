@@ -58,7 +58,6 @@ namespace EEPK_Organiser.Forms
 
         private void MaterialsEditorForm_Closing(object sender, CancelEventArgs e)
         {
-            Closing -= MaterialsEditorForm_Closing;
             materialsEditor.Dispose();
         }
     

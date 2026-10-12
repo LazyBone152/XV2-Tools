@@ -37,10 +37,16 @@ namespace EEPK_Organiser.ViewModel
         public CustomColor MatCol1 => CurrentMaterial.MatCol1;
         public CustomColor MatCol2 => CurrentMaterial.MatCol2;
         public CustomColor MatCol3 => CurrentMaterial.MatCol3;
+        public CustomColor MatCol4 => CurrentMaterial.MatCol4;
+        public CustomColor MatCol5 => CurrentMaterial.MatCol5;
+        public CustomColor MatCol6 => CurrentMaterial.MatCol6;
+        public CustomColor MatCol7 => CurrentMaterial.MatCol7;
 
         //Texture
         public CustomMatUV TexScrl0 => CurrentMaterial.TexScrl0;
         public CustomMatUV TexScrl1 => CurrentMaterial.TexScrl1;
+        public CustomMatUV TexScrl2 => CurrentMaterial.TexScrl2;
+        public CustomMatUV TexScrl3 => CurrentMaterial.TexScrl3;
         public CustomMatUV gScroll0 => CurrentMaterial.gScroll0;
         public CustomMatUV gScroll1 => CurrentMaterial.gScroll1;
 

@@ -14,7 +14,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              Dialog:DialogParticipation.Register="{Binding}"
-             d:DesignHeight="600" d:DesignWidth="920" Name="UserControl">
+             d:DesignHeight="6000" d:DesignWidth="970" Name="UserControl">
     <Grid>
         <Grid.Resources>
             <ObjectDataProvider x:Key="alphaBlendTypeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
@@ -300,6 +300,38 @@
                                             <Label Content="MatCol3"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol3}"/>
                                         </Grid>
+                                        <Grid Margin="3,3" Width="450" x:Name="MatCol4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="MatCol4"/>
+                                            <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol4}"/>
+                                        </Grid>
+                                        <Grid Margin="3,3" Width="450" x:Name="MatCol5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="MatCol5"/>
+                                            <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol5}"/>
+                                        </Grid>
+                                        <Grid Margin="3,3" Width="450" x:Name="MatCol6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="MatCol6"/>
+                                            <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol6}"/>
+                                        </Grid>
+                                        <Grid Margin="3,3" Width="450" x:Name="MatCol7">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="MatCol7"/>
+                                            <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol7}"/>
+                                        </Grid>
                                     </WrapPanel>
                                 </StackPanel>
 
@@ -323,6 +355,22 @@
                                             </Grid.ColumnDefinitions>
                                             <Label Content="TexScrl1"/>
                                             <vector:CustomMatUV Grid.Column="1" Value="{Binding MaterialViewModel.TexScrl1}" Width="315" HorizontalAlignment="Left"/>
+                                        </Grid>
+                                        <Grid Margin="3,3" Width="450" x:Name="TexScrl2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="TexScrl2"/>
+                                            <vector:CustomMatUV Grid.Column="1" Value="{Binding MaterialViewModel.TexScrl2}" Width="315" HorizontalAlignment="Left"/>
+                                        </Grid>
+                                        <Grid Margin="3,3" Width="450" x:Name="TexScrl3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="TexScrl3"/>
+                                            <vector:CustomMatUV Grid.Column="1" Value="{Binding MaterialViewModel.TexScrl3}" Width="315" HorizontalAlignment="Left"/>
                                         </Grid>
 
                                     </WrapPanel>

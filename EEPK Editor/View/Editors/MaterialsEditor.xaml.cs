@@ -204,6 +204,13 @@ namespace EEPK_Organiser.View
             InitializeComponent();
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
             Loaded += MaterialsEditor_Loaded;
+            Unloaded += MaterialsEditor_Unloaded;
+        }
+
+        private void MaterialsEditor_Unloaded(object sender, RoutedEventArgs e)
+        {
+            UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
+            MaterialViewModel?.Dispose();
         }
 
 
@@ -229,13 +236,19 @@ namespace EEPK_Organiser.View
                 MatCol0,
                 MatCol1,
                 MatCol2,
-                MatCol3
+                MatCol3,
+                MatCol4,
+                MatCol5,
+                MatCol6,
+                MatCol7
             };
 
             TextureParameters = new FrameworkElement[]
             {
                 TexScrl0,
                 TexScrl1,
+                TexScrl2,
+                TexScrl3,
                 TexRep0,
                 TexRep1,
                 TexRep2,
@@ -712,7 +725,7 @@ namespace EEPK_Organiser.View
 
             if (FilterParameters)
             {
-                AnalyzedShader shaderHelper = MaterialAnalyzer.Instance.ShaderHelper.Shaders.FirstOrDefault(x => x.ShaderProgram == SelectedMaterial?.ShaderProgram);
+                AnalyzedShader shaderHelper = MaterialAnalyzer.Instance.ShaderHelper.GetShader(SelectedMaterial);
 
                 UpdateVisibilitiesRecursive(ScaleOffsetParameters, shaderHelper);
                 UpdateVisibilitiesRecursive(ColorParameters, shaderHelper);
@@ -751,20 +764,17 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void UpdateVisibilitiesRecursive(FrameworkElement[] elements, AnalyzedShader shader, bool allVisible = false)
+        private static void UpdateVisibilitiesRecursive(FrameworkElement[] elements, AnalyzedShader shader, bool allVisible = false)
         {
             for(int i = 0; i < elements.Length; i++)
             {
-                if (MaterialAnalyzer.Instance.ShaderHelper.AllParameters.Contains(elements[i].Name))
+                if (MaterialAnalyzer.Instance.ShaderHelper.AllParameters.Contains(elements[i].Name) && shader != null)
                 {
-                    if (shader != null)
-                    {
-                        elements[i].Visibility = shader.Parameters.Any(x => x.Name == elements[i].Name) ? Visibility.Visible : Visibility.Collapsed;
-                    }
-                    else
-                    {
-                        elements[i].Visibility = allVisible ? Visibility.Visible : Visibility.Collapsed;
-                    }
+                    elements[i].Visibility = shader.Parameters.Any(x => x.Name == elements[i].Name) ? Visibility.Visible : Visibility.Collapsed;
+                }
+                else
+                {
+                    elements[i].Visibility = allVisible ? Visibility.Visible : Visibility.Collapsed;
                 }
             }
         }
@@ -773,8 +783,8 @@ namespace EEPK_Organiser.View
 
         public void Dispose()
         {
-            Loaded -= MaterialsEditor_Loaded;
             UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
+            GC.SuppressFinalize(this);
         }
 
         private void SetName(string name)

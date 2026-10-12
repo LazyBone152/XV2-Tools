@@ -99,12 +99,24 @@ namespace Xv2CoreLib.EMM
         public CustomColor MatCol2;
         [ParameterGroup(ParameterGroup.Color)]
         public CustomColor MatCol3;
+        [ParameterGroup(ParameterGroup.Color)]
+        public CustomColor MatCol4;
+        [ParameterGroup(ParameterGroup.Color)]
+        public CustomColor MatCol5;
+        [ParameterGroup(ParameterGroup.Color)]
+        public CustomColor MatCol6;
+        [ParameterGroup(ParameterGroup.Color)]
+        public CustomColor MatCol7;
 
         //Texture Scroll
         [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatUV TexScrl0;
         [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatUV TexScrl1;
+        [ParameterGroup(ParameterGroup.Texture)]
+        public CustomMatUV TexScrl2;
+        [ParameterGroup(ParameterGroup.Texture)]
+        public CustomMatUV TexScrl3;
 
         //Texture Sampler parameters
         //In these values the index lines up with a sampler index. So in theory, the limit is 4, but in vanilla EMM files only 3 is used.
@@ -573,8 +585,14 @@ namespace Xv2CoreLib.EMM
             MatCol1.PropertyChanged += VectorValuesChangedEvent;
             MatCol2.PropertyChanged += VectorValuesChangedEvent;
             MatCol3.PropertyChanged += VectorValuesChangedEvent;
+            MatCol4.PropertyChanged += VectorValuesChangedEvent;
+            MatCol5.PropertyChanged += VectorValuesChangedEvent;
+            MatCol6.PropertyChanged += VectorValuesChangedEvent;
+            MatCol7.PropertyChanged += VectorValuesChangedEvent;
             TexScrl0.PropertyChanged += VectorValuesChangedEvent;
             TexScrl1.PropertyChanged += VectorValuesChangedEvent;
+            TexScrl2.PropertyChanged += VectorValuesChangedEvent;
+            TexScrl3.PropertyChanged += VectorValuesChangedEvent;
             TexRep0.PropertyChanged += VectorValuesChangedEvent;
             TexRep1.PropertyChanged += VectorValuesChangedEvent;
             TexRep2.PropertyChanged += VectorValuesChangedEvent;
@@ -811,6 +829,14 @@ namespace Xv2CoreLib.EMM
                     return MatCol2;
                 case 3:
                     return MatCol3;
+                case 4:
+                    return MatCol4;
+                case 5:
+                    return MatCol5;
+                case 6:
+                    return MatCol6;
+                case 7:
+                    return MatCol7;
             }
 
             return null;
@@ -824,6 +850,10 @@ namespace Xv2CoreLib.EMM
                     return TexScrl0;
                 case 1:
                     return TexScrl1;
+                case 2:
+                    return TexScrl2;
+                case 3:
+                    return TexScrl3;
             }
 
             return null;
@@ -927,6 +957,10 @@ namespace Xv2CoreLib.EMM
             "MatCol1",
             "MatCol2",
             "MatCol3",
+            "MatCol4",
+            "MatCol5",
+            "MatCol6",
+            "MatCol7",
             "MatAmb",
             "MatDif",
         };

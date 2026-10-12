@@ -30,7 +30,7 @@ namespace Xv2CoreLib.EMM.Analyzer
 
         public void AnalyzeMaterials()
         {
-            const string path = @"D:\VS_Test\EMM\ALL EMM - XV1 included";
+            const string path = @"G:\VS_Test\EMM\ALL EMM - XV1 included";
 
             string[] files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
             ShaderHelper shaders = new ShaderHelper();
@@ -74,16 +74,24 @@ namespace Xv2CoreLib.EMM.Analyzer
             "TexRep3",
             "TexScrl0",
             "TexScrl1",
+            "TexScrl2",
+            "TexScrl3",
             "gScroll0",
-            "gScroll1"
+            "gScroll1",
+            "gScroll"
         };
 
         internal string[] RGBA_Parameters = new string[]
         {
+            "gCamPos",
             "MatCol0",
             "MatCol1",
             "MatCol2",
             "MatCol3",
+            "MatCol4",
+            "MatCol5",
+            "MatCol6",
+            "MatCol7",
             "GlareCol",
             "MatDif",
             "MatAmb",
@@ -176,10 +184,29 @@ namespace Xv2CoreLib.EMM.Analyzer
 
             shader.ParseParameters(material, parameters);
         }
+    
+        public AnalyzedShader GetShader(EmmMaterial material)
+        {
+            if (material is null) return null;
+            AnalyzedShader shader = Shaders.FirstOrDefault(x => x.ShaderProgram == material.ShaderProgram);
+
+            if(shader == null)
+            {
+                shader = new AnalyzedShader(material.ShaderProgram, true);
+                Shaders.Add(shader);
+            }
+
+            if (shader.IsUnknown)
+                shader.ParseParameters(material);
+
+            return shader;
+        }
     }
 
     public class AnalyzedShader
     {
+        [YAXDontSerialize]
+        public bool IsUnknown { get; private set; }
         [YAXAttributeForClass]
         public string ShaderProgram { get; set; }
 
@@ -187,7 +214,15 @@ namespace Xv2CoreLib.EMM.Analyzer
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public List<AnalyzedParameter> Parameters { get; set; } = new List<AnalyzedParameter>();
 
-        public void ParseParameters(EmmMaterial material, List<string> parameters)
+        public AnalyzedShader() { }
+
+        public AnalyzedShader(string shaderProgram, bool isUnknown)
+        {
+            ShaderProgram = shaderProgram;
+            IsUnknown = isUnknown;
+        }
+
+        public void ParseParameters(EmmMaterial material, List<string> parameters = null)
         {
             if (material.ShaderProgram == ShaderProgram)
             {
@@ -205,14 +240,14 @@ namespace Xv2CoreLib.EMM.Analyzer
                     {
                         AddParameter(vector);
 
-                        if (!parameters.Contains(vector))
+                        if (parameters != null && !parameters.Contains(vector))
                             parameters.Add(vector);
                     }
                     else
                     {
                         AddParameter(param.Name);
 
-                        if (!parameters.Contains(param.Name))
+                        if (parameters != null && !parameters.Contains(param.Name))
                             parameters.Add(param.Name);
                     }
 

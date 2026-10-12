@@ -378,7 +378,7 @@ namespace Xv2CoreLib.EMM
         {
             get
             {
-                AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.Shaders.FirstOrDefault(x => x.ShaderProgram == ShaderProgram);
+                AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.GetShader(this);
                 if (shader == null || DecompiledParameters == null) return System.Windows.Media.Brushes.White;
                 return DecompiledParameters.GetPreviewBrush(shader);
             }
@@ -486,7 +486,7 @@ namespace Xv2CoreLib.EMM
 
         public void AccumulateUsedColors(Xv2ColorAccumulator accumulator)
         {
-            AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.Shaders.FirstOrDefault(x => x.ShaderProgram == ShaderProgram);
+            AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.GetShader(this);
             if(DecompiledParameters == null || shader == null) return;
 
             accumulator.AddColor(DecompiledParameters.CalculatePreviewColor(shader));
@@ -494,7 +494,7 @@ namespace Xv2CoreLib.EMM
 
         public Xv2Color GetUsedColor()
         {
-            AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.Shaders.FirstOrDefault(x => x.ShaderProgram == ShaderProgram);
+            AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.GetShader(this);
             if (DecompiledParameters == null || shader == null) return Xv2Color.Transparent;
 
             return DecompiledParameters.GetPreviewColor(shader);
