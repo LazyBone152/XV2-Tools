@@ -8,14 +8,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using Xv2CoreLib.Color;
-using Xv2CoreLib.ECF;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.ETR;
 using Xv2CoreLib.Resource;
-using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
@@ -163,7 +161,7 @@ namespace EEPK_Organiser.Forms
             RecolorItems = recolorItems;
             IsHueSet = isHueSet;
 
-            foreach(var item in recolorItems)
+            foreach (var item in recolorItems)
             {
                 IsMaterial = item is EmmMaterial;
                 break;
@@ -520,6 +518,8 @@ namespace EEPK_Organiser.Forms
         #if !XenoKit
         //To be implemented in XenoKit
         private void XenoKitInit() { }
+
+        public bool EnableLivePreview { get; set; } = true;
         #endif
 
     }
