@@ -141,12 +141,12 @@ namespace EEPK_Organiser.ViewModel
         public bool AlphaBlend
         {
             get => CurrentMaterial.AlphaBlend == 1;
-            set => SetIntBoolValue(value, nameof(CurrentMaterial.AlphaBlend), 2);
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.AlphaBlend), ParameterChangeType.UpdateShaderProgram);
         }
         public AlphaBlendType AlphaBlendType
         {
             get => (AlphaBlendType)CurrentMaterial.AlphaBlendType;
-            set => SetIntValue((int)value, nameof(CurrentMaterial.AlphaBlendType), 2);
+            set => SetIntValue((int)value, nameof(CurrentMaterial.AlphaBlendType), ParameterChangeType.UpdateShaderProgram);
         }
         public int AlphaTest
         {
@@ -168,12 +168,12 @@ namespace EEPK_Organiser.ViewModel
         public bool AlphaSortMask
         {
             get => CurrentMaterial.AlphaSortMask == 1;
-            set => SetIntBoolValue(value, nameof(CurrentMaterial.AlphaSortMask), 2);
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.AlphaSortMask), ParameterChangeType.UpdateShaderProgram);
         }
         public bool ZTestMask
         {
             get => CurrentMaterial.ZTestMask == 1;
-            set => SetIntBoolValue(value, nameof(CurrentMaterial.ZTestMask), 2);
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.ZTestMask), ParameterChangeType.UpdateShaderProgram);
         }
         public bool ZWriteMask
         {
@@ -213,12 +213,12 @@ namespace EEPK_Organiser.ViewModel
         public bool BackFace
         {
             get => CurrentMaterial.BackFace == 1;
-            set => SetIntBoolValue(value, nameof(CurrentMaterial.BackFace), 2);
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.BackFace), ParameterChangeType.UpdateShaderProgram);
         }
         public bool TwoSidedRender
         {
             get => CurrentMaterial.TwoSidedRender == 1;
-            set => SetIntBoolValue(value, nameof(CurrentMaterial.TwoSidedRender), 2);
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.TwoSidedRender), ParameterChangeType.UpdateShaderProgram);
         }
 
         //LowRez
@@ -427,60 +427,60 @@ namespace EEPK_Organiser.ViewModel
         }
 
         #region UndoableSetMethods
-        private void SetIntBoolValue(bool newValue, string fieldName, int changeType = 1)
+        private void SetIntBoolValue(bool newValue, string fieldName, ParameterChangeType changeType = ParameterChangeType.UpdateParameters)
         {
             int value = newValue ? 1 : 0;
             SetIntValue(value, fieldName, changeType);
             RaisePropertyChanged(fieldName);
         }
 
-        private void SetIntValue(int newValue, string fieldName, int changeType = 1)
+        private void SetIntValue(int newValue, string fieldName, ParameterChangeType changeType = ParameterChangeType.UpdateParameters)
         {
             int original = (int)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);
 
             if(original != newValue)
             {
                 CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
-                CurrentMaterial.ParametersChanged = changeType;
+                CurrentMaterial.RaiseParametersChanged(changeType);
 
                 UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
                 {
                     new UndoableField(fieldName, CurrentMaterial, original, newValue),
-                    new UndoablePropertyGeneric(nameof(CurrentMaterial.ParametersChanged), CurrentMaterial, changeType, changeType)
+                    new UndoActionDelegate(CurrentMaterial, nameof(CurrentMaterial.RaiseParametersChanged), true, "", new object[1] { changeType })
                 }, $"{fieldName}");
             }
         }
 
-        private void SetBoolValue(bool newValue, string fieldName, int changeType = 1)
+        private void SetBoolValue(bool newValue, string fieldName, ParameterChangeType changeType = ParameterChangeType.UpdateParameters)
         {
             bool original = (bool)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);
 
             if (original != newValue)
             {
                 CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
-                CurrentMaterial.ParametersChanged = changeType;
+                CurrentMaterial.RaiseParametersChanged(changeType);
 
                 UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
                 {
                     new UndoableField(fieldName, CurrentMaterial, original, newValue),
-                    new UndoablePropertyGeneric(nameof(CurrentMaterial.ParametersChanged), CurrentMaterial, changeType, changeType)
+                    new UndoActionDelegate(CurrentMaterial, nameof(CurrentMaterial.RaiseParametersChanged), true, "", new object[1] { changeType })
                 }, $"{fieldName}");
             }
         }
 
-        private void SetFloatValue(float newValue, string fieldName, int changeType = 1)
+        private void SetFloatValue(float newValue, string fieldName, ParameterChangeType changeType = ParameterChangeType.UpdateParameters)
         {
             float original = (float)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);
 
             if (original != newValue)
             {
                 CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
-                CurrentMaterial.ParametersChanged = changeType;
+                CurrentMaterial.RaiseParametersChanged(changeType);
 
                 UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
                 {
                     new UndoableField(fieldName, CurrentMaterial, original, newValue),
-                    new UndoablePropertyGeneric(nameof(CurrentMaterial.ParametersChanged), CurrentMaterial, changeType, changeType)
+                    new UndoActionDelegate(CurrentMaterial, nameof(CurrentMaterial.RaiseParametersChanged), true, "", new object[1] { changeType })
                 }, $"{fieldName}");
             }
         }

@@ -31,18 +31,8 @@ namespace Xv2CoreLib.EMM
 
     */
     [Serializable]
-    public class DecompiledMaterial : INotifyPropertyChanged
+    public class DecompiledMaterial
     {
-        #region NotifyPropChanged
-        [field: NonSerialized]
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
-
         #region CachedValues
         /// <summary>
         /// Used for creating default <see cref="DecompiledMaterial"/> objects. Cached here for performance reasons.
@@ -283,21 +273,6 @@ namespace Xv2CoreLib.EMM
         //Initially set values for this material. When saving back, these values will always be saved regardless of if they are "default".
         private List<string> InitialParameters = new List<string>();
 
-        //Notify
-        private int _parametersChanged = 0;
-        public int ParametersChanged
-        {
-            get => _parametersChanged;
-            set
-            {
-                if(_parametersChanged != value)
-                {
-                    _parametersChanged = value;
-                    NotifyPropertyChanged(nameof(ParametersChanged));
-                }
-            }
-        }
-
         /// <summary>
         /// Force wireframe mode in the XenoKit viewport. Not an actual game material parameter!
         /// </summary>
@@ -381,6 +356,7 @@ namespace Xv2CoreLib.EMM
         private bool HasParameterInt(FieldInfo fieldInfo)
         {
             if (InitialParameters.Contains(fieldInfo.Name)) return true;
+            if (fieldInfo.Name == nameof(AlphaBlendType) && AlphaBlend > 0) return true;
 
             int defaultValue = DefaultMaterialValues.GetDefautInt(fieldInfo.Name);
             int currentValue = (int)fieldInfo.GetValue(this);
@@ -864,7 +840,7 @@ namespace Xv2CoreLib.EMM
             foreach (var field in Fields)
             {
                 //Skip non-parameters
-                if (field.Name == nameof(InitialParameters) || field.Name == nameof(_parametersChanged)) continue;
+                if (field.Name == nameof(InitialParameters) || field.Name == nameof(ParametersChanged)) continue;
 
                 object oldValue = field.GetValue(this);
                 object newValue = field.GetValue(material);
@@ -997,19 +973,32 @@ namespace Xv2CoreLib.EMM
 
         #endregion
 
+        #region Notify Changes
+        public event EventHandler<ParameterChangeType> ParametersChanged;
+
+        public void RaiseShaderParametersChanged()
+        {
+            ParametersChanged?.Invoke(this, ParameterChangeType.UpdateShaderProgram);
+        }
+
+        public void RaiseMaterialParametersChanged()
+        {
+            ParametersChanged?.Invoke(this, ParameterChangeType.UpdateParameters);
+        }
+
+        public void RaiseParametersChanged(ParameterChangeType type)
+        {
+            ParametersChanged?.Invoke(this, type);
+        }
+
         private void VectorValuesChangedEvent(object sender, PropertyChangedEventArgs e)
         {
             if (ColorComponents.Contains(e.PropertyName))
-                NotifyPropertyChanged(e.PropertyName);
+                ParametersChanged?.Invoke(this, ParameterChangeType.UpdateColor);
 
-            _parametersChanged = 1;
-            NotifyPropertyChanged(nameof(ParametersChanged));
+            ParametersChanged?.Invoke(this, ParameterChangeType.UpdateParameters);
         }
-
-        public void ResetParametersChanged()
-        {
-            _parametersChanged = 0;
-        }
+        #endregion
 
         public System.Windows.Media.Color CalculatePreviewColor(AnalyzedShader shader)
         {
@@ -1049,7 +1038,6 @@ namespace Xv2CoreLib.EMM
 
     public enum AlphaBlendType : int
     {
-        NotSet = -1,
         Normal = 0,
         Additive = 1,
         Subtractive = 2
@@ -1078,6 +1066,13 @@ namespace Xv2CoreLib.EMM
         Alpha,
         Texture,
         Lighting
+    }
+
+    public enum ParameterChangeType
+    {
+        UpdateParameters,
+        UpdateShaderProgram,
+        UpdateColor
     }
 
     #region Attributes

@@ -387,7 +387,7 @@ namespace Xv2CoreLib.EMM
         public void DecompileParameters()
         {
             DecompiledParameters = DecompiledMaterial.Decompile(this);
-            DecompiledParameters.PropertyChanged += DecompiledParameters_PropertyChanged;
+            DecompiledParameters.ParametersChanged += DecompiledParameters_ParametersChanged;
         }
 
         public void CompileParameters()
@@ -453,7 +453,7 @@ namespace Xv2CoreLib.EMM
             }
 
             if (colorChanged)
-                DecompiledParameters.ParametersChanged = 1;
+                DecompiledParameters.RaiseParametersChanged(ParameterChangeType.UpdateColor);
         }
 
         #region Get
@@ -510,9 +510,9 @@ namespace Xv2CoreLib.EMM
             NotifyPropertyChanged(nameof(PreviewBrush));
         }
 
-        private void DecompiledParameters_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void DecompiledParameters_ParametersChanged(object sender, ParameterChangeType changeType)
         {
-            if (DecompiledMaterial.ColorComponents.Contains(e.PropertyName))
+            if (changeType == ParameterChangeType.UpdateColor)
                 NotifyPropertyChanged(nameof(PreviewBrush));
         }
     }

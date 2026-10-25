@@ -17,7 +17,6 @@ namespace Xv2CoreLib.EMM
         //The value types must be the same for Int, float, and bools
         //For Vectors, Colors and MatUVs they must be float[4].
 
-        public readonly static int AlphaBlendType = -1;
         public readonly static float[] MatOffset0 = new float[4] { 0, 0, 0, 0 };
         public readonly static float[] MatOffset1 = MatOffset0;
         public readonly static float[] MatScale0 = new float[4] { 1, 1, 1, 1 };
