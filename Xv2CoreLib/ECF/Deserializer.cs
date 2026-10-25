@@ -27,7 +27,7 @@ namespace Xv2CoreLib.ECF
 
             bytes.AddRange(BitConverter.GetBytes((ushort)37568));
             bytes.AddRange(BitConverter.GetBytes((ushort)65535));
-            bytes.AddRange(BitConverter.GetBytes(ecfFile.I_12));
+            bytes.AddRange(BitConverter.GetBytes(ecfFile.Priority));
             bytes.AddRange(new byte[12]);
 
             if (ecfFile.Nodes != null)

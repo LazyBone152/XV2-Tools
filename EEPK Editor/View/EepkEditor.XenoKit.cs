@@ -1,4 +1,6 @@
-﻿namespace EEPK_Organiser.View
+﻿using Xv2CoreLib.EffectContainer;
+
+namespace EEPK_Organiser.View
 {
     public partial class EepkEditor
     {
@@ -6,6 +8,11 @@
         partial void PlaySelectedEffect()
         {
             
+        }
+
+        public void AssetEmoOpenEditor(Asset asset)
+        {
+
         }
     }
 }

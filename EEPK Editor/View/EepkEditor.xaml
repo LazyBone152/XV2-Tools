@@ -13,8 +13,10 @@
              xmlns:forms="clr-namespace:EEPK_Organiser.Forms"
              xmlns:eepkDic="clr-namespace:Xv2CoreLib.ValuesDictionary;assembly=Xv2CoreLib"
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:viewModel="clr-namespace:EEPK_Organiser.ViewModel"
+             xmlns:view="clr-namespace:EEPK_Organiser.View"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1050" Dialog:DialogParticipation.Register="{Binding}" Name="UserControl">
+             d:DesignHeight="6000" d:DesignWidth="900" Dialog:DialogParticipation.Register="{Binding}" Name="UserControl">
     <mvvm:AutoObservableUserControl.Resources>
         <Style x:Key="ExpandableDataGridHeaderStyle" TargetType="{x:Type DataGridRowHeader}">
             <Setter Property="Background" Value="Transparent" />
@@ -59,6 +61,11 @@
     <Grid x:Name="rootGrid">
         <Grid.Resources>
             <lbUtils:BindingProxy x:Key="proxy" Data="{Binding}"/>
+            <ObjectDataProvider x:Key="drawPassEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="viewModel:EmoDrawPass"/>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
         </Grid.Resources>
 
         <TabControl x:Name="tabControl" SelectionChanged="TabControl_SelectionChanged" Controls:TabControlHelper.Underlined="TabItems" IsEnabled="{Binding IsFileLoaded}" Margin="0, 4">
@@ -66,9 +73,9 @@
             <Controls:MetroTabItem Header="EFFECT" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="35"/>
-                        <ColumnDefinition Width="0.45*"/>
-                        <ColumnDefinition Width="*" MinWidth="500" MaxWidth="800"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="0.55*"/>
+                        <ColumnDefinition Width="*" MinWidth="500" MaxWidth="600"/>
                     </Grid.ColumnDefinitions>
 
                     <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="EffectDataGrid_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel"
@@ -77,7 +84,7 @@
                               AutoGenerateColumns="False" CanUserDeleteRows="False" CellEditEnding="EffectDataGrid_CellEditEnding"
                               HeadersVisibility="Row" RowHeaderWidth="25" RowDetailsVisibilityMode="Collapsed" RowHeaderStyle="{DynamicResource ExpandableDataGridHeaderStyle}"
                               SelectionUnit="FullRow"
-                              BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1"
+                              BorderBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" BorderThickness="1"
                               helper:DataGridHelper.SelectedItems="{Binding ElementName=UserControl, Path=SelectedEffects, Mode=OneWay}">
                         <DataGrid.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=Effect_DeleteEffectCommand}"/>
@@ -172,300 +179,383 @@
                         </DataGrid.RowDetailsTemplate>
                     </DataGrid>
 
-                    <Border Grid.Column="2" BorderBrush="{DynamicResource MahApps.Brushes.Accent}" BorderThickness="1" Margin="5, 0">
+                    <Border Grid.Column="2" BorderBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" BorderThickness="1" Margin="5, 0">
                         <Grid>
                             <ScrollViewer Grid.Column="2" Visibility="{Binding ElementName=UserControl, Path=EffectPartVisibility}">
                                 <Grid Background="Transparent">
                                     <StackPanel>
                                         <Expander x:Name="effectPartGeneral" Header="General" IsExpanded="True">
-                                            <StackPanel>
+                                            <StackPanel Margin="0,0,0,2.5">
                                                 <StackPanel HorizontalAlignment="Left">
                                                     <Grid Margin="3,3,0,0" Width="400">
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="125"/>
+                                                            <ColumnDefinition Width="122.5"/>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="75"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="Asset"/>
                                                         <TextBox Grid.Column="1" IsEnabled="False" Text="{Binding SelectedEffectPart.AssetRefDetails, Mode=OneWay}" IsReadOnly="True"  TextWrapping="NoWrap" VerticalAlignment="Top"/>
-                                                        <Button Grid.Column="2" Margin="5,0" Command="{Binding EffectPart_ChangeAssetCommand}" Content="Change"/>
+                                                        <Button Grid.Column="2" Margin="5,0" Command="{Binding ElementName=UserControl, Path=EffectPart_ChangeAssetCommand}" Content="Change"/>
                                                     </Grid>
                                                 </StackPanel>
 
                                                 <StackPanel Orientation="Horizontal">
-                                                    <Grid Margin="3,5,0,0" Width="250">
+                                                    <Grid Margin="3,5,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
-                                                        <Label Content="Start Time"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.StartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                                        <Label Content="Start Delay" ToolTip="Delay starting of the effect by N frames."/>
+                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.StartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                                     </Grid>
-                                                    <Grid Margin="3,5,0,0" Width="250">
+                                                    <Grid Margin="3,5,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
-                                                        <Label Content="Deactivation" ToolTip="Controls how this effect will be externally deactivated (from BAC, BSA, DEM...). Regardless of this setting the effect will be deactivated when it naturally ends, as long as it is not looped.&#x0a;&#x0a;Never:&#x0a;This effect can not be deactivated&#x0a;&#x0a;Immediate:&#x0a;This effect will immediately end when deactivated&#x0a;&#x0a;Loop Cancel:&#x0a;This effect will end when deactivated, but not immediately. &#x0a;[PBIND] Looped particles will end immediately, however any non-looped particles will remain active for their remaining lifetime, and can still create new (non-looped) particles."/>
-                                                        <ComboBox Grid.Column="1" SelectedValue="{Binding EffectPartViewModel.Deactivation, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Key" ItemsSource="{x:Static eepkDic:EEPK.Deactivation}"/>
+                                                        <Label Content="Deactivation Mode" ToolTip="Controls how this effect will end when it receives a termination request. Regardless of this setting the effect will be deactivated when it naturally ends, as long as it is not looped.&#x0a;&#x0a;Never:&#x0a;This effect can not be deactivated&#x0a;&#x0a;Immediate:&#x0a;This effect will immediately end when deactivated&#x0a;&#x0a;Loop Cancel:&#x0a;This effect will end when deactivated, but not immediately. &#x0a;[PBIND] Looped particles will end immediately, however any non-looped particles will remain active for their remaining lifetime, and can still create new (non-looped) particles."/>
+                                                        <ComboBox Grid.Column="1" SelectedValue="{Binding ElementName=UserControl, Path=EffectPartViewModel.Deactivation, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Key" ItemsSource="{x:Static eepkDic:EEPK.Deactivation}"/>
                                                     </Grid>
                                                 </StackPanel>
 
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Grid Margin="3,5,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="Attachment"/>
-                                                        <ComboBox Grid.Column="1" SelectedValue="{Binding EffectPartViewModel.Attachment, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Key" ItemsSource="{x:Static eepkDic:EEPK.AttachmentTypes}"/>
-                                                    </Grid>
-                                                    <Grid Margin="3,5,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="Attachment Bone"/>
-                                                        <ComboBox Grid.Column="1" IsEditable="True" Text="{Binding EffectPartViewModel.ESK, UpdateSourceTrigger=LostFocus}" ItemsSource="{x:Static eepkDic:EEPK.CommonBones}"/>
-                                                    </Grid>
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Grid Margin="3,5,0,0" Width="250">
+                                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Grid Margin="3,5,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="Orientation Type"/>
-                                                        <ComboBox Grid.Column="1" SelectedValue="{Binding EffectPartViewModel.OrientationType, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Key" ItemsSource="{x:Static eepkDic:EEPK.Orientation}"/>
+                                                        <ComboBox Grid.Column="1" SelectedValue="{Binding ElementName=UserControl, Path=EffectPartViewModel.OrientationType, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Key" ItemsSource="{x:Static eepkDic:EEPK.Orientation}"/>
                                                     </Grid>
-                                                    <Grid Margin="3,3,0,0" Width="250">
+                                                    <Grid Margin="3,3,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="Direction"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_06, UpdateSourceTrigger=PropertyChanged}" Maximum="2" Minimum="0"/>
+                                                        <ComboBox Grid.Column="1" SelectedIndex="{Binding ElementName=UserControl, Path=EffectPartViewModel.DirectionAxis, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{x:Static eepkDic:EEPK.DirectionAxis}"/>
                                                     </Grid>
-
+                                                </StackPanel>
+                                                <StackPanel Width="500" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Grid Margin="3,5,0,0" Width="245">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Label Content="Attachment Type"/>
+                                                            <ComboBox Grid.Column="1" SelectedValue="{Binding ElementName=UserControl, Path=EffectPartViewModel.Attachment, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Key" ItemsSource="{x:Static eepkDic:EEPK.AttachmentTypes}"/>
+                                                        </Grid>
+                                                        <Grid Margin="3,5,0,0" Width="245">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Label Content="Attachment Bone"/>
+                                                            <ComboBox Grid.Column="1" IsEditable="True" Text="{Binding ElementName=UserControl, Path=EffectPartViewModel.ESK, UpdateSourceTrigger=LostFocus}" ItemsSource="{x:Static eepkDic:EEPK.CommonBones}"/>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Grid Margin="3,5,0,0" Width="245" HorizontalAlignment="Left">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="122.5"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Label Content="Position Update" ToolTip="Update the effect position every frame. If not set, then the effect will keep it's initial position for its entire lifespan."/>
+                                                            <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_32_0, UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </Grid>
+                                                        <Grid Margin="3,5,0,0" Width="245" HorizontalAlignment="Left">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="122.5"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Label Content="Rotation Update" ToolTip="Update the effect orientation every frame. If not set, then the effect will keep it's initial orientation for its entire lifespan."/>
+                                                            <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_32_1, UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                    <Grid Margin="3,5,0,0" Width="245" HorizontalAlignment="Left">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="122.5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="Instant Update" ToolTip="Instantly update particle position and orientation to move with the attached bone (requires either the Position Update or Rotation Update flag to have any effect).&#x0a;&#x0a;Without this, particle nodes will only be created at the bone position, but wont update with it throughout their lifetime."/>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_32_2, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Grid Margin="3,5,0,0" Width="245" HorizontalAlignment="Left">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="122.5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="Use Time Scale" ToolTip="Inherit the Time Scale value of the user of this effect."/>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_32_4, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </Grid>
+                                                    <Grid Margin="3,5,0,0" Width="245" HorizontalAlignment="Left">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="122.5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="Ground Check" ToolTip="Flags the effect to only appear if it passes a Y-axis check (near or on the ground). Additionally will also perform a check per frame, and will terminate the effect if it fails."/>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_32_3, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </Grid>
                                                 </StackPanel>
 
-                                                <WrapPanel>
-                                                    <Grid Margin="3,5,0,0" Width="250">
+                                                <StackPanel Width="500" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsLIGHT, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Label Content="Light Settings" ToolTip="By default all these flags are active, but if any of them are enabled here then the others will become inactive." FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="5,0">
+                                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_36_4, UpdateSourceTrigger=PropertyChanged}" Content="Apply to Characters"/>
+                                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_36_5, UpdateSourceTrigger=PropertyChanged}" Content="Apply to Stages"/>
+                                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_36_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk 6" ToolTip="Related to the other light flags somehow. Likely for the light affecting something else."/>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+
+
+                                            </StackPanel>
+                                        </Expander>
+                                        <Expander Header="Render Options" IsExpanded="True" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <StackPanel MaxWidth="500" HorizontalAlignment="Left" Margin="0,0,0,2.5">
+                                                <Grid Margin="3,5,0,0" Width="245" HorizontalAlignment="Left">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Label Content="Depth Bias"/>
+                                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.DepthBias, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
+                                                </Grid>
+                                                <Grid Margin="3,5,0,0" Width="245" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsEMO, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Label Content="Draw Pass"/>
+                                                    <ComboBox Grid.Column="1" SelectedItem="{Binding ElementName=UserControl, Path=EffectPartViewModel.EmoDrawPass}" ItemsSource="{Binding Source={StaticResource ResourceKey=drawPassEnum}}"/>
+                                                </Grid>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Grid Margin="3,5,0,0" Width="245" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotLIGHT, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="122.5"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="Distance Fading" ToolTip="Enable fading of the effect according to the Near Fade Distance and Far Fade Distance values."/>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.EnableDistanceCulling, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </Grid>
+                                                    <Grid Margin="3,5,0,0" Width="245" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=EffectPartViewModel.EnableDistanceCulling}" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsEMO, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="122.5"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="No Frustum Culling" ToolTip="Disable frustum culling when drawing this EMO. Useful for animated EMOs where the bounding boxes used for culling are no longer accurate to the animated shape."/>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.EnableDistanceCulling, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotLIGHT, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Grid Margin="3,5,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="Near Fade Distance"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.F_84, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
+                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.F_84, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                                     </Grid>
-                                                    <Grid Margin="3,5,0,0" Width="250">
+                                                    <Grid Margin="3,5,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="Far Fade Distance"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.F_88, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
+                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.F_88, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                                     </Grid>
-                                                    <Grid Margin="3,5,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="Avoid Sphere"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.F_24, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
-                                                    </Grid>
-                                                </WrapPanel>
+                                                </StackPanel>
                                             </StackPanel>
-
                                         </Expander>
                                         <Expander Header="Position / Rotation / Scale" IsExpanded="True" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <StackPanel MaxWidth="550" HorizontalAlignment="Left">
-                                                <TextBlock Text="Position" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
-                                                <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Label Content="Bone Direction" ToolTip="These position values will be relative to the bone direction if enabled, otherwise they will be in world space."/>
-                                                    <CheckBox Grid.Column="1" IsChecked="{Binding EffectPartViewModel.I_32_5, UpdateSourceTrigger=PropertyChanged}"/>
-                                                </Grid>
-                                                <Grid Margin="3,5,0,0" Width="900">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="104"/>
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="111"/>
+                                            <StackPanel MaxWidth="500" HorizontalAlignment="Left" Margin="0,0,0,2.5">
 
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="112"/>
-
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="112"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Label Content="Position" ToolTip="Applies a position offset to the effect in addition to its spawn location (as determined by Attachment).&#x0a;&#x0a;When Bone Direction is enabled, the position offset will be applied relative to the Attachment Bone."/>
-                                                    <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
-                                                    <Controls:NumericUpDown Grid.Column="2" Value="{Binding EffectPartViewModel.POSITION_X, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-
-                                                    <Label Grid.Column="3" Content="Y" HorizontalContentAlignment="Right"/>
-                                                    <Controls:NumericUpDown Grid.Column="4" Value="{Binding EffectPartViewModel.POSITION_Y, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-
-                                                    <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
-                                                    <Controls:NumericUpDown Grid.Column="6" Value="{Binding EffectPartViewModel.POSITION_Z, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-                                                </Grid>
-
-                                                <TextBlock Text="Rotation" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
-                                                <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Label Content="Enable Rotation"/>
-                                                    <CheckBox Grid.Column="1" IsChecked="{Binding EffectPartViewModel.I_32_6, UpdateSourceTrigger=PropertyChanged}"/>
-                                                </Grid>
-                                                <Grid Margin="3,5,0,0" Width="900">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="104"/>
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="111"/>
-
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="112"/>
-
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="112"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Label Content="Rotation (Min)"/>
-                                                    <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
-                                                    <Controls:NumericUpDown Grid.Column="2" Value="{Binding EffectPartViewModel.F_52, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-
-                                                    <Label Grid.Column="3" Content="Y" HorizontalContentAlignment="Right"/>
-                                                    <Controls:NumericUpDown Grid.Column="4" Value="{Binding EffectPartViewModel.F_60, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-
-                                                    <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
-                                                    <Controls:NumericUpDown Grid.Column="6" Value="{Binding EffectPartViewModel.F_68, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-                                                </Grid>
-                                                <Grid Margin="3,5,0,0" Width="900">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="104"/>
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="111"/>
-
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="112"/>
-
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="112"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Label Content="Rotation (Max)"/>
-                                                    <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
-                                                    <Controls:NumericUpDown Grid.Column="2" Value="{Binding EffectPartViewModel.F_56, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-
-                                                    <Label Grid.Column="3" Content="Y" HorizontalContentAlignment="Right"/>
-                                                    <Controls:NumericUpDown Grid.Column="4" Value="{Binding EffectPartViewModel.F_64, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-
-                                                    <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
-                                                    <Controls:NumericUpDown Grid.Column="6" Value="{Binding EffectPartViewModel.F_72, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-                                                </Grid>
-
-                                                <TextBlock Text="Scale" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
-                                                <WrapPanel>
-                                                    <Grid Margin="3,5,0,0" Width="250" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <StackPanel Width="500" HorizontalAlignment="Left">
+                                                    <TextBlock Text="Position Offset" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
+                                                    <Grid Margin="3,5,0,0">
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="100"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="111"/>
+
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="112"/>
+
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="112"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="Position" ToolTip="Applies a position offset to the effect in addition to its spawn location (as determined by Attachment).&#x0a;&#x0a;When Bone Direction is enabled, the position offset will be applied relative to the Attachment Bone."/>
+                                                        <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
+                                                        <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.POSITION_X, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                                        <Label Grid.Column="3" Content="Y" HorizontalContentAlignment="Right"/>
+                                                        <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.POSITION_Y, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                                        <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
+                                                        <Controls:NumericUpDown Grid.Column="6" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.POSITION_Z, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                                    </Grid>
+                                                    <Grid Margin="3,5,0,0" Width="140" HorizontalAlignment="Left">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="120"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="Bone Direction" ToolTip="These position values will be relative to the bone direction if enabled, otherwise they will be in world space."/>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_32_5, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </Grid>
+                                                </StackPanel>
+
+                                                <StackPanel Width="500" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotLIGHT, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <TextBlock Text="Rotation" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
+                                                    <Grid Margin="3,5,0,0" Width="140" HorizontalAlignment="Left">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="120"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
-                                                        <Label Content="Scale (Min)" ToolTip="Scales the Effect Part. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.SIZE_1, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding EffectPartViewModel.IsNotTBIND}"/>
+                                                        <Label Content="Enable Rotation"/>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_32_6, UpdateSourceTrigger=PropertyChanged}"/>
                                                     </Grid>
-                                                    <Grid Margin="3,5,0,0" Width="250" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Grid Margin="3,5,0,0">
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="100"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="111"/>
+
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="112"/>
+
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="112"/>
                                                         </Grid.ColumnDefinitions>
-                                                        <Label Content="Scale (Max)" ToolTip="Scales the Effect Part. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.SIZE_2, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding EffectPartViewModel.IsNotTBIND}"/>
+                                                        <Label Content="Rotation (Min)"/>
+                                                        <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
+                                                        <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.F_52, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                                        <Label Grid.Column="3" Content="Y" HorizontalContentAlignment="Right"/>
+                                                        <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.F_60, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                                        <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
+                                                        <Controls:NumericUpDown Grid.Column="6" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.F_68, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                                     </Grid>
-                                                </WrapPanel>
+                                                    <Grid Margin="3,5,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="100"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="111"/>
+
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="112"/>
+
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="112"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="Rotation (Max)"/>
+                                                        <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
+                                                        <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.F_56, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                                        <Label Grid.Column="3" Content="Y" HorizontalContentAlignment="Right"/>
+                                                        <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.F_64, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                                        <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
+                                                        <Controls:NumericUpDown Grid.Column="6" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.F_72, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                                
+
+                                                <StackPanel>
+                                                    <TextBlock Text="Scale" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Grid Margin="3,5,0,0" Width="245" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="120"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Label Content="Scale (Min)" ToolTip="Scales the Effect Part. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
+                                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.SIZE_1, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding EffectPartViewModel.IsNotTBIND}"/>
+                                                        </Grid>
+                                                        <Grid Margin="3,5,0,0" Width="245" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="120"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Label Content="Scale (Max)" ToolTip="Scales the Effect Part. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
+                                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.SIZE_2, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding EffectPartViewModel.IsNotTBIND}"/>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                    <Grid Margin="3,5,0,0" Width="490" HorizontalAlignment="Left">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="122.5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="Inherit Users Scale"/>
+                                                        <CheckBox Grid.Column="1" Width="80" Content="Start" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.InheritUsersScaleOnStart, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsEmoOrPbind, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                        <CheckBox Grid.Column="2" Width="80" Content="Update" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.InheritUsersScaleOnUpdate, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </Grid>
+                                                    <Grid Margin="3,5,0,0" Width="490" HorizontalAlignment="Left">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="122.5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Content="Inherit Bone Scale"/>
+                                                        <CheckBox Grid.Column="1" Width="80" Content="Start" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.InheritBoneScaleOnStart, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsEmoOrPbind, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                        <CheckBox Grid.Column="2" Width="80" Content="Update" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.InheritBoneScaleOnUpdate, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </Grid>
+
+                                                </StackPanel>
                                             </StackPanel>
                                         </Expander>
                                         <Expander Header="Animation" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsUsingEma, Converter={StaticResource BooleanToVisibilityConverter}}" IsExpanded="True">
-                                            <StackPanel>
+                                            <StackPanel Margin="0,0,0,2.5">
                                                 <WrapPanel>
-                                                    <Grid Margin="3,5,0,0" Width="250">
+                                                    <Grid Margin="3,5,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="Animation ID" ToolTip="ID of animation within the EMA file for this asset."/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_30, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_30, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                                     </Grid>
 
-                                                    <Grid Margin="3,5,0,0" Width="250">
+                                                    <Grid Margin="3,5,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="Enable Looping"/>
-                                                        <CheckBox Grid.Column="1" IsChecked="{Binding EffectPartViewModel.I_36_0, UpdateSourceTrigger=PropertyChanged}"/>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_36_0, UpdateSourceTrigger=PropertyChanged}"/>
                                                     </Grid>
                                                 </WrapPanel>
                                                 <WrapPanel>
-                                                    <Grid Margin="3,5,0,0" Width="250">
+                                                    <Grid Margin="3,5,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="Start Frame"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_92, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_92, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                                     </Grid>
-                                                    <Grid Margin="3,5,0,0" Width="250">
+                                                    <Grid Margin="3,5,0,0" Width="245">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="End Frame"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_94, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=EffectPartViewModel.I_94, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                                     </Grid>
                                                 </WrapPanel>
                                             </StackPanel>
                                         </Expander>
-                                        <Expander Header="Primary Flags" IsExpanded="True">
-                                            <StackPanel MaxWidth="550" HorizontalAlignment="Left">
-                                                <Label Content="Attachment" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2" ToolTip="These flags control how the attachment bone is updated throughout the effects life cycle."/>
-                                                <WrapPanel>
-                                                    <CheckBox Width="160" Margin="3,1" Content="Position Update" IsChecked="{Binding EffectPartViewModel.I_32_0, UpdateSourceTrigger=PropertyChanged}" ToolTip="Continually update the effects position to match its attached bone."/>
-                                                    <CheckBox Width="160" Margin="3,1" Content="Rotation Update" IsChecked="{Binding EffectPartViewModel.I_32_1, UpdateSourceTrigger=PropertyChanged}" ToolTip="Continually update the effects rotation to match its attached bone."/>
-                                                    <CheckBox Width="160" Margin="3,1" Content="Instant Particle Update" IsChecked="{Binding EffectPartViewModel.I_32_2, UpdateSourceTrigger=PropertyChanged}" ToolTip="Instantly update particle position and rotation to move with the attached bone (requires either the Position Update or Rotation Update flag to have any effect).&#x0a;&#x0a;Without this, particle nodes will only be created at the bone position, but wont update with it throughout their lifetime."/>
-
-                                                </WrapPanel>
-
-                                                <Label Content="Light Flags" ToolTip="By default all these flags are active, but if any of them are enabled here then the others will become inactive." FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
-                                                <WrapPanel>
-                                                    <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_36_4, UpdateSourceTrigger=PropertyChanged}" Content="Apply to Characters"/>
-                                                    <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_36_5, UpdateSourceTrigger=PropertyChanged}" Content="Apply to Stages"/>
-                                                    <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_36_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk 6" ToolTip="Related to the other light flags somehow. Likely for the light affecting something else."/>
-                                                </WrapPanel>
-
-                                                <Label Content="Link Flags" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
-                                                <WrapPanel>
-                                                    <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_39_3, UpdateSourceTrigger=PropertyChanged}" Content="_RelativePosZ_To_AbsPosZ"/>
-                                                    <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_39_4, UpdateSourceTrigger=PropertyChanged}" Content="_ScaleZ_To_BonePosZ"/>
-                                                    <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_39_7, UpdateSourceTrigger=PropertyChanged}" Content="_ObjectRotation_To_XXXX" ToolTip="Dont ask"/>
-                                                </WrapPanel>
-
-                                                <Label Content="Other" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
-                                                <WrapPanel>
-                                                    <CheckBox Width="160" Margin="3,1, 0, 3" IsChecked="{Binding EffectPartViewModel.I_32_4, UpdateSourceTrigger=PropertyChanged}" Content="Allow Time Scale" ToolTip="Allows the effect to be time scaled."/>
-                                                    <CheckBox Width="160" Margin="3,1, 0, 3" IsChecked="{Binding EffectPartViewModel.I_39_0, UpdateSourceTrigger=PropertyChanged}" Content="No Glare" ToolTip="Disables all glare for this effect."/>
-                                                    <CheckBox Width="160" Margin="3,1, 0, 3" IsChecked="{Binding EffectPartViewModel.I_39_2, UpdateSourceTrigger=PropertyChanged}" Content="InverseTransparenDrawOrder" ToolTip="InverseTransparentDrawOrder"/>
-                                                    <CheckBox Width="160" Margin="3,1, 0, 3" IsChecked="{Binding EffectPartViewModel.I_32_7, UpdateSourceTrigger=PropertyChanged}" Content="SceneCenterToBoneDir"/>
-                                                    <CheckBox Width="160" Margin="3,1,0,3" Content="Ground Only" IsChecked="{Binding EffectPartViewModel.I_32_3, UpdateSourceTrigger=PropertyChanged}" ToolTip="The effect will only appear when on (or near) the ground."/>
-                                                </WrapPanel>
-                                            </StackPanel>
-                                        </Expander>
                                         <Expander Header="Unknown Flags" IsExpanded="False">
-                                            <WrapPanel>
+                                            <WrapPanel Margin="0,0,0,2.5">
+                                                <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_39_3, UpdateSourceTrigger=PropertyChanged}" Content="_BoneDir_UnkScale" ToolTip="Requires Bone Direction flag. Applies some scale to the position offset... how and for what reason is currently unknown."/>
+                                                <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_39_7, UpdateSourceTrigger=PropertyChanged}" Content="_ObjectRotation_To_XXXX"/>
+                                                <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_32_7, UpdateSourceTrigger=PropertyChanged}" Content="SceneCenterToBoneDir"/>
+
                                                 <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_39_1, UpdateSourceTrigger=PropertyChanged}" Content="Flag__39__Unk1"/>
-                                                <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_39_5, UpdateSourceTrigger=PropertyChanged}" Content="Flag__39__Unk5"/>
                                                 <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_39_6, UpdateSourceTrigger=PropertyChanged}" Content="Flag__39__Unk6"/>
 
                                                 <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_36_1, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk1"/>
@@ -482,79 +572,6 @@
                                                 <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_37_6, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk6"/>
                                                 <CheckBox Width="160" Margin="3,1" IsChecked="{Binding EffectPartViewModel.I_37_7, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk7"/>
                                             </WrapPanel>
-                                        </Expander>
-                                        <Expander Header="Unknown Values" IsExpanded="False">
-                                            <StackPanel>
-                                                <WrapPanel HorizontalAlignment="Left">
-                                                    <Grid Margin="3,3,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="I__07"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_07, UpdateSourceTrigger=PropertyChanged}" />
-                                                    </Grid>
-                                                    <Grid Margin="3,3,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="I__08"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_08, UpdateSourceTrigger=PropertyChanged}" />
-                                                    </Grid>
-                                                    <Grid Margin="3,3,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="I__12"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_12, UpdateSourceTrigger=PropertyChanged}" />
-                                                    </Grid>
-                                                    <Grid Margin="3,3,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="I__16"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_16, UpdateSourceTrigger=PropertyChanged}" />
-                                                    </Grid>
-                                                    <Grid Margin="3,3,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="I__20"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_20, UpdateSourceTrigger=PropertyChanged}" />
-                                                    </Grid>
-                                                    <Grid Margin="3,3,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="I__34"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_34, UpdateSourceTrigger=PropertyChanged}" />
-                                                    </Grid>
-                                                </WrapPanel>
-                                                <WrapPanel HorizontalAlignment="Left">
-                                                    <Grid Margin="3,3,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="I__38__a"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_38_a, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="15"/>
-                                                    </Grid>
-                                                    <Grid Margin="3,3,0,0" Width="250">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Label Content="I__38__b"/>
-                                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding EffectPartViewModel.I_38_b, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="15"/>
-                                                    </Grid>
-
-                                                </WrapPanel>
-                                            </StackPanel>
                                         </Expander>
                                     </StackPanel>
 
@@ -592,7 +609,7 @@
                                         <MenuItem Header="Awoken Skill" Command="{Binding ImportEffectsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.AwokenSkill}"/>
                                         <MenuItem Header="Demo" Command="{Binding ImportEffectsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Demo}"/>
                                         <Separator/>
-                                        <MenuItem Header="From Cached Files" ItemsSource="{Binding ElementName=UserControl, Path=cacheManager.CachedFiles}" MouseMove="MenuItem_MouseMove" Click="EffectOptions_ImportEffectsFromCache_Click">
+                                        <MenuItem Header="From Cached Files" ItemsSource="{Binding Data.cacheManager.CachedFiles, Source={StaticResource proxy}}" MouseMove="MenuItem_MouseMove" Click="EffectOptions_ImportEffectsFromCache_Click">
                                             <MenuItem.ItemContainerStyle>
                                                 <Style>
                                                     <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
@@ -603,466 +620,41 @@
                                     </ContextMenu>
                                 </Button.ContextMenu>
 
-                                <iconPacks:PackIconMaterialLight Kind="Plus" />
+                                <iconPacks:PackIconMaterialLight Kind="FolderPlus" />
                             </Button>
                             <TextBlock Text="Import" HorizontalAlignment="Center" FontSize="10"/>
                         </StackPanel>
 
+                        <StackPanel VerticalAlignment="Center">
+                            <Button Command="{Binding ElementName=UserControl, Path=Effect_DeleteEffectCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}">
+                                <iconPacks:PackIconMaterialLight Kind="Delete" />
+                            </Button>
+                            <TextBlock Text="Remove" HorizontalAlignment="Center" FontSize="10"/>
+                        </StackPanel>
+                        <StackPanel VerticalAlignment="Center">
+                            <Button Command="{Binding ElementName=UserControl, Path=Effect_DuplicateCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}">
+                                <iconPacks:PackIconMaterialLight Kind="ContentDuplicate" />
+                            </Button>
+                            <TextBlock Text="Duplicate" HorizontalAlignment="Center" FontSize="10"/>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Controls:MetroTabItem>
 
             <Controls:MetroTabItem Header="PBIND" Controls:HeaderedControlHelper.HeaderFontSize="14">
-                <Grid Background="Transparent">
-
-                    <DataGrid SelectionMode="Extended" x:Name="pbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding ElementName=UserControl, Path=effectContainerFile.Pbind.ViewAssets}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedPbind, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
-                        <DataGrid.InputBindings>
-                            <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="F2" Command="{Binding ElementName=UserControl, Path=AssetRenameCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="Q" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="H" Modifiers="Alt" Command="{Binding ElementName=UserControl, Path=AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <KeyBinding Key="Return" Command="{Binding ElementName=UserControl, Path=AssetOpenEditorCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ElementName=UserControl, Path=AssetOpenEditorCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                        </DataGrid.InputBindings>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu FontSize="12">
-                                <MenuItem Header="Rename" Command="{Binding AssetRenameCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <MenuItem Header="Merge" Command="{Binding AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <MenuItem Header="Copy" Command="{Binding AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <MenuItem Header="Paste" Command="{Binding AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <MenuItem Header="Paste Over (Replace)" Command="{Binding AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <MenuItem Header="Delete" Command="{Binding AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <MenuItem Header="Duplicate" Command="{Binding AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <MenuItem Header="Used By?" Command="{Binding AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <Separator/>
-                                <MenuItem Header="Remove Color Animations" Command="{Binding AssetPbindRemoveColorAnimationsCommand}"/>
-                                <MenuItem Header="Remove Random Color Range" Command="{Binding AssetPbindRemoveRandomColorRangeCommand}"/>
-                                <Separator/>
-                                <MenuItem Header="Edit" Command="{Binding AssetOpenEditorCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <MenuItem Header="Hue Adjustment" Command="{Binding AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                <MenuItem Header="Hue Set" Command="{Binding AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Asset" Binding="{Binding FileNamesPreviewWithExtension}" Width="*" IsReadOnly="True"/>
-                        </DataGrid.Columns>
-
-                        <DataGrid.RowHeaderTemplate>
-                            <DataTemplate>
-                                <Grid VerticalAlignment="Top" Width="12" Height="12">
-                                </Grid>
-                            </DataTemplate>
-                        </DataGrid.RowHeaderTemplate>
-                    </DataGrid>
-
-                    <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
-                        <StackPanel Margin="0, 5">
-                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
-                                <Button.ContextMenu>
-                                    <ContextMenu FontSize="12">
-                                        <MenuItem Header="New EMP" Command="{Binding PbindCreateNewEmpCommand}"/>
-                                        <MenuItem Header="Load External EEPK" Command="{Binding ImportAssetsFromExternalFileCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}"/>
-                                        <Separator/>
-                                        <MenuItem Header="CMN" Command="{Binding ImportPbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.CMN}"/>
-                                        <MenuItem Header="Character" Command="{Binding ImportPbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Character}"/>
-                                        <MenuItem Header="Super Skill" Command="{Binding ImportPbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.SuperSkill}"/>
-                                        <MenuItem Header="Ultimate Skill" Command="{Binding ImportPbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.UltimateSkill}"/>
-                                        <MenuItem Header="Evasive Skill" Command="{Binding ImportPbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.EvasiveSkill}"/>
-                                        <MenuItem Header="Blast Skill/Type" Command="{Binding ImportPbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.BlastSkill}"/>
-                                        <MenuItem Header="Awoken Skill" Command="{Binding ImportPbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.AwokenSkill}"/>
-                                        <MenuItem Header="Demo (Cutscene)" Command="{Binding ImportPbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Demo}"/>
-                                        <Separator/>
-                                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles}" MouseMove="MenuItem_MouseMove" Click="PBIND_ImportAsset_MenuItem_FromCachedFiles_Click">
-                                            <MenuItem.ItemContainerStyle>
-                                                <Style>
-                                                    <Setter Property="HeaderedItemsControl.Header" Value="{Binding DisplayName}" />
-                                                </Style>
-                                            </MenuItem.ItemContainerStyle>
-                                        </MenuItem>
-                                    </ContextMenu>
-                                </Button.ContextMenu>
-                            </Button>
-
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetOpenMaterialFormCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}" Content="Materials" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetOpenTextureFormCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}" Content="Textures" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetOpenSettingsCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}" Content="Settings" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetRemoveUnusedCommand}" CommandParameter="{x:Static eepk:AssetType.PBIND}" Content="Remove Unused" Margin="10,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="123"/>
-                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding ElementName=UserControl, Path=effectContainerFile.Pbind.UndoableLooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" Margin="10,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="123"/>
-
-                        </StackPanel>
-                    </GroupBox>
-                    <Label Content="{Binding ElementName=UserControl, Path=effectContainerFile.Pbind.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
-
-                </Grid>
+                <view:AssetContainerView x:Name="pbindView" AssetContainer="{Binding ElementName=UserControl, Path=effectContainerFile.Pbind}"/>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="TBIND" Controls:HeaderedControlHelper.HeaderFontSize="14">
-                <Grid Background="Transparent">
-
-                    <DataGrid SelectionMode="Extended" x:Name="tbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding ElementName=UserControl, Path=effectContainerFile.Tbind.ViewAssets}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTbind, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
-                        <DataGrid.InputBindings>
-                            <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="F2" Command="{Binding ElementName=UserControl, Path=AssetRenameCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="Q" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="H" Modifiers="Alt" Command="{Binding ElementName=UserControl, Path=AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <KeyBinding Key="Return" Command="{Binding ElementName=UserControl, Path=AssetOpenEditorCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ElementName=UserControl, Path=AssetOpenEditorCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                        </DataGrid.InputBindings>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu FontSize="12">
-                                <MenuItem Header="Rename" Command="{Binding AssetRenameCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Merge" Command="{Binding AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Copy" Command="{Binding AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Paste" Command="{Binding AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Paste Over (Replace)" Command="{Binding AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Delete" Command="{Binding AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Duplicate" Command="{Binding AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Used By?" Command="{Binding AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <Separator/>
-                                <MenuItem Header="Edit" Command="{Binding AssetOpenEditorCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Hue Adjustment" Command="{Binding AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Hue Set" Command="{Binding AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                <MenuItem Header="Scale" Command="{Binding AssetTbindScaleCommand}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Asset" Width="*" IsReadOnly="True" Binding="{Binding FileNamesPreviewWithExtension}"/>
-                        </DataGrid.Columns>
-
-                        <DataGrid.RowHeaderTemplate>
-                            <DataTemplate>
-                                <Grid VerticalAlignment="Top" Width="12" Height="12">
-                                </Grid>
-                            </DataTemplate>
-                        </DataGrid.RowHeaderTemplate>
-                    </DataGrid>
-                    <Label Content="{Binding ElementName=UserControl, Path=effectContainerFile.Tbind.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
-                    <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
-                        <StackPanel Margin="0, 5">
-                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0"  VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
-                                <Button.ContextMenu>
-                                    <ContextMenu FontSize="12">
-                                        <MenuItem Header="New ETR" Command="{Binding TbindCreateNewEtrCommand}"/>
-                                        <MenuItem Header="Load External EEPK" Command="{Binding ImportAssetsFromExternalFileCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}"/>
-                                        <Separator/>
-                                        <MenuItem Header="CMN" Command="{Binding ImportTbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.CMN}"/>
-                                        <MenuItem Header="Character" Command="{Binding ImportTbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Character}"/>
-                                        <MenuItem Header="Super Skill" Command="{Binding ImportTbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.SuperSkill}"/>
-                                        <MenuItem Header="Ultimate Skill" Command="{Binding ImportTbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.UltimateSkill}"/>
-                                        <MenuItem Header="Evasive Skill" Command="{Binding ImportTbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.EvasiveSkill}"/>
-                                        <MenuItem Header="Blast Skill/Type" Command="{Binding ImportTbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.BlastSkill}"/>
-                                        <MenuItem Header="Awoken Skill" Command="{Binding ImportTbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.AwokenSkill}"/>
-                                        <MenuItem Header="Demo (Cutscene)" Command="{Binding ImportTbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Demo}"/>
-                                        <Separator/>
-                                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles}" MouseMove="MenuItem_MouseMove" Click="TBIND_ImportAsset_MenuItem_FromCachedFiles_Click">
-                                            <MenuItem.ItemContainerStyle>
-                                                <Style>
-                                                    <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
-                                                </Style>
-                                            </MenuItem.ItemContainerStyle>
-                                        </MenuItem>
-
-                                    </ContextMenu>
-                                </Button.ContextMenu>
-                            </Button>
-
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetOpenMaterialFormCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}" Content="Materials" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetOpenTextureFormCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}" Content="Textures" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetOpenSettingsCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}" Content="Settings" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetRemoveUnusedCommand}" CommandParameter="{x:Static eepk:AssetType.TBIND}" Content="Remove Unused" Margin="10,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="123"/>
-                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding ElementName=UserControl, Path=effectContainerFile.Tbind.UndoableLooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" Margin="10,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="123"/>
-
-                        </StackPanel>
-                    </GroupBox>
-
-                </Grid>
+                <view:AssetContainerView x:Name="tbindView" AssetContainer="{Binding ElementName=UserControl, Path=effectContainerFile.Tbind}"/>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="CBIND" Controls:HeaderedControlHelper.HeaderFontSize="14">
-                <Grid Background="Transparent">
-
-                    <DataGrid SelectionMode="Extended" x:Name="cbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding ElementName=UserControl, Path=effectContainerFile.Cbind.ViewAssets}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedCbind, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
-                        <DataGrid.InputBindings>
-                            <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="F2" Command="{Binding ElementName=UserControl, Path=AssetRenameCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="Q" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="H" Modifiers="Alt" Command="{Binding ElementName=UserControl, Path=AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <KeyBinding Key="Return" Command="{Binding ElementName=UserControl, Path=AssetOpenEditorCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ElementName=UserControl, Path=AssetOpenEditorCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                        </DataGrid.InputBindings>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu FontSize="12">
-                                <MenuItem Header="Rename" Command="{Binding AssetRenameCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Merge" Command="{Binding AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Copy" Command="{Binding AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Paste" Command="{Binding AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Paste Over (Replace)" Command="{Binding AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Delete" Command="{Binding AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Duplicate" Command="{Binding AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Extract" Command="{Binding AssetExtractCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Used By?" Command="{Binding AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <Separator/>
-                                <MenuItem Header="Edit" Command="{Binding AssetOpenEditorCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Hue Adjustment" Command="{Binding AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                <MenuItem Header="Hue Set" Command="{Binding AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Asset" Width="*" IsReadOnly="True" Binding="{Binding FileNamesPreviewWithExtension}"/>
-                        </DataGrid.Columns>
-
-                        <DataGrid.RowHeaderTemplate>
-                            <DataTemplate>
-                                <Grid VerticalAlignment="Top" Width="12" Height="12">
-                                </Grid>
-                            </DataTemplate>
-                        </DataGrid.RowHeaderTemplate>
-                    </DataGrid>
-                    <Label Content="{Binding ElementName=UserControl, Path=effectContainerFile.Cbind.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
-                    <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
-                        <StackPanel Margin="0, 5">
-                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
-                                <Button.ContextMenu>
-                                    <ContextMenu FontSize="12">
-                                        <MenuItem Header="New ECF" Command="{Binding CbindCreateNewEcfCommand}"/>
-                                        <MenuItem Header="Load External EEPK" Command="{Binding ImportAssetsFromExternalFileCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}"/>
-                                        <MenuItem Header="Load External ECF" Command="{Binding CbindImportExternalEcfCommand}"/>
-                                        <Separator/>
-                                        <MenuItem Header="CMN" Command="{Binding ImportCbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.CMN}"/>
-                                        <MenuItem Header="Character" Command="{Binding ImportCbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Character}"/>
-                                        <MenuItem Header="Super Skill" Command="{Binding ImportCbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.SuperSkill}"/>
-                                        <MenuItem Header="Ultimate Skill" Command="{Binding ImportCbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.UltimateSkill}"/>
-                                        <MenuItem Header="Evasive Skill" Command="{Binding ImportCbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.EvasiveSkill}"/>
-                                        <MenuItem Header="Blast Skill/Type" Command="{Binding ImportCbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.BlastSkill}"/>
-                                        <MenuItem Header="Awoken Skill" Command="{Binding ImportCbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.AwokenSkill}"/>
-                                        <MenuItem Header="Demo (Cutscene)" Command="{Binding ImportCbindAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Demo}"/>
-                                        <Separator/>
-                                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles}" MouseMove="MenuItem_MouseMove" Click="CBIND_ImportAsset_MenuItem_FromCachedFiles_Click">
-                                            <MenuItem.ItemContainerStyle>
-                                                <Style>
-                                                    <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
-                                                </Style>
-                                            </MenuItem.ItemContainerStyle>
-                                        </MenuItem>
-
-                                    </ContextMenu>
-                                </Button.ContextMenu>
-                            </Button>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetOpenSettingsCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}" Content="Settings" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetRemoveUnusedCommand}" CommandParameter="{x:Static eepk:AssetType.CBIND}" Content="Remove Unused" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding ElementName=UserControl, Path=effectContainerFile.Cbind.UndoableLooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                        </StackPanel>
-                    </GroupBox>
-
-                </Grid>
+                <view:AssetContainerView x:Name="cbindView" AssetContainer="{Binding ElementName=UserControl, Path=effectContainerFile.Cbind}"/>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="EMO" Controls:HeaderedControlHelper.HeaderFontSize="14">
-                <Grid Background="Transparent">
-
-                    <DataGrid SelectionMode="Extended" x:Name="emoDataGrid" RowDetailsVisibilityMode="VisibleWhenSelected" ItemsSource="{Binding ElementName=UserControl, Path=effectContainerFile.Emo.ViewAssets}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedEmo, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
-                        <DataGrid.InputBindings>
-                            <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                            <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                            <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                            <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                            <KeyBinding Key="Q" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                            <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                            <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                            <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                            <KeyBinding Key="H" Modifiers="Alt" Command="{Binding ElementName=UserControl, Path=AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                        </DataGrid.InputBindings>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu FontSize="12">
-                                <MenuItem Header="New Asset" Command="{Binding EmoCreateNewAssetCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Add File" Command="{Binding AssetEmoAddFileCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Add File (EMD + ESK -> EMO)" Command="{Binding AssetEmoAddEmdFileCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Add File (EAN -> OBJ.EMA)" Command="{Binding AssetEmoAddEanFileCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}" Visibility="Collapsed"/>
-                                <Separator/>
-                                <MenuItem Header="Merge" Command="{Binding AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Copy" Command="{Binding AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Paste" Command="{Binding AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Paste Over (Replace)" Command="{Binding AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Delete" Command="{Binding AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Duplicate" Command="{Binding AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Used By?" Command="{Binding AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <Separator/>
-                                <MenuItem Header="Hue Adjustment" Command="{Binding AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                <MenuItem Header="Hue Set" Command="{Binding AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Asset" Width="*" IsReadOnly="True" Binding="{Binding FileNamesPreviewWithExtension}"/>
-                        </DataGrid.Columns>
-
-                        <DataGrid.RowDetailsTemplate>
-                            <DataTemplate>
-                                <ListBox BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" ItemsSource="{Binding Files.Binding}" SelectedItem="{Binding Data.SelectedEmoFile, UpdateSourceTrigger=PropertyChanged, Source={StaticResource proxy}}">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="0,2">
-                                                <Grid.InputBindings>
-                                                    <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ElementName=UserControl, Path=AssetEmoDoubleClickCommand}" CommandParameter="{Binding}"/>
-                                                </Grid.InputBindings>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="{Binding EmoFullFileNamePreview}"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                    <ListBox.InputBindings>
-                                        <KeyBinding Key="F2" Command="{Binding Data.AssetEmoFileRenameCommand, Source={StaticResource proxy}}"/>
-                                        <KeyBinding Key="Delete" Command="{Binding Data.AssetEmoFileDeleteCommand, Source={StaticResource proxy}}"/>
-                                        <KeyBinding Key="Return" Command="{Binding Data.AssetEmoFileEditCommand, Source={StaticResource proxy}}"/>
-                                    </ListBox.InputBindings>
-                                    <ListBox.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Rename" Command="{Binding Data.AssetEmoFileRenameCommand, Source={StaticResource proxy}}"/>
-                                            <MenuItem Header="Replace" Command="{Binding Data.AssetEmoFileReplaceCommand, Source={StaticResource proxy}}"/>
-                                            <MenuItem Header="Delete" Command="{Binding Data.AssetEmoFileDeleteCommand, Source={StaticResource proxy}}"/>
-                                            <MenuItem Header="Extract" Command="{Binding Data.AssetEmoFileExtractCommand, Source={StaticResource proxy}}"/>
-                                            <MenuItem Header="Edit" Command="{Binding Data.AssetEmoFileEditCommand, Source={StaticResource proxy}}"/>
-                                        </ContextMenu>
-                                    </ListBox.ContextMenu>
-                                </ListBox>
-                            </DataTemplate>
-                        </DataGrid.RowDetailsTemplate>
-                    </DataGrid>
-                    <Label Content="{Binding ElementName=UserControl, Path=effectContainerFile.Emo.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
-                    <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
-                        <StackPanel Margin="0, 5">
-                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
-                                <Button.ContextMenu>
-                                    <ContextMenu FontSize="12">
-                                        <MenuItem Header="Load External EEPK" Command="{Binding ImportAssetsFromExternalFileCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}"/>
-                                        <MenuItem Header="Load External EMO Files" Command="{Binding EmoImportExternalFilesCommand}"/>
-                                        <Separator/>
-                                        <MenuItem Header="CMN" Command="{Binding ImportEmoAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.CMN}"/>
-                                        <MenuItem Header="Character" Command="{Binding ImportEmoAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Character}"/>
-                                        <MenuItem Header="Super Skill" Command="{Binding ImportEmoAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.SuperSkill}"/>
-                                        <MenuItem Header="Ultimate Skill" Command="{Binding ImportEmoAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.UltimateSkill}"/>
-                                        <MenuItem Header="Evasive Skill" Command="{Binding ImportEmoAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.EvasiveSkill}"/>
-                                        <MenuItem Header="Blast Skill/Type" Command="{Binding ImportEmoAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.BlastSkill}"/>
-                                        <MenuItem Header="Awoken Skill" Command="{Binding ImportEmoAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.AwokenSkill}"/>
-                                        <MenuItem Header="Demo (Cutscene)" Command="{Binding ImportEmoAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Demo}"/>
-                                        <Separator/>
-                                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles}" MouseMove="MenuItem_MouseMove" Click="EMO_ImportAsset_MenuItem_FromCachedFiles_Click">
-                                            <MenuItem.ItemContainerStyle>
-                                                <Style>
-                                                    <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
-                                                </Style>
-                                            </MenuItem.ItemContainerStyle>
-                                        </MenuItem>
-
-                                    </ContextMenu>
-                                </Button.ContextMenu>
-                            </Button>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetOpenSettingsCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}" Content="Settings" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetRemoveUnusedCommand}" CommandParameter="{x:Static eepk:AssetType.EMO}" Content="Remove Unused" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                        </StackPanel>
-                    </GroupBox>
-                </Grid>
+                <view:AssetContainerView x:Name="emoView" AssetContainer="{Binding ElementName=UserControl, Path=effectContainerFile.Emo}"/>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="LIGHT" Controls:HeaderedControlHelper.HeaderFontSize="14">
-                <Grid Background="Transparent">
-
-                    <DataGrid SelectionMode="Extended" x:Name="lightDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding ElementName=UserControl, Path=effectContainerFile.LightEma.ViewAssets}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedLight, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
-                        <DataGrid.InputBindings>
-                            <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            <KeyBinding Key="F2" Command="{Binding ElementName=UserControl, Path=AssetRenameCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            <KeyBinding Key="Q" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            <KeyBinding Key="H" Modifiers="Alt" Command="{Binding ElementName=UserControl, Path=AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                        </DataGrid.InputBindings>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu FontSize="12">
-                                <MenuItem Header="Rename" Command="{Binding AssetRenameCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <MenuItem Header="Merge" Command="{Binding AssetMergeCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <MenuItem Header="Copy" Command="{Binding AssetCopyCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <MenuItem Header="Paste" Command="{Binding AssetPasteCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <MenuItem Header="Delete" Command="{Binding AssetDeleteCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <MenuItem Header="Paste Over (Replace)" Command="{Binding AssetPasteOverCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <MenuItem Header="Duplicate" Command="{Binding AssetDuplicateCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <MenuItem Header="Extract" Command="{Binding AssetExtractCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <MenuItem Header="Used By?" Command="{Binding AssetUsedByCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <Separator/>
-                                <MenuItem Header="Hue Adjustment" Command="{Binding AssetHueAdjustCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                <MenuItem Header="Hue Set" Command="{Binding AssetHueSetCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Asset" Width="*" IsReadOnly="True" Binding="{Binding FileNamesPreviewWithExtension}"/>
-                        </DataGrid.Columns>
-
-                        <DataGrid.RowHeaderTemplate>
-                            <DataTemplate>
-                                <Grid VerticalAlignment="Top" Width="12" Height="12">
-                                </Grid>
-                            </DataTemplate>
-                        </DataGrid.RowHeaderTemplate>
-                    </DataGrid>
-                    <Label Content="{Binding ElementName=UserControl, Path=effectContainerFile.LightEma.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
-                    <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
-                        <StackPanel Margin="0, 5">
-                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
-                                <Button.ContextMenu>
-                                    <ContextMenu FontSize="12">
-                                        <MenuItem Header="Load External EEPK" Command="{Binding ImportAssetsFromExternalFileCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}"/>
-                                        <MenuItem Header="Load External LIGHT.EMA" Command="{Binding LightImportExternalCommand}"/>
-                                        <Separator/>
-                                        <MenuItem Header="CMN" Command="{Binding ImportLightAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.CMN}"/>
-                                        <MenuItem Header="Character" Command="{Binding ImportLightAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Character}"/>
-                                        <MenuItem Header="Super Skill" Command="{Binding ImportLightAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.SuperSkill}"/>
-                                        <MenuItem Header="Ultimate Skill" Command="{Binding ImportLightAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.UltimateSkill}"/>
-                                        <MenuItem Header="Evasive Skill" Command="{Binding ImportLightAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.EvasiveSkill}"/>
-                                        <MenuItem Header="Blast Skill/Type" Command="{Binding ImportLightAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.BlastSkill}"/>
-                                        <MenuItem Header="Awoken Skill" Command="{Binding ImportLightAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.AwokenSkill}"/>
-                                        <MenuItem Header="Demo (Cutscene)" Command="{Binding ImportLightAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Demo}"/>
-                                        <Separator/>
-                                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles}" MouseMove="MenuItem_MouseMove" Click="LIGHT_ImportAsset_MenuItem_FromCachedFiles_Click">
-                                            <MenuItem.ItemContainerStyle>
-                                                <Style>
-                                                    <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
-                                                </Style>
-                                            </MenuItem.ItemContainerStyle>
-                                        </MenuItem>
-
-                                    </ContextMenu>
-                                </Button.ContextMenu>
-                            </Button>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetOpenSettingsCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}" Content="Settings" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                            <Button Command="{Binding ElementName=UserControl, Path=AssetRemoveUnusedCommand}" CommandParameter="{x:Static eepk:AssetType.LIGHT}" Content="Remove Unused" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding ElementName=UserControl, Path=effectContainerFile.LightEma.UndoableLooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
-                        </StackPanel>
-                    </GroupBox>
-                </Grid>
+                <view:AssetContainerView x:Name="lightView" AssetContainer="{Binding ElementName=UserControl, Path=effectContainerFile.LightEma}"/>
             </Controls:MetroTabItem>
 
         </TabControl>

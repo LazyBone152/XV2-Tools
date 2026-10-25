@@ -1002,8 +1002,8 @@ namespace LB_Mod_Installer.Installer
                 }
 
                 //Crash fix for when too many auras are installed.
-                binaryFile.Pbind.AssetListLimit = 0x9C40;
-                binaryFile.Pbind.I_12 = 0x9C40;
+                binaryFile.Pbind.ParticleEngineConfig2 = 0x9C40;
+                binaryFile.Pbind.ParticleEngineConfig3 = 0x9C40;
 
                 //Cleanup the VFXPACKAGE before install
                 installFile.MergeDuplicateTextures(Xv2CoreLib.EEPK.AssetType.PBIND);

@@ -26,9 +26,32 @@ namespace Xv2CoreLib.EEPK
         public int Version = 37568;
         [YAXSerializeAs("Containers")]
         [YAXDontSerializeIfNull]
-        public List<AssetContainer> AssetContainers { get; set; } = new List<AssetContainer>();
+        public List<EepkAssetContainer> AssetContainers { get; set; } = new List<EepkAssetContainer>(5);
         [YAXDontSerializeIfNull]
         public List<Effect> Effects { get; set; } = new List<Effect>();
+
+        public EEPK_File() { }
+
+        public EEPK_File(EffectContainerFile effectContainer)
+        {
+            Version = (int)effectContainer.Version;
+            Effects.AddRange(effectContainer.Effects);
+
+            if (effectContainer.Emo.Assets.Count > 0)
+                AssetContainers.Add(new EepkAssetContainer(effectContainer.Emo));
+            
+            if (effectContainer.Pbind.Assets.Count > 0)
+                AssetContainers.Add(new EepkAssetContainer(effectContainer.Pbind));
+            
+            if (effectContainer.Tbind.Assets.Count > 0)
+                AssetContainers.Add(new EepkAssetContainer(effectContainer.Tbind));
+            
+            if (effectContainer.LightEma.Assets.Count > 0)
+                AssetContainers.Add(new EepkAssetContainer(effectContainer.LightEma));
+            
+            if (effectContainer.Cbind.Assets.Count > 0)
+                AssetContainers.Add(new EepkAssetContainer(effectContainer.Cbind));
+        }
 
         #region LoadSave
         public static EEPK_File Load(string path)
@@ -54,15 +77,12 @@ namespace Xv2CoreLib.EEPK
             for (ushort containerIdx = 0; containerIdx < assetContainerCount; containerIdx++)
             {
                 int offset = assetContainerOffset + (EEPK_ASSET_CONTAINER_SIZE * containerIdx);
-                var assetContainer = new AssetContainer();
+                var assetContainer = new EepkAssetContainer();
 
-                assetContainer.AssetSpawnLimit = BitConverter.ToInt32(bytes, offset);
-                assetContainer.I_04 = bytes[offset + 4];
-                assetContainer.I_05 = bytes[offset + 5];
-                assetContainer.I_06 = bytes[offset + 6];
-                assetContainer.I_07 = bytes[offset + 7];
-                assetContainer.AssetListLimit = BitConverter.ToInt32(bytes, offset + 8);
-                assetContainer.I_12 = BitConverter.ToInt32(bytes, offset + 12);
+                assetContainer.PoolSize = BitConverter.ToInt32(bytes, offset);
+                assetContainer.ParticleEngineConfig1 = BitConverter.ToInt32(bytes, offset + 4);
+                assetContainer.ParticleEngineConfig2 = BitConverter.ToInt32(bytes, offset + 8);
+                assetContainer.ParticleEngineConfig3 = BitConverter.ToInt32(bytes, offset + 12);
                 assetContainer.AssetType = (AssetType)BitConverter.ToUInt16(bytes, offset + 16);
 
                 ushort assetCount = BitConverter.ToUInt16(bytes, offset + 30);
@@ -80,7 +100,7 @@ namespace Xv2CoreLib.EEPK
                 for (int assetIdx = 0; assetIdx < assetCount; assetIdx++)
                 {
                     int assetOffset =  assetStartOffset + (EEPK_ASSET_SIZE * assetIdx);
-                    AssetEntry asset = new AssetEntry();
+                    EepkAssetEntry asset = new EepkAssetEntry();
 
                     asset.XML_Index = assetIdx;
                     asset.I_00 = BitConverter.ToInt16(bytes, assetOffset);
@@ -135,17 +155,6 @@ namespace Xv2CoreLib.EEPK
                     {
                         EffectPart effectPart = new EffectPart();
 
-                        //Read flag values
-                        uint flags36 = BitConverter.ToUInt32(bytes, effectPartOffset + 36);
-
-                        //The 3rd byte from flags2 is split out into 2 uint4 values (as was the case with the original parser)
-                        effectPart.I_38_a = (byte)((flags36 >> 16) & 0xFu);
-                        effectPart.I_38_b = (byte)((flags36 >> 20) & 0xFu);
-                        flags36 &= ~(0xFFu << 16); //Clear uint4 bits from flags36
-
-                        effectPart.Flags1 = (EepkEffectPartFlags1)bytes[effectPartOffset + 32];
-                        effectPart.Flags2 = (EepkEffectPartFlags2)flags36;
-
                         //Read EffectPart
                         effectPart.AssetIndex = BitConverter.ToUInt16(bytes, effectPartOffset);
                         effectPart.AssetType = (AssetType)bytes[effectPartOffset + 2];
@@ -153,15 +162,11 @@ namespace Xv2CoreLib.EEPK
                         effectPart.Orientation = (OrientationType)bytes[effectPartOffset + 4];
                         effectPart.Deactivation = (DeactivationMode)bytes[effectPartOffset + 5];
                         effectPart.I_06 = bytes[effectPartOffset + 6];
-                        effectPart.I_07 = bytes[effectPartOffset + 7];
-                        effectPart.I_08 = BitConverter.ToInt32(bytes, effectPartOffset + 8);
-                        effectPart.I_12 = BitConverter.ToInt32(bytes, effectPartOffset + 12);
-                        effectPart.I_16 = BitConverter.ToInt32(bytes, effectPartOffset + 16);
-                        effectPart.I_20 = BitConverter.ToInt32(bytes, effectPartOffset + 20);
-                        effectPart.AvoidSphere = BitConverter.ToSingle(bytes, effectPartOffset + 24);
+                        effectPart.DepthBias = BitConverter.ToSingle(bytes, effectPartOffset + 24);
                         effectPart.StartTime = BitConverter.ToUInt16(bytes, effectPartOffset + 28);
                         effectPart.EMA_AnimationIndex = BitConverter.ToUInt16(bytes, effectPartOffset + 30);
-                        effectPart.I_34 = BitConverter.ToInt16(bytes, effectPartOffset + 34);
+                        effectPart.Flags1 = (EepkEffectPartFlags1)BitConverter.ToUInt32(bytes, effectPartOffset + 32);
+                        effectPart.Flags2 = (EepkEffectPartFlags2)BitConverter.ToUInt32(bytes, effectPartOffset + 36);
                         effectPart.PositionX = BitConverter.ToSingle(bytes, effectPartOffset + 40);
                         effectPart.PositionY = BitConverter.ToSingle(bytes, effectPartOffset + 44);
                         effectPart.PositionZ = BitConverter.ToSingle(bytes, effectPartOffset + 48);
@@ -255,15 +260,12 @@ namespace Xv2CoreLib.EEPK
             {
                 int containerOffset = assetContainerStart + (assetContainerIdx * EEPK_ASSET_CONTAINER_SIZE);
                 Span<byte> assetContainerSpan = span.Slice(containerOffset, EEPK_ASSET_CONTAINER_SIZE);
-                AssetContainer assetContainer = AssetContainers[assetContainerIdx];
+                EepkAssetContainer assetContainer = AssetContainers[assetContainerIdx];
 
-                BinaryPrimitives.WriteInt32LittleEndian(assetContainerSpan, assetContainer.AssetSpawnLimit);
-                assetContainerSpan[4] = assetContainer.I_04;
-                assetContainerSpan[5] = assetContainer.I_05;
-                assetContainerSpan[6] = assetContainer.I_06;
-                assetContainerSpan[7] = assetContainer.I_07;
-                BinaryPrimitives.WriteInt32LittleEndian(assetContainerSpan.Slice(8, 4), assetContainer.AssetListLimit);
-                BinaryPrimitives.WriteInt32LittleEndian(assetContainerSpan.Slice(12, 4), assetContainer.I_12);
+                BinaryPrimitives.WriteInt32LittleEndian(assetContainerSpan, assetContainer.PoolSize);
+                BinaryPrimitives.WriteInt32LittleEndian(assetContainerSpan.Slice(4, 4), assetContainer.ParticleEngineConfig1);
+                BinaryPrimitives.WriteInt32LittleEndian(assetContainerSpan.Slice(8, 4), assetContainer.ParticleEngineConfig2);
+                BinaryPrimitives.WriteInt32LittleEndian(assetContainerSpan.Slice(12, 4), assetContainer.ParticleEngineConfig3);
                 BinaryPrimitives.WriteUInt16LittleEndian(assetContainerSpan.Slice(16, 2), (ushort)assetContainer.AssetType);
                 BinaryPrimitives.WriteUInt16LittleEndian(assetContainerSpan.Slice(30, 2), (ushort)assetContainer.Assets.Count);
 
@@ -307,7 +309,7 @@ namespace Xv2CoreLib.EEPK
                     BinaryPrimitives.WriteInt32LittleEndian(assetSpan.Slice(4, 4), stringBufferPosition - assetOffset); //Offset to numbers
 
                     for (int i = 0; i < asset.Files.Count; i++)
-                        buffer[stringBufferPosition++] = (byte)AssetEntry.GetAssetFileType(asset.Files[i], true);
+                        buffer[stringBufferPosition++] = (byte)EepkAssetEntry.GetAssetFileType(asset.Files[i], true);
 
                     //Write paths
                     BinaryPrimitives.WriteInt32LittleEndian(assetSpan.Slice(8, 4), assetFileTableBufferPosition - assetOffset); //Offset to file path table
@@ -351,12 +353,6 @@ namespace Xv2CoreLib.EEPK
                 {
                     Span<byte> effectPartSpan = span.Slice(effectPartOffset, EEPK_EFFECT_PART_SIZE);
                     EffectPart effectPart = effect.EffectParts[effectPartIdx];
-                    
-                    //Create combined flag value from flags2 + both int4 values
-                    uint flags36 = (uint)effectPart.Flags2;
-                    flags36 &= ~(0xFFu << 16); //Clear the uint4 bits from flags36 before setting them
-                    flags36 |= ((uint)effectPart.I_38_a & 0xF) << 16;
-                    flags36 |= ((uint)effectPart.I_38_b & 0xF) << 20;
 
                     BinaryPrimitives.WriteUInt16LittleEndian(effectPartSpan, effectPart.AssetIndex);
                     effectPartSpan[2] = (byte)effectPart.AssetType;
@@ -364,17 +360,11 @@ namespace Xv2CoreLib.EEPK
                     effectPartSpan[4] = (byte)effectPart.Orientation;
                     effectPartSpan[5] = (byte)effectPart.Deactivation;
                     effectPartSpan[6] = effectPart.I_06;
-                    effectPartSpan[7] = effectPart.I_07;
-                    BinaryPrimitives.WriteInt32LittleEndian(effectPartSpan.Slice(8, 4), effectPart.I_08);
-                    BinaryPrimitives.WriteInt32LittleEndian(effectPartSpan.Slice(12, 4), effectPart.I_12);
-                    BinaryPrimitives.WriteInt32LittleEndian(effectPartSpan.Slice(16, 4), effectPart.I_16);
-                    BinaryPrimitives.WriteInt32LittleEndian(effectPartSpan.Slice(20, 4), effectPart.I_20);
-                    BinaryPrimitivesHelper.WriteSingleLittleEndian(effectPartSpan.Slice(24, 4), effectPart.AvoidSphere);
+                    BinaryPrimitivesHelper.WriteSingleLittleEndian(effectPartSpan.Slice(24, 4), effectPart.DepthBias);
                     BinaryPrimitives.WriteUInt16LittleEndian(effectPartSpan.Slice(28, 2), effectPart.StartTime);
                     BinaryPrimitives.WriteUInt16LittleEndian(effectPartSpan.Slice(30, 2), effectPart.EMA_AnimationIndex);
-                    effectPartSpan[32] = (byte)effectPart.Flags1;
-                    BinaryPrimitives.WriteInt16LittleEndian(effectPartSpan.Slice(34, 2), effectPart.I_34);
-                    BinaryPrimitives.WriteUInt32LittleEndian(effectPartSpan.Slice(36, 4), flags36);
+                    BinaryPrimitives.WriteUInt32LittleEndian(effectPartSpan.Slice(32, 4), (uint)effectPart.Flags1);
+                    BinaryPrimitives.WriteUInt32LittleEndian(effectPartSpan.Slice(36, 4), (uint)effectPart.Flags2);
                     BinaryPrimitivesHelper.WriteSingleLittleEndian(effectPartSpan.Slice(40, 4), effectPart.PositionX);
                     BinaryPrimitivesHelper.WriteSingleLittleEndian(effectPartSpan.Slice(44, 4), effectPart.PositionY);
                     BinaryPrimitivesHelper.WriteSingleLittleEndian(effectPartSpan.Slice(48, 4), effectPart.PositionZ);
@@ -482,7 +472,7 @@ namespace Xv2CoreLib.EEPK
 
         public void RenameContainersToSkillFolder(string newName)
         {
-            foreach (AssetContainer container in AssetContainers)
+            foreach (EepkAssetContainer container in AssetContainers)
             {
                 if (container.AssetType != AssetType.EMO)
                 {
@@ -509,22 +499,16 @@ namespace Xv2CoreLib.EEPK
 
     [Serializable]
     [YAXSerializeAs("Container")]
-    public class AssetContainer
+    public class EepkAssetContainer
     {
         [CustomSerialize]
-        public int AssetSpawnLimit { get; set; } //Limits how many assets of this type that can be spawned. The number doesn't equal an exact amount of assets, and multiple users of an EEPK increase the limit. But generally, higher number = more assets.
-        [CustomSerialize(isHex: true)]
-        public byte I_04 { get; set; }
-        [CustomSerialize(isHex: true)]
-        public byte I_05 { get; set; }
-        [CustomSerialize(isHex: true)]
-        public byte I_06 { get; set; }
-        [CustomSerialize(isHex: true)]
-        public byte I_07 { get; set; }
+        public int PoolSize { get; set; } = 8; //Sets the initial asset pool size for the games internal effects system.
         [CustomSerialize]
-        public int AssetListLimit { get; set; }  // Limits the amount of assets that can be loaded by the game before crashing.
+        public int ParticleEngineConfig1 { get; set; } = -1; //These 3 values are used to configure the games particle engine. Always -1 for non-PBIND types.
         [CustomSerialize]
-        public int I_12 { get; set; }
+        public int ParticleEngineConfig2 { get; set; } = -1;
+        [CustomSerialize]
+        public int ParticleEngineConfig3 { get; set; } = -1;
         [YAXAttributeForClass]
         [YAXSerializeAs("AssetType")]
         public AssetType AssetType { get; set; }
@@ -537,13 +521,71 @@ namespace Xv2CoreLib.EEPK
 
         [YAXSerializeAs("Assets")]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Asset")]
-        public List<AssetEntry> Assets { get; set; } = new List<AssetEntry>();
+        public List<EepkAssetEntry> Assets { get; set; } = new List<EepkAssetEntry>();
 
+        public EepkAssetContainer() { }
+
+        public EepkAssetContainer(AssetContainerTool assetContainer)
+        {
+            AssetType = assetContainer.ContainerAssetType;
+            ContainerEmbPath = assetContainer.File1_Name;
+            MaterialEmmPath = assetContainer.File2_Name;
+            TextureEmbPath = assetContainer.File3_Name;
+
+            if (assetContainer.AutoConfiguration)
+            {
+                AutoCalculateConfigurationValues();
+            }
+            else
+            {
+                PoolSize = assetContainer.PoolSize;
+                ParticleEngineConfig1 = assetContainer.ParticleEngineConfig1;
+                ParticleEngineConfig2 = assetContainer.ParticleEngineConfig2;
+                ParticleEngineConfig3 = assetContainer.ParticleEngineConfig3;
+            }
+
+            if(assetContainer.Assets != null)
+            {
+                foreach(var asset in assetContainer.Assets)
+                {
+                    EepkAssetEntry newAsset = new EepkAssetEntry();
+                    newAsset.I_00 = asset.I_00;
+
+                    for (int i = 0; i < asset.Files.Count; i++)
+                    {
+                        if (!string.IsNullOrWhiteSpace(asset.Files[i].FullFileName))
+                            newAsset.Files.Add(asset.Files[i].FullFileName);
+                    }
+
+                    Assets.Add(newAsset);
+                }
+            }
+        }
+
+        private void AutoCalculateConfigurationValues()
+        {
+            if (AssetType == AssetType.PBIND)
+            {
+                //PoolSize is 1/4 the value for PBIND compared to other asset types (game will multiply it by 4)
+                PoolSize = (int)Math.Ceiling(Assets.Count / 4.0);
+
+                ParticleEngineConfig1 = PoolSize * 8;
+                ParticleEngineConfig2 = PoolSize * 16;
+                ParticleEngineConfig3 = PoolSize * 16;
+            }
+            else
+            {
+                PoolSize = Assets.Count > PoolSize ? (int)(Math.Ceiling(Assets.Count / 4.0) * 4.0) : PoolSize;
+                ParticleEngineConfig1 = -1;
+                ParticleEngineConfig2 = -1;
+                ParticleEngineConfig3 = -1;
+            }
+        }
     }
 
     [Serializable]
     [YAXSerializeAs("Asset")]
-    public class AssetEntry
+    public class EepkAssetEntry
     {
         [YAXAttributeForClass]
         [YAXSerializeAs("Index")]
@@ -725,29 +767,13 @@ namespace Xv2CoreLib.EEPK
         public DeactivationMode Deactivation { get; set; }
         [CustomSerialize]
         public byte I_06 { get; set; }
-        [CustomSerialize]
-        public byte I_07 { get; set; }
-        [CustomSerialize]
-        public int I_08 { get; set; }
-        [CustomSerialize]
-        public int I_12 { get; set; }
-        [CustomSerialize]
-        public int I_16 { get; set; }
-        [CustomSerialize]
-        public int I_20 { get; set; }
-        [CustomSerialize(parent: "AvoidSphere", serializeAs: "Diameter", isFloat: true)]
-        public float AvoidSphere { get; set; }
-        [CustomSerialize]
-        public short I_34 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float DepthBias { get; set; }
 
         [CustomSerialize]
         public EepkEffectPartFlags1 Flags1 { get; set; }
         [CustomSerialize]
         public EepkEffectPartFlags2 Flags2 { get; set; }
-        [CustomSerialize("Flag_38", "a", isHex: true)]
-        public byte I_38_a { get; set; } //int4
-        [CustomSerialize("Flag_38", "b", isHex: true)]
-        public byte I_38_b { get; set; } //int4
 
 
         [CustomSerialize("Position", "X", isFloat: true)]
@@ -801,7 +827,9 @@ namespace Xv2CoreLib.EEPK
         [YAXDontSerialize]
         public bool EMA_Loop => HasFlag2(EepkEffectPartFlags2.EMA_Loop);
         [YAXDontSerialize]
-        public bool NoGlare => HasFlag2(EepkEffectPartFlags2.NoGlare);
+        public bool NoGlare => HasFlag2(EepkEffectPartFlags2.IsDecal);
+        [YAXDontSerialize]
+        public bool NoDistanceCulling => HasFlag2(EepkEffectPartFlags2.DisableDistanceCulling);
 
         public EffectPart Clone()
         {
@@ -816,7 +844,7 @@ namespace Xv2CoreLib.EEPK
                 PositionX = PositionX,
                 PositionY = PositionY,
                 PositionZ = PositionZ,
-                AvoidSphere = AvoidSphere,
+                DepthBias = DepthBias,
                 RotationX_Min = RotationX_Min,
                 RotationX_Max = RotationX_Max,
                 RotationY_Min = RotationY_Min,
@@ -829,16 +857,8 @@ namespace Xv2CoreLib.EEPK
                 Orientation = Orientation,
                 Deactivation = Deactivation,
                 I_06 = I_06,
-                I_07 = I_07,
-                I_08 = I_08,
-                I_12 = I_12,
-                I_16 = I_16,
-                I_20 = I_20,
                 StartTime = StartTime,
                 EMA_AnimationIndex = EMA_AnimationIndex,
-                I_34 = I_34,
-                I_38_a = I_38_a,
-                I_38_b = I_38_b,
                 EMA_LoopStartFrame = EMA_LoopStartFrame,
                 EMA_LoopEndFrame = EMA_LoopEndFrame,
                 Flags1 = Flags1,
@@ -953,7 +973,7 @@ namespace Xv2CoreLib.EEPK
     }
 
     [Flags]
-    public enum EepkEffectPartFlags1 : byte
+    public enum EepkEffectPartFlags1 : uint
     {
         PositionUpdate = 0x01,
         RotateUpdate = 0x02,
@@ -972,9 +992,9 @@ namespace Xv2CoreLib.EEPK
         I_36_1 = 0x02,
         I_36_2 = 0x04,
         I_36_3 = 0x08,
-        I_36_4 = 0x10,
-        I_36_5 = 0x20,
-        I_36_6 = 0x40,
+        LightApplyToCharacter = 0x10, //Note: These 3 light flags act as if they are all enabled if none of them are set.
+        LightApplyToStage = 0x20,
+        LightUnknown = 0x40,
         I_36_7 = 0x80,
         I_37_0 = 0x100,
         I_37_1 = 0x200,
@@ -984,15 +1004,22 @@ namespace Xv2CoreLib.EEPK
         I_37_5 = 0x2000,
         I_37_6 = 0x4000,
         I_37_7 = 0x8000,
-        //0x10000 to 0x800000 is reserved for the 2 uint4 value (this could just be flags too...?)
-        NoGlare = 0x1000000,
+        DisableDistanceCulling = 0x10000, //Fading based on near and far fade parameters
+        DisableFrustumCulling = 0x20000, //Disables frustum culling for EMO
+        IsGrassDrawPass = 0x40000,
+        PriorityDrawPassB = 0x80000, //Draws EMO in an earlier pass (only if PriorityDrawPassA and IsGrassDrawPass are not set)
+        InheritUsersScaleOnStart = 0x100000, //On start only (EMO / PBIND). Takes the largest scale axis
+        InheritNodeScaleOnStart = 0x200000, //On start only (EMO / PBIND)
+        I_38_6 = 0x400000, //Something to do with orientation type 1
+        I_38_7 = 0x800000,
+        IsDecal = 0x1000000, //A decal, such as stage battle damage. Draws in a separate pass. (EMO only)
         I_39_1 = 0x2000000,
-        InverseTransparentDrawOrder = 0x4000000,
-        RelativePositionZ_To_AbsolutePositionZ = 0x8000000,
-        ScaleZ_To_BonePositionZ = 0x10000000,
-        I_39_5 = 0x20000000,
+        PriorityDrawPassA = 0x4000000, //Draws EMO in an earlier pass (before the PriorityDrawPassB pass)
+        PositionScaleUnk = 0x8000000, //Requires UseBoneDirection... and applies a scale to the position. Needs more research.
+        InheritUsersScaleOnUpdate = 0x10000000, //Every frame
+        InheritNodeScaleOnUpdate = 0x20000000, //Every frame, requires InheritUsersScaleOnUpdate to also be set
         I_39_6 = 0x40000000,
-        ObjectOrientation_To_XXXX = 0x80000000
+        ObjectOrientation_To_XXXX = 0x80000000 //Does something when orientation type is 1
     }
 
     public enum DeactivationMode : byte
@@ -1018,4 +1045,5 @@ namespace Xv2CoreLib.EEPK
         Camera = 3,
         RotateMovement = 4
     }
+
 }

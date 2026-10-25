@@ -7,68 +7,52 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
         mc:Ignorable="d"
-        Title="Asset Type Settings" Height="270" Width="300" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" x:Name="Window" TitleCharacterCasing="Normal">
+        Title="Asset Type Settings" Height="200" Width="300" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" x:Name="Window" TitleCharacterCasing="Normal">
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
     </Window.InputBindings>
-    <Grid>
+    <Grid Margin="5">
         <StackPanel HorizontalAlignment="Left">
             <Grid Margin="3,5,0,0" Width="280">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="Spawn Limit 1" ToolTip="Affects the amount of individual instances of this asset type that can be spawned. Doesn't appear to be a direct amount, but generally a higher number means more assets can be spawned.&#x0a;&#x0a;For skills and characters, this limit is doubled for each user of the EEPK."/>
-                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.AssetSpawnLimit}"/>
+                <Label x:Name="poolSizeLabel" Content="Pool Size"/>
+                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.PoolSize}"/>
             </Grid>
-            <Grid Margin="3,5,0,0" Width="280">
+            <Grid Margin="3,5,0,0" Width="280" x:Name="particleConfig1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="Spawn Limit 2"/>
-                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.I_04}" Minimum="0" Maximum="255"/>
+                <Label Content="Particle Config 1"/>
+                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.ParticleEngineConfig1}" Minimum="0" Maximum="255"/>
             </Grid>
-            <Grid Margin="3,5,0,0" Width="280">
+            <Grid Margin="3,5,0,0" Width="280" x:Name="particleConfig2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="I__05"/>
-                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.I_05}" Minimum="0" Maximum="255"/>
+                <Label Content="Particle Config 2" ToolTip="Affects the amount of assets that can be loaded by the game. It's not a direct count, but a higher number generally means more can be loaded.&#x0a;&#x0a;If the limit defined here is insufficient for the amount of assets, the game WILL crash!"/>
+                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.ParticleEngineConfig2}"/>
             </Grid>
-            <Grid Margin="3,5,0,0" Width="280">
+            <Grid Margin="3,5,0,0" Width="280" x:Name="particleConfig3">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="I__06"/>
-                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.I_06}" Minimum="0" Maximum="255"/>
+                <Label Content="Particle Config 3"/>
+                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.ParticleEngineConfig3}"/>
             </Grid>
-            <Grid Margin="3,5,0,0" Width="280">
+            <Grid Margin="3,5,0,0" Width="280" HorizontalAlignment="Left">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="I__07"/>
-                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.I_07}" Minimum="0" Maximum="255"/>
-            </Grid>
-            <Grid Margin="3,5,0,0" Width="280">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Label Content="Load Limit" ToolTip="Affects the amount of assets that can be loaded by the game. It's not a direct count, but a higher number generally means more can be loaded.&#x0a;&#x0a;If the limit defined here is insufficient for the amount of assets, the game WILL crash!"/>
-                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.AssetListLimit}"/>
-            </Grid>
-            <Grid Margin="3,5,0,0" Width="280">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Label Content="I__12"/>
-                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=Window, Path=ViewModel.I_12}"/>
+                <Label Content="Auto Calculate" ToolTip="Auto generate an appropriate pool size and (if PBIND) particle config values when saving the eepk.&#x0a;&#x0a;The generated pool size will be equal or slightly greater than the number of assets (rounded up to nearest multiply of 4). The particle config values will then be derived from the pool size."/>
+                <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=Window, Path=ViewModel.AutoGenerate, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
         </StackPanel>
     </Grid>

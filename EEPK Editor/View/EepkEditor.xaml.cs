@@ -142,7 +142,6 @@ namespace EEPK_Organiser.View
             rootGrid.DataContext = this;
 
             EepkChanged += EepkInstanceChanged;
-            UndoManager.Instance.UndoOrRedoCalled += UndoManager_UndoOrRedoCalled;
 
 #if !XenoKit
             //Load NameLists
@@ -150,13 +149,6 @@ namespace EEPK_Organiser.View
 #endif
 
             XenoKit_Init();
-        }
-
-        private void UndoManager_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
-        {
-            if (effectContainerFile == null) return;
-
-            emoDataGrid.Items.Refresh();
         }
 
         //Loading
@@ -852,7 +844,7 @@ namespace EEPK_Organiser.View
         //Partial declarations to be implemented in XenoKit
 
         public Visibility XenoKitVisible { get; private set; } = Visibility.Collapsed;
-        private bool XenoKitAvailable { get; set; } = false;
+        public bool XenoKitAvailable { get; private set; } = false;
 
         partial void XenoKit_Init();
 
@@ -867,7 +859,6 @@ namespace EEPK_Organiser.View
 
         partial void PlayAsset(Asset asset);
 
-        partial void AssetEmoOpenEditor(Asset asset);
 
         #endregion
 

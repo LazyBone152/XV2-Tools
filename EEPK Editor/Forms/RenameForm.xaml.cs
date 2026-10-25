@@ -1,6 +1,7 @@
 ﻿using LB_Common.Forms;
 using MahApps.Metro.Controls;
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using Xv2CoreLib.EffectContainer;
@@ -74,12 +75,18 @@ namespace EEPK_Organiser.Forms
                 return;
             }
 
+            if (EffectFile.GetExtension(NameValue)?.ToLower() == Extension.ToLower())
+            {
+                NameValue = EffectFile.GetFileNameWithoutExtension(NameValue);
+            }
+
             if (NameValue + Extension == OriginalName)
             {
                 WasNameChanged = false;
                 Close();
                 return;
             }
+
 
             if (CurrentMode == Mode.Asset)
             {
@@ -130,6 +137,11 @@ namespace EEPK_Organiser.Forms
             {
                 e.Handled = true;
                 Button_OK_Click(null, null);
+            }
+            else if(e.Key == Key.Escape)
+            {
+                e.Handled = true;
+                Button_Cancel_Click(null, null);
             }
         }
 

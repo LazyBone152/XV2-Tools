@@ -31,7 +31,7 @@ namespace Xv2CoreLib.ECF
         {
             NodeCount = BitConverter.ToInt16(rawBytes, 26);
             NodeOffset = BitConverter.ToInt32(rawBytes, 28);
-            ecfFile.I_12 = BitConverter.ToUInt16(rawBytes, 12);
+            ecfFile.Priority = BitConverter.ToUInt16(rawBytes, 12);
 
             if (NodeCount > 0)
             {

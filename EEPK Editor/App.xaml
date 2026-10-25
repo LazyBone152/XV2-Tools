@@ -12,7 +12,7 @@
             <converters:StringToIntParameterConverter x:Key="StringToIntConverter" />
 
             <BitmapImage x:Key="gridlines" UriSource="Resources/transparent_checkerboard.png" />
-
+            
             <Style x:Key="ButtonNoGlow" TargetType="Button">
                 <Setter Property="OverridesDefaultStyle" Value="True" />
                 <Setter Property="Cursor" Value="Hand" />
@@ -43,9 +43,14 @@
                     </Style>
                     <Style TargetType="{x:Type Expander}" BasedOn="{StaticResource {x:Type Expander}}">
                         <Setter Property="controls:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" />
+                        <Setter Property="BorderThickness" Value="1" />
                     </Style>
                     <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Setter Property="FontSize" Value="11"/>
+                    </Style>
+                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}">
+                        <Setter Property="controls:ControlsHelper.ContentCharacterCasing" Value="Normal" />
                     </Style>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>

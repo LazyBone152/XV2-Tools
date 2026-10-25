@@ -1,6 +1,7 @@
 ﻿using LB_Common.Mvvm;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.Resource.UndoRedo;
 using static Xv2CoreLib.EEPK.EffectPart;
@@ -9,10 +10,9 @@ namespace EEPK_Organiser.ViewModel
 {
     public class EffectPartViewModel : AutoObservableObject
     {
+
         private readonly EffectPart defaultModel = new EffectPart();
         private EffectPart effectPart;
-
-        public bool IsNotTBIND => effectPart.AssetType != AssetType.TBIND;
 
         public ushort StartTime
         {
@@ -61,7 +61,7 @@ namespace EEPK_Organiser.ViewModel
                 }
             }
         }
-        public byte I_06
+        public byte DirectionAxis
         {
             get
             {
@@ -69,80 +69,20 @@ namespace EEPK_Organiser.ViewModel
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_06), effectPart, effectPart.I_06, value, "I_06"));
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_06), effectPart, effectPart.I_06, value, "Direction Axis"));
                 effectPart.I_06 = value;
             }
         }
-        public byte I_07
+        public float DepthBias
         {
             get
             {
-                return effectPart.I_07;
+                return effectPart.DepthBias;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_07), effectPart, effectPart.I_07, value, "I_07"));
-                effectPart.I_07 = value;
-            }
-        }
-        public int I_08
-        {
-            get
-            {
-                return effectPart.I_08;
-            }
-            set
-            {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_08), effectPart, effectPart.I_08, value, "I_08"));
-                effectPart.I_08 = value;
-            }
-        }
-        public int I_12
-        {
-            get
-            {
-                return effectPart.I_12;
-            }
-            set
-            {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_12), effectPart, effectPart.I_12, value, "I_12"));
-                effectPart.I_12 = value;
-            }
-        }
-        public int I_16
-        {
-            get
-            {
-                return effectPart.I_16;
-            }
-            set
-            {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_16), effectPart, effectPart.I_16, value, "I_16"));
-                effectPart.I_16 = value;
-            }
-        }
-        public int I_20
-        {
-            get
-            {
-                return effectPart.I_20;
-            }
-            set
-            {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_20), effectPart, effectPart.I_20, value, "I_20"));
-                effectPart.I_20 = value;
-            }
-        }
-        public float F_24
-        {
-            get
-            {
-                return effectPart.AvoidSphere;
-            }
-            set
-            {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.AvoidSphere), effectPart, effectPart.AvoidSphere, value, "AvoidSphere"));
-                effectPart.AvoidSphere = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.DepthBias), effectPart, effectPart.DepthBias, value, nameof(effectPart.DepthBias)));
+                effectPart.DepthBias = value;
             }
         }
         public bool I_32_0
@@ -185,18 +125,6 @@ namespace EEPK_Organiser.ViewModel
             get => effectPart.HasFlag1(EepkEffectPartFlags1.UseScreenCenterToBoneDirection);
             set => SetFlags1(EepkEffectPartFlags1.UseScreenCenterToBoneDirection, value);
         }
-        public short I_34
-        {
-            get
-            {
-                return effectPart.I_34;
-            }
-            set
-            {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_34), effectPart, effectPart.I_34, value, "I_34"));
-                effectPart.I_34 = value;
-            }
-        }
         public bool I_36_1
         {
             get => effectPart.HasFlag2(EepkEffectPartFlags2.I_36_1);
@@ -214,18 +142,18 @@ namespace EEPK_Organiser.ViewModel
         }
         public bool I_36_4
         {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.I_36_4);
-            set => SetFlags2(EepkEffectPartFlags2.I_36_4, value);
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.LightApplyToCharacter);
+            set => SetFlags2(EepkEffectPartFlags2.LightApplyToCharacter, value);
         }
         public bool I_36_5
         {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.I_36_5);
-            set => SetFlags2(EepkEffectPartFlags2.I_36_5, value);
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.LightApplyToStage);
+            set => SetFlags2(EepkEffectPartFlags2.LightApplyToStage, value);
         }
         public bool I_36_6
         {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.I_36_6);
-            set => SetFlags2(EepkEffectPartFlags2.I_36_6, value);
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.LightUnknown);
+            set => SetFlags2(EepkEffectPartFlags2.LightUnknown, value);
         }
         public bool I_36_7
         {
@@ -272,59 +200,44 @@ namespace EEPK_Organiser.ViewModel
             get => effectPart.HasFlag2(EepkEffectPartFlags2.I_37_7);
             set => SetFlags2(EepkEffectPartFlags2.I_37_7, value);
         }
-        public byte I_38_a
+        public bool EnableDistanceCulling
         {
-            get
-            {
-                return effectPart.I_38_a;
-            }
+            get => !effectPart.HasFlag2(EepkEffectPartFlags2.DisableDistanceCulling);
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_38_a), effectPart, effectPart.I_38_a, value, "I_38_a"));
-                effectPart.I_38_a = value;
+                SetFlags2(EepkEffectPartFlags2.DisableDistanceCulling, !value);
+                NotifyPropertyChanged(nameof(EnableDistanceCulling));
             }
-        }
-        public byte I_38_b
-        {
-            get
-            {
-                return effectPart.I_38_b;
-            }
-            set
-            {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_38_b), effectPart, effectPart.I_38_b, value, "I_38_b"));
-                effectPart.I_38_b = value;
-            }
-        }
-        public bool I_39_0
-        {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.NoGlare);
-            set => SetFlags2(EepkEffectPartFlags2.NoGlare, value);
         }
         public bool I_39_1
         {
             get => effectPart.HasFlag2(EepkEffectPartFlags2.I_39_1);
             set => SetFlags2(EepkEffectPartFlags2.I_39_1, value);
         }
-        public bool I_39_2
-        {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.InverseTransparentDrawOrder);
-            set => SetFlags2(EepkEffectPartFlags2.InverseTransparentDrawOrder, value);
-        }
         public bool I_39_3
         {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.RelativePositionZ_To_AbsolutePositionZ);
-            set => SetFlags2(EepkEffectPartFlags2.RelativePositionZ_To_AbsolutePositionZ, value);
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.PositionScaleUnk);
+            set => SetFlags2(EepkEffectPartFlags2.PositionScaleUnk, value);
         }
-        public bool I_39_4
+        public bool InheritUsersScaleOnStart
         {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.ScaleZ_To_BonePositionZ);
-            set => SetFlags2(EepkEffectPartFlags2.ScaleZ_To_BonePositionZ, value);
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.InheritUsersScaleOnStart);
+            set => SetFlags2(EepkEffectPartFlags2.InheritUsersScaleOnStart, value);
         }
-        public bool I_39_5
+        public bool InheritBoneScaleOnStart
         {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.I_39_5);
-            set => SetFlags2(EepkEffectPartFlags2.I_39_5, value);
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.InheritNodeScaleOnStart);
+            set => SetFlags2(EepkEffectPartFlags2.InheritNodeScaleOnStart, value);
+        }
+        public bool InheritUsersScaleOnUpdate
+        {
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.InheritUsersScaleOnUpdate);
+            set => SetFlags2(EepkEffectPartFlags2.InheritUsersScaleOnUpdate, value);
+        }
+        public bool InheritBoneScaleOnUpdate
+        {
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.InheritNodeScaleOnUpdate);
+            set => SetFlags2(EepkEffectPartFlags2.InheritNodeScaleOnUpdate, value);
         }
         public bool I_39_6
         {
@@ -556,8 +469,19 @@ namespace EEPK_Organiser.ViewModel
             }
         }
 
+        public EmoDrawPass EmoDrawPass
+        {
+            get => GetDrawPass();
+            set => SetDrawPass(value);
+        }
+
         public bool IsUsingEma => effectPart?.AssetType == AssetType.EMO || effectPart?.AssetType == AssetType.LIGHT;
+        public bool IsEmoOrPbind => effectPart?.AssetType == AssetType.EMO || effectPart?.AssetType == AssetType.PBIND;
         public bool IsNotCBIND => effectPart?.AssetType != AssetType.CBIND;
+        public bool IsNotTBIND => effectPart?.AssetType != AssetType.TBIND;
+        public bool IsNotLIGHT => effectPart?.AssetType != AssetType.LIGHT;
+        public bool IsLIGHT => effectPart?.AssetType == AssetType.LIGHT;
+        public bool IsEMO => effectPart?.AssetType == AssetType.EMO;
 
         public EffectPartViewModel()
         {
@@ -585,13 +509,8 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(() => Attachment);
             RaisePropertyChanged(() => OrientationType);
             RaisePropertyChanged(() => Deactivation);
-            RaisePropertyChanged(() => I_06);
-            RaisePropertyChanged(() => I_07);
-            RaisePropertyChanged(() => I_08);
-            RaisePropertyChanged(() => I_12);
-            RaisePropertyChanged(() => I_16);
-            RaisePropertyChanged(() => I_20);
-            RaisePropertyChanged(() => F_24);
+            RaisePropertyChanged(() => DirectionAxis);
+            RaisePropertyChanged(() => DepthBias);
             RaisePropertyChanged(() => I_32_0);
             RaisePropertyChanged(() => I_32_1);
             RaisePropertyChanged(() => I_32_2);
@@ -600,7 +519,6 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(() => I_32_5);
             RaisePropertyChanged(() => I_32_6);
             RaisePropertyChanged(() => I_32_7);
-            RaisePropertyChanged(() => I_34);
             RaisePropertyChanged(() => I_36_0);
             RaisePropertyChanged(() => I_36_1);
             RaisePropertyChanged(() => I_36_2);
@@ -617,14 +535,12 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(() => I_37_5);
             RaisePropertyChanged(() => I_37_6);
             RaisePropertyChanged(() => I_37_7);
-            RaisePropertyChanged(() => I_38_a);
-            RaisePropertyChanged(() => I_38_b);
-            RaisePropertyChanged(() => I_39_0);
             RaisePropertyChanged(() => I_39_1);
-            RaisePropertyChanged(() => I_39_2);
             RaisePropertyChanged(() => I_39_3);
-            RaisePropertyChanged(() => I_39_4);
-            RaisePropertyChanged(() => I_39_5);
+            RaisePropertyChanged(() => InheritUsersScaleOnStart);
+            RaisePropertyChanged(() => InheritBoneScaleOnStart);
+            RaisePropertyChanged(() => InheritUsersScaleOnUpdate);
+            RaisePropertyChanged(() => InheritBoneScaleOnUpdate);
             RaisePropertyChanged(() => I_39_6);
             RaisePropertyChanged(() => I_39_7);
             RaisePropertyChanged(() => POSITION_X);
@@ -645,7 +561,14 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(() => ESK);
             RaisePropertyChanged(() => IsNotTBIND);
             RaisePropertyChanged(() => IsNotCBIND);
+            RaisePropertyChanged(() => IsNotLIGHT);
+            RaisePropertyChanged(() => IsLIGHT);
+            RaisePropertyChanged(() => IsEMO);
             RaisePropertyChanged(() => IsUsingEma);
+            RaisePropertyChanged(() => IsEmoOrPbind);
+
+            RaisePropertyChanged(() => EnableDistanceCulling);
+            RaisePropertyChanged(() => EmoDrawPass);
         }
 
         private void SetFlags1(EepkEffectPartFlags1 flag, bool state)
@@ -671,7 +594,7 @@ namespace EEPK_Organiser.ViewModel
 
         private void SetFlags2(EepkEffectPartFlags2 flag, bool state)
         {
-            byte mask = (byte)flag;
+            uint mask = (uint)flag;
             uint flag2 = (uint)effectPart.Flags2;
             EepkEffectPartFlags2 originalValue = effectPart.Flags2;
 
@@ -681,7 +604,7 @@ namespace EEPK_Organiser.ViewModel
             }
             else
             {
-                flag2 &= (uint)~mask;
+                flag2 &= ~mask;
             }
 
             effectPart.Flags2 = (EepkEffectPartFlags2)flag2;
@@ -689,5 +612,60 @@ namespace EEPK_Organiser.ViewModel
             if (effectPart.Flags2 != originalValue)
                 UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(effectPart.Flags2), effectPart, originalValue, effectPart.Flags2, "EEPK Flags"));
         }
+    
+        private EmoDrawPass GetDrawPass()
+        {
+            if (effectPart == null) return 0;
+
+            if (effectPart.HasFlag2(EepkEffectPartFlags2.IsGrassDrawPass))
+                return EmoDrawPass.Grass;
+
+            if (effectPart.HasFlag2(EepkEffectPartFlags2.IsDecal))
+                return EmoDrawPass.Decal;
+
+            if (effectPart.HasFlag2(EepkEffectPartFlags2.PriorityDrawPassA))
+                return EmoDrawPass.PriorityA;
+
+            if (effectPart.HasFlag2(EepkEffectPartFlags2.PriorityDrawPassB))
+                return EmoDrawPass.PriorityB;
+
+            return EmoDrawPass.Default;
+        }
+
+        private void SetDrawPass(EmoDrawPass drawPass)
+        {
+            uint flag2 = ((uint)effectPart.Flags2) &~(uint)(EepkEffectPartFlags2.IsGrassDrawPass | EepkEffectPartFlags2.IsDecal | EepkEffectPartFlags2.PriorityDrawPassA | EepkEffectPartFlags2.PriorityDrawPassB);
+            EepkEffectPartFlags2 originalValue = effectPart.Flags2;
+
+            switch (drawPass)
+            {
+                case EmoDrawPass.Grass:
+                    flag2 |= (uint)EepkEffectPartFlags2.IsGrassDrawPass;
+                    break;
+                case EmoDrawPass.Decal:
+                    flag2 |= (uint)EepkEffectPartFlags2.IsDecal;
+                    break;
+                case EmoDrawPass.PriorityA:
+                    flag2 |= (uint)EepkEffectPartFlags2.PriorityDrawPassA;
+                    break;
+                case EmoDrawPass.PriorityB:
+                    flag2 |= (uint)EepkEffectPartFlags2.PriorityDrawPassB;
+                    break;
+            }
+
+            effectPart.Flags2 = (EepkEffectPartFlags2)flag2;
+
+            if (effectPart.Flags2 != originalValue)
+                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(effectPart.Flags2), effectPart, originalValue, effectPart.Flags2, "EMO Draw Pass"));
+        }
+    }
+
+    public enum EmoDrawPass
+    {
+        Default,
+        Grass,
+        Decal,
+        PriorityA,
+        PriorityB
     }
 }

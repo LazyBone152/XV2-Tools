@@ -77,9 +77,9 @@ namespace Xv2CoreLib.ValuesDictionary
         {
             { OrientationType.None, "None" },
             { OrientationType.User, "User" },
-            { OrientationType.AttachmentBone, "Attachment Bone" },
+            { OrientationType.AttachmentBone, "Bone" },
             { OrientationType.Camera, "Camera" },
-            { OrientationType.RotateMovement, "Rotate Movement" },
+            { OrientationType.RotateMovement, "Trail" },
         };
 
         public static Dictionary<Attachment, string> AttachmentTypes { get; private set; } = new Dictionary<Attachment, string>()
@@ -88,6 +88,13 @@ namespace Xv2CoreLib.ValuesDictionary
             { Attachment.Unk1, "Unk 1" },
             { Attachment.Bone, "Bone" },
             { Attachment.Camera, "Camera" },
+        };
+
+        public static string[] DirectionAxis { get; private set; } = new string[]
+        {
+            "X",
+            "Y",
+            "-Z"
         };
     }
 }

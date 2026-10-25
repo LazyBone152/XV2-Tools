@@ -397,6 +397,9 @@ namespace Xv2CoreLib.EMM
 
         public bool Compare(EmmMaterial material2, bool compareName = false)
         {
+            if (material2 is null) 
+                return false;
+
             if (Name != material2.Name && compareName)
                 return false;
 

@@ -1,0 +1,174 @@
+﻿<mvvm:AutoObservableUserControl x:Class="EEPK_Organiser.View.AssetContainerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:mvvm="clr-namespace:LB_Common.Mvvm;assembly=LB_Common"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
+             xmlns:helper="clr-namespace:LB_Common.AttachedProperties;assembly=LB_Common"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:local="clr-namespace:EEPK_Organiser.View"
+             xmlns:forms="clr-namespace:EEPK_Organiser.Forms"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Name="UserControl">
+    <mvvm:AutoObservableUserControl.Resources>
+        <lbUtils:BindingProxy x:Key="proxy" Data="{Binding}"/>
+
+        <DataTemplate x:Key="EmoListBox">
+            <ListBox BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" ItemsSource="{Binding Files.Binding}" SelectedItem="{Binding Data.SelectedEmoFile, UpdateSourceTrigger=PropertyChanged, Source={StaticResource proxy}}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,2">
+                            <Grid.InputBindings>
+                                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ElementName=UserControl, Path=AssetEmoDoubleClickCommand}" CommandParameter="{Binding}"/>
+                            </Grid.InputBindings>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding EmoFullFileNamePreview}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.InputBindings>
+                    <KeyBinding Key="F2" Command="{Binding Data.AssetEmoFileRenameCommand, Source={StaticResource proxy}}"/>
+                    <KeyBinding Key="Delete" Command="{Binding Data.AssetEmoFileDeleteCommand, Source={StaticResource proxy}}"/>
+                    <KeyBinding Key="Return" Command="{Binding Data.AssetEmoFileEditCommand, Source={StaticResource proxy}}"/>
+                </ListBox.InputBindings>
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Rename" Command="{Binding Data.AssetEmoFileRenameCommand, Source={StaticResource proxy}}"/>
+                        <MenuItem Header="Replace" Command="{Binding Data.AssetEmoFileReplaceCommand, Source={StaticResource proxy}}"/>
+                        <MenuItem Header="Delete" Command="{Binding Data.AssetEmoFileDeleteCommand, Source={StaticResource proxy}}"/>
+                        <MenuItem Header="Extract" Command="{Binding Data.AssetEmoFileExtractCommand, Source={StaticResource proxy}}"/>
+                        <MenuItem Header="Edit" Command="{Binding Data.AssetEmoFileEditCommand, Source={StaticResource proxy}}"/>
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
+        </DataTemplate>
+    </mvvm:AutoObservableUserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="45"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="0,20,0,0" VerticalAlignment="Top">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type StackPanel}">
+                    <Setter Property="Margin" Value="0,5,0,0"/>
+                </Style>
+            </StackPanel.Resources>
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding ElementName=UserControl, Path=NewAssetCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}">
+                    <iconPacks:PackIconMaterialLight Kind="Plus" />
+                </Button>
+                <TextBlock Text="New" HorizontalAlignment="Center" FontSize="10"/>
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+                <Button HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                    <Button.ContextMenu>
+                        <ContextMenu FontSize="12">
+                            <MenuItem Header="Load External EEPK" Command="{Binding ImportAssetsFromExternalFileCommand}"/>
+                            <MenuItem Header="Load External ECF" Command="{Binding CbindImportExternalEcfCommand}" Visibility="{Binding IsCbind, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <MenuItem Header="Load External LIGHT.EMA" Command="{Binding LightImportExternalCommand}" Visibility="{Binding IsLight, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <MenuItem Header="Load External Files" Command="{Binding EmoImportExternalFilesCommand}" Visibility="{Binding IsEmo, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <Separator/>
+                            <MenuItem Header="CMN" Command="{Binding ImportAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.CMN}"/>
+                            <MenuItem Header="Character" Command="{Binding ImportAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Character}"/>
+                            <MenuItem Header="Super Skill" Command="{Binding ImportAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.SuperSkill}"/>
+                            <MenuItem Header="Ultimate Skill" Command="{Binding ImportAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.UltimateSkill}"/>
+                            <MenuItem Header="Evasive Skill" Command="{Binding ImportAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.EvasiveSkill}"/>
+                            <MenuItem Header="Blast Skill/Type" Command="{Binding ImportAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.BlastSkill}"/>
+                            <MenuItem Header="Awoken Skill" Command="{Binding ImportAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.AwokenSkill}"/>
+                            <MenuItem Header="Demo (Cutscene)" Command="{Binding ImportAssetsFromGameCommand}" CommandParameter="{x:Static forms:EntitySelector+EntityType.Demo}"/>
+                        </ContextMenu>
+                    </Button.ContextMenu>
+
+                    <iconPacks:PackIconMaterialLight Kind="FolderPlus" />
+                </Button>
+                <TextBlock Text="Import" HorizontalAlignment="Center" FontSize="10"/>
+            </StackPanel>
+
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding ElementName=UserControl, Path=AssetDeleteCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}">
+                    <iconPacks:PackIconMaterialLight Kind="Delete" />
+                </Button>
+                <TextBlock Text="Remove" HorizontalAlignment="Center" FontSize="10"/>
+            </StackPanel>
+            
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding ElementName=UserControl, Path=AssetDuplicateCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}">
+                    <iconPacks:PackIconMaterialLight Kind="ContentDuplicate" />
+                </Button>
+                <TextBlock Text="Duplicate" HorizontalAlignment="Center" FontSize="10"/>
+            </StackPanel>
+            
+        </StackPanel>
+
+        <DataGrid x:Name="dataGrid" Grid.Column="1" SelectionMode="Extended" ItemsSource="{Binding ElementName=UserControl, Path=AssetContainer.ViewAssets}" 
+                  SelectedItem="{Binding ElementName=UserControl, Path=SelectedAsset, UpdateSourceTrigger=PropertyChanged}" helper:DataGridHelper.SelectedItems="{Binding ElementName=UserControl, Path=SelectedAssets, Mode=OneWay}"
+                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" CanUserResizeRows="False"
+                  BorderBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" BorderThickness="1" Margin="0,5,0,10" HeadersVisibility="Row"
+                  RowHeaderWidth="0">
+            <DataGrid.InputBindings>
+                <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetCopyCommand}"/>
+                <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteCommand}"/>
+                <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetPasteOverCommand}"/>
+                <KeyBinding Key="F2" Command="{Binding ElementName=UserControl, Path=AssetRenameCommand}"/>
+                <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetMergeCommand}"/>
+                <KeyBinding Key="Q" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetUsedByCommand}"/>
+                <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=AssetDeleteCommand}"/>
+                <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetDuplicateCommand}"/>
+                <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AssetHueAdjustCommand}"/>
+                <KeyBinding Key="H" Modifiers="Alt" Command="{Binding ElementName=UserControl, Path=AssetHueSetCommand}"/>
+                <KeyBinding Key="Return" Command="{Binding ElementName=UserControl, Path=AssetOpenEditorCommand}"/>
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ElementName=UserControl, Path=AssetOpenEditorCommand}"/>
+            </DataGrid.InputBindings>
+            <DataGrid.ContextMenu>
+                <ContextMenu FontSize="12">
+                    <MenuItem Header="Add File" Command="{Binding AssetEmoAddFileCommand}" Visibility="{Binding IsEmo, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <MenuItem Header="Add File (EMD + ESK -> EMO)" Command="{Binding AssetEmoAddEmdFileCommand}" Visibility="{Binding IsEmo, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <MenuItem Header="Add File (EAN -> OBJ.EMA)" Command="{Binding AssetEmoAddEanFileCommand}" Visibility="Collapsed"/> <!-- EAN conversion does not work; needs fixing -->
+                    <Separator Visibility="{Binding IsEmo, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <MenuItem Header="Rename" Command="{Binding AssetRenameCommand}"/>
+                    <MenuItem Header="Merge" Command="{Binding AssetMergeCommand}"/>
+                    <MenuItem Header="Copy" Command="{Binding AssetCopyCommand}"/>
+                    <MenuItem Header="Paste" Command="{Binding AssetPasteCommand}"/>
+                    <MenuItem Header="Paste Over (Replace)" Command="{Binding AssetPasteOverCommand}"/>
+                    <MenuItem Header="Delete" Command="{Binding AssetDeleteCommand}"/>
+                    <MenuItem Header="Duplicate" Command="{Binding AssetDuplicateCommand}"/>
+                    <MenuItem Header="Extract" Command="{Binding AssetExtractCommand}" Visibility="{Binding IsCbindOrLight, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <MenuItem Header="Used By?" Command="{Binding AssetUsedByCommand}"/>
+                    <Separator Visibility="{Binding IsPbind, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <MenuItem Header="Remove Color Animations" Command="{Binding AssetPbindRemoveColorAnimationsCommand}" Visibility="{Binding IsPbind, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <MenuItem Header="Remove Random Color Range" Command="{Binding AssetPbindRemoveRandomColorRangeCommand}" Visibility="{Binding IsPbind, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <Separator/>
+                    <MenuItem Header="Edit" Command="{Binding AssetOpenEditorCommand}" Visibility="{Binding IsNotLight, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <MenuItem Header="Hue Adjustment" Command="{Binding AssetHueAdjustCommand}"/>
+                    <MenuItem Header="Hue Set" Command="{Binding AssetHueSetCommand}"/>
+                    <MenuItem Header="Scale" Command="{Binding AssetTbindScaleCommand}" Visibility="{Binding IsTbind, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="nameColumn" Header="Asset" Binding="{Binding FileNamesPreviewWithExtension}" Width="*" IsReadOnly="True"/>
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+        <GroupBox Grid.Column="2" Header="Options" Height="Auto" VerticalAlignment="Top" Width="180" Margin="0,5,0,10" BorderBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" BorderThickness="1" Controls:ControlsHelper.ContentCharacterCasing="Normal">
+            <StackPanel Margin="0, 5">
+
+                <Button Command="{Binding ElementName=UserControl, Path=AssetOpenMaterialFormCommand}" Content="Materials" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" Visibility="{Binding IsPbindOrTbind, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Command="{Binding ElementName=UserControl, Path=AssetOpenTextureFormCommand}" Content="Textures" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" Visibility="{Binding IsPbindOrTbind, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Command="{Binding ElementName=UserControl, Path=AssetOpenSettingsCommand}" Content="Settings" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123"/>
+
+                <Button Command="{Binding ElementName=UserControl, Path=AssetRemoveUnusedCommand}" Content="Remove Unused" Margin="10,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="123"/>
+                <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding ElementName=UserControl, Path=AssetContainer.UndoableLooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" Margin="10,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="123" Visibility="{Binding IsNotEmo, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+            </StackPanel>
+        </GroupBox>
+        <Label Grid.Column="2" Content="{Binding ElementName=UserControl, Path=AssetContainer.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="10,0" VerticalAlignment="Bottom" Width="177" Height="30"/>
+
+    </Grid>
+</mvvm:AutoObservableUserControl>

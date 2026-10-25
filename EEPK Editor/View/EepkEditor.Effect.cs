@@ -377,22 +377,25 @@ namespace EEPK_Organiser.View
                 {
                     case AssetType.PBIND:
                         tabControl.SelectedIndex = (int)Tabs.Pbind;
+                        pbindView.SelectAsset(SelectedEffectPart.AssetRef);
                         break;
                     case AssetType.TBIND:
                         tabControl.SelectedIndex = (int)Tabs.Tbind;
+                        tbindView.SelectAsset(SelectedEffectPart.AssetRef);
                         break;
                     case AssetType.CBIND:
                         tabControl.SelectedIndex = (int)Tabs.Cbind;
+                        cbindView.SelectAsset(SelectedEffectPart.AssetRef);
                         break;
                     case AssetType.EMO:
                         tabControl.SelectedIndex = (int)Tabs.Emo;
+                        emoView.SelectAsset(SelectedEffectPart.AssetRef);
                         break;
                     case AssetType.LIGHT:
                         tabControl.SelectedIndex = (int)Tabs.Light;
+                        lightView.SelectAsset(SelectedEffectPart.AssetRef);
                         break;
                 }
-
-                SelectAsset(SelectedEffectPart.AssetRef);
             }
         }
 

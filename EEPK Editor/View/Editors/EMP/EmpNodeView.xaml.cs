@@ -275,8 +275,8 @@ namespace EEPK_Organiser.View.Editors.EMP
 
         private bool HasTextureRef(int texIndex)
         {
-            //return true;
-            return IsNodeSelected() ? Node.EmissionNode.Texture.TextureEntryRef[texIndex].TextureRef != null : false;
+            return true;
+            //return IsNodeSelected() ? Node.EmissionNode.Texture.TextureEntryRef[texIndex].TextureRef != null : false;
         }
 
         private bool IsNodeSelected()

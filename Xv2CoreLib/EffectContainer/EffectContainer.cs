@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -880,7 +881,7 @@ namespace Xv2CoreLib.EffectContainer
             FinalizeMainEmb();
 
             //Save eepk
-            EEPK_File eepkFile = CreateEepk();
+            EEPK_File eepkFile = new EEPK_File(this);
             SaveFile(eepkFile.SaveToBytes(), string.Format("{0}/{1}.eepk", Directory, Name));
 
             //Auto-generate IDs for containers
@@ -1608,16 +1609,13 @@ namespace Xv2CoreLib.EffectContainer
 
             foreach (var container in eepkFile.AssetContainers)
             {
-                AssetContainerTool assetContainer = new AssetContainerTool();
+                AssetContainerTool assetContainer = new AssetContainerTool(effectContainer);
 
                 assetContainer.LooseFiles = string.IsNullOrWhiteSpace(container.ContainerEmbPath);
-                assetContainer.AssetSpawnLimit = container.AssetSpawnLimit;
-                assetContainer.I_04 = container.I_04;
-                assetContainer.I_05 = container.I_05;
-                assetContainer.I_06 = container.I_06;
-                assetContainer.I_07 = container.I_07;
-                assetContainer.AssetListLimit = container.AssetListLimit;
-                assetContainer.I_12 = container.I_12;
+                assetContainer.PoolSize = container.PoolSize;
+                assetContainer.ParticleEngineConfig1 = container.ParticleEngineConfig1;
+                assetContainer.ParticleEngineConfig2 = container.ParticleEngineConfig2;
+                assetContainer.ParticleEngineConfig3 = container.ParticleEngineConfig3;
                 assetContainer.ContainerAssetType = container.AssetType;
 
                 assetContainer.File1_Name = container.ContainerEmbPath;
@@ -1706,86 +1704,6 @@ namespace Xv2CoreLib.EffectContainer
             return effectContainer;
         }
 
-        public static EEPK_File CreateEepk(EffectContainerFile effectContainer)
-        {
-            EEPK_File eepkFile = new EEPK_File();
-            eepkFile.Version = (int)effectContainer.Version;
-            eepkFile.AssetContainers = new List<AssetContainer>();
-            eepkFile.Effects = effectContainer.Effects.ToList();
-
-            if (effectContainer.Emo.Assets.Count > 0)
-            {
-                eepkFile.AssetContainers.Add(CreateEepkAssetContainer(effectContainer.Emo, AssetType.EMO));
-            }
-
-            if (effectContainer.Pbind.Assets.Count > 0)
-            {
-                eepkFile.AssetContainers.Add(CreateEepkAssetContainer(effectContainer.Pbind, AssetType.PBIND));
-            }
-
-            if (effectContainer.Tbind.Assets.Count > 0)
-            {
-                eepkFile.AssetContainers.Add(CreateEepkAssetContainer(effectContainer.Tbind, AssetType.TBIND));
-            }
-
-            if (effectContainer.LightEma.Assets.Count > 0)
-            {
-                eepkFile.AssetContainers.Add(CreateEepkAssetContainer(effectContainer.LightEma, AssetType.LIGHT));
-            }
-
-            if (effectContainer.Cbind.Assets.Count > 0)
-            {
-                eepkFile.AssetContainers.Add(CreateEepkAssetContainer(effectContainer.Cbind, AssetType.CBIND));
-            }
-
-            return eepkFile;
-        }
-
-        private static AssetContainer CreateEepkAssetContainer(AssetContainerTool assetContainer, AssetType type)
-        {
-            AssetContainer newAssetContainer = new AssetContainer();
-            newAssetContainer.AssetSpawnLimit = assetContainer.AssetSpawnLimit;
-            newAssetContainer.I_04 = assetContainer.I_04;
-            newAssetContainer.I_05 = assetContainer.I_05;
-            newAssetContainer.I_06 = assetContainer.I_06;
-            newAssetContainer.I_07 = assetContainer.I_07;
-            newAssetContainer.AssetListLimit = assetContainer.AssetListLimit;
-            newAssetContainer.I_12 = assetContainer.I_12;
-            newAssetContainer.AssetType = type;
-
-            newAssetContainer.ContainerEmbPath = assetContainer.File1_Name;
-            newAssetContainer.MaterialEmmPath = assetContainer.File2_Name;
-            newAssetContainer.TextureEmbPath = assetContainer.File3_Name;
-
-            if (assetContainer.Assets != null)
-            {
-                newAssetContainer.Assets = new List<AssetEntry>();
-
-                foreach (var asset in assetContainer.Assets)
-                {
-                    List<string> files = new List<string>(asset.Files.Count);
-
-                    for (int i = 0; i < asset.Files.Count; i++)
-                    {
-                        if (!string.IsNullOrWhiteSpace(asset.Files[i].FullFileName))
-                            files.Add(asset.Files[i].FullFileName);
-                    }
-
-                    newAssetContainer.Assets.Add(new AssetEntry()
-                    {
-                        I_00 = asset.I_00,
-                        Files = files
-                    });
-                }
-            }
-
-            return newAssetContainer;
-        }
-
-        public EEPK_File CreateEepk()
-        {
-            return CreateEepk(this);
-        }
         #endregion
 
         #region Helpers
@@ -1815,7 +1733,7 @@ namespace Xv2CoreLib.EffectContainer
             switch (type)
             {
                 case AssetType.PBIND:
-                    return new AssetContainerTool()
+                    return new AssetContainerTool(this)
                     {
                         LooseFiles = false,
                         File1_Ref = EMB_File.GetDefault(),
@@ -1827,7 +1745,7 @@ namespace Xv2CoreLib.EffectContainer
                         ContainerAssetType = AssetType.PBIND
                     };
                 case AssetType.TBIND:
-                    return new AssetContainerTool()
+                    return new AssetContainerTool(this)
                     {
                         LooseFiles = false,
                         File1_Ref = EMB_File.GetDefault(),
@@ -1839,7 +1757,7 @@ namespace Xv2CoreLib.EffectContainer
                         ContainerAssetType = AssetType.TBIND
                     };
                 case AssetType.CBIND:
-                    return new AssetContainerTool()
+                    return new AssetContainerTool(this)
                     {
                         LooseFiles = false,
                         File1_Ref = EMB_File.GetDefault(),
@@ -1847,13 +1765,13 @@ namespace Xv2CoreLib.EffectContainer
                         ContainerAssetType = AssetType.CBIND
                     };
                 case AssetType.EMO:
-                    return new AssetContainerTool()
+                    return new AssetContainerTool(this)
                     {
                         LooseFiles = true,
                         ContainerAssetType = AssetType.EMO
                     };
                 case AssetType.LIGHT:
-                    return new AssetContainerTool()
+                    return new AssetContainerTool(this)
                     {
                         LooseFiles = true,
                         ContainerAssetType = AssetType.LIGHT
@@ -2634,6 +2552,7 @@ namespace Xv2CoreLib.EffectContainer
         }
         #endregion
 
+        public readonly EffectContainerFile EffectContainer;
         public AssetType ContainerAssetType { get; internal set; }
 
         private bool _looseFilesValue = false;
@@ -2670,14 +2589,11 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-
-        public int AssetSpawnLimit { get; set; } = 128;
-        public byte I_04 { get; set; } = 255;
-        public byte I_05 { get; set; } = 255;
-        public byte I_06 { get; set; } = 255;
-        public byte I_07 { get; set; } = 255;
-        public int AssetListLimit { get; set; } = -1;
-        public int I_12 { get; set; } = -1;
+        public bool AutoConfiguration { get; set; } //TODO: Implement UI for this
+        public int PoolSize { get; set; } = 128;
+        public int ParticleEngineConfig1 { get; set; } = 255;
+        public int ParticleEngineConfig2 { get; set; } = -1;
+        public int ParticleEngineConfig3 { get; set; } = -1;
 
         public string File1_Name { get; set; } //Main container emb (pbind, tbind, cbind, light)
         public string File2_Name { get; set; } //Material .emm
@@ -2713,6 +2629,12 @@ namespace Xv2CoreLib.EffectContainer
 
         public AssetContainerTool()
         {
+            Assets = new AsyncObservableCollection<Asset>();
+        }
+
+        public AssetContainerTool(EffectContainerFile effectContainer)
+        {
+            EffectContainer = effectContainer;
             Assets = new AsyncObservableCollection<Asset>();
         }
 
@@ -3354,7 +3276,7 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         public Asset AddAsset(EMP_File empFile, string name)
         {
-            if (Path.GetExtension(name) != ".emp")
+            if (Path.GetExtension(name).ToLower() != ".emp")
             {
                 name += ".emp";
             }
@@ -3370,7 +3292,7 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         public Asset AddAsset(ETR_File etrFile, string name)
         {
-            if (Path.GetExtension(name) != ".etr")
+            if (Path.GetExtension(name).ToLower() != ".etr")
             {
                 name += ".etr";
             }
@@ -3386,7 +3308,7 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         public Asset AddAsset(ECF_File ecfFile, string name)
         {
-            if (Path.GetExtension(name) != ".ecf")
+            if (Path.GetExtension(name).ToLower() != ".ecf")
             {
                 name += ".ecf";
             }
@@ -4108,6 +4030,7 @@ namespace Xv2CoreLib.EffectContainer
                 await asset.ApplyHueAdjustment(input);
             }
         }
+   
     }
 
     [Serializable]
@@ -4272,7 +4195,7 @@ namespace Xv2CoreLib.EffectContainer
                     break;
             }
 
-            newEffectFile.Extension = EffectFile.GetExtension(name);
+            newEffectFile.SetName(name);
 
             if (HasFileType(type))
             {
@@ -4598,8 +4521,8 @@ namespace Xv2CoreLib.EffectContainer
                 if (value != this._extension)
                 {
                     this._extension = value;
-                    NotifyPropertyChanged("FileName");
-                    NotifyPropertyChanged("FullFileName");
+                    NotifyPropertyChanged(nameof(FileName));
+                    NotifyPropertyChanged(nameof(FullFileName));
                 }
             }
         }

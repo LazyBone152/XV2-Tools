@@ -9,8 +9,8 @@
         Title="Rename" Loaded="Window_Loaded" Height="155.42" Width="377.193" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" KeyDown="Window_KeyDown">
     <Grid>
         <TextBox x:Name="textBox" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="77,32,0,0" TextWrapping="NoWrap" Text="{Binding NameValue, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="261" KeyDown="TextBox_KeyDown"/>
-        <Button Click="Button_OK_Click" Content="Ok" HorizontalAlignment="Left" Margin="89,91,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button Click="Button_Cancel_Click" Content="Cancel" HorizontalAlignment="Left" Margin="196,91,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Click="Button_OK_Click" Content="Ok" HorizontalAlignment="Left" Margin="105,92,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Click="Button_Cancel_Click" Content="Cancel" HorizontalAlignment="Left" Margin="212,92,0,0" VerticalAlignment="Top" Width="75"/>
         <Label Content="Name" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="62" Height="24"/>
 
     </Grid>

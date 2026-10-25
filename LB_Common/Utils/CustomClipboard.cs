@@ -6,7 +6,7 @@ namespace LB_Common.Utils
 {
     public static class CustomClipboard
     {
-        public static bool UseLocalClipboard = false;
+        public static bool UseLocalClipboard = true;
         private static string StoredFormat = null;
         private static object StoredObject = null;
 

@@ -6,7 +6,6 @@ using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.EMP_NEW.Keyframes;
 using Xv2CoreLib.Color;
 using Xv2CoreLib.Resource;
-using Xv2CoreLib.Resource.UndoRedo;
 using System.Threading.Tasks;
 
 namespace Xv2CoreLib.ECF
@@ -15,8 +14,7 @@ namespace Xv2CoreLib.ECF
     [Serializable]
     public class ECF_File : IPreviewUpdate, IHueAdjustment
     {
-        public ushort I_12 { get; set; }
-        //followed by 12 zero bytes
+        public ushort Priority { get; set; }
 
         public AsyncObservableCollection<ECF_Node> Nodes { get; set; } = new AsyncObservableCollection<ECF_Node>();
 
