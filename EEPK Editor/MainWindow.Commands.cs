@@ -146,7 +146,7 @@ namespace EEPK_Organiser
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
-                View.EepkEditor.CloseAllEditorForms();
+                EepkEditor.CloseAllEditorForms();
 
                 EepkFile = effectFile;
                 NotifyPropertyChanged(nameof(CanSave));

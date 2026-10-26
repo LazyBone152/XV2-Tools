@@ -158,6 +158,13 @@ namespace EEPK_Organiser.View
 
         public void SelectAsset(Asset asset)
         {
+            if(asset == null)
+            {
+                SelectedAssets.Clear();
+                SelectedAsset = null;
+                return;
+            }
+
             if (!SelectedAssets.Contains(asset))
             {
                 SelectedAssets.Clear();

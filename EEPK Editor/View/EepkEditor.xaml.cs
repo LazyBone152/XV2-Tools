@@ -64,8 +64,16 @@ namespace EEPK_Organiser.View
             NotifyPropertyChanged(nameof(effectContainerFile));
             NotifyPropertyChanged(nameof(IsFileLoaded));
 
+            SelectedEffects.Clear();
+            SelectedEffectParts.Clear();
+            pbindView.SelectedAssets.Clear();
+            tbindView.SelectedAssets.Clear();
+            cbindView.SelectedAssets.Clear();
+            emoView.SelectedAssets.Clear();
+            lightView.SelectedAssets.Clear();
+
 #if !XenoKit
-            if(effectContainerFile != null)
+            if (effectContainerFile != null)
                 nameListManager.EepkLoaded(effectContainerFile);
 #endif
         }
