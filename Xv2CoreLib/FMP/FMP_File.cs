@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using Xv2CoreLib.ACB;
 using Xv2CoreLib.EMD;
 using Xv2CoreLib.ESK;
@@ -32,6 +33,49 @@ namespace Xv2CoreLib.FMP
         Unk14 = 0x2000, //unused
         Unk15 = 0x4000, //unused
         Unk16 = 0x8000
+    }
+
+    public enum CommandType : short
+    {
+        TimerSet = -20,
+        OccluderDel = -16,
+        OccluderAdd = -15,
+        MirrorObject = -10,
+        MotionSet = -8,
+        MotionState = -7,
+        EventCall = -5,
+        NoParameter = 0,
+        SetSky = 1,
+        SetSun = 4,
+        AddSound = 5,
+        PlaySound3D = 7,
+        PlayEffect = 16,
+        Water = 100,
+        ChangeArea = 101,
+        SetLct = 102,
+        WaterFall = 103,
+        SmallScene = 104,
+        SetBreakPartsEffect = 105,
+        SetShadowArea = 106,
+        SetFlagUseCmnBreakPartsEffect = 107,
+        SetBreakPartsInvisible = 108,
+        SetMotion = 110,
+        LimitMoveInvisible = 112,
+        HideObject = 113,
+        HitCapsule = 114,
+        LockonEnable = 115,
+        HenshinImpossible = 116,
+        PlayMassiveParticles = 117,
+        ScatterFragment = 118,
+        ScatterFragmentCustom = 119,
+        Camera = 200,
+        ChaseStart = 202,
+        LockCamera = 204,
+        UnlockCamera = 205,
+        ChangeFootEffect = 208,
+        ChangeInteraction = 209,
+        AddPlaneSound = 210,
+        ChangeEnvSound = 211
     }
 
     [YAXSerializeAs("FMP")]
@@ -1546,13 +1590,42 @@ namespace Xv2CoreLib.FMP
         [YAXAttributeForClass]
         public int I_00 { get; set; }
         [YAXAttributeForClass]
-        public byte I_04 { get; set; }
-        [YAXAttributeForClass]
-        public byte I_05 { get; set; }
+        [YAXHexValue]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public ushort Mask { get; set; }
         [YAXAttributeForClass]
         public byte I_06 { get; set; }
         [YAXAttributeForClass]
         public byte I_07 { get; set; }
+
+        #region LegacyCompatibility
+        //Value aliases for legacy XML compat
+        //Unfortunately YAXAltAlias does not work with class attributes or split values
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_04")]
+        [YAXDontSerializeIfNull]
+        public string XML_I_04
+        {
+            get => null;
+            set
+            {
+                if (ushort.TryParse(value, out ushort sValue))
+                    Mask |= sValue;
+            }
+        }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_05")]
+        [YAXDontSerializeIfNull]
+        public string XML_I_05
+        {
+            get => null;
+            set
+            {
+                if (ushort.TryParse(value, out ushort sValue))
+                    Mask |= (ushort)(sValue >> 8);
+            }
+        }
+        #endregion
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
         [YAXDontSerializeIfNull]
@@ -1564,8 +1637,7 @@ namespace Xv2CoreLib.FMP
             int actionStart = bytes.Count;
 
             bytes.AddRange(BitConverter.GetBytes(I_00));
-            bytes.Add(I_04);
-            bytes.Add(I_05);
+            bytes.AddRange(BitConverter.GetBytes(Mask));
             bytes.Add(I_06);
             bytes.Add(I_07);
             bytes.AddRange(BitConverter.GetBytes(commandCount));
@@ -1576,12 +1648,15 @@ namespace Xv2CoreLib.FMP
 
             for (int i = 0; i < commandCount; i++)
             {
-                stringWriter.Add(new StringWriter.StringInfo() { Offset = bytes.Count, StringToWrite = Commands[i].Name });
+                string commandName = Commands[i].Name;
+
+                if (FMP_Command.CommandNamesDic.TryGetValue(Commands[i].Type, out string knownCommandName))
+                    commandName = knownCommandName;
+
+                stringWriter.Add(new StringWriter.StringInfo() { Offset = bytes.Count, StringToWrite = commandName });
                 bytes.AddRange(new byte[4]);
-                bytes.Add(Commands[i].I_04);
-                bytes.Add(Commands[i].I_05);
-                bytes.Add(Commands[i].I_06);
-                bytes.Add(Commands[i].I_07);
+                bytes.AddRange(BitConverter.GetBytes(Commands[i].Mask));
+                bytes.AddRange(BitConverter.GetBytes((short)Commands[i].Type));
                 bytes.AddRange(BitConverter.GetBytes(Commands[i].Parameters?.Count ?? 0));
                 bytes.AddRange(new byte[4]); //Offset to parameters
             }
@@ -1652,8 +1727,7 @@ namespace Xv2CoreLib.FMP
         {
             FMP_Action action = new FMP_Action();
             action.I_00 = BitConverter.ToInt32(bytes, offset);
-            action.I_04 = bytes[offset + 4];
-            action.I_05 = bytes[offset + 5];
+            action.Mask = BitConverter.ToUInt16(bytes, offset + 4);
             action.I_06 = bytes[offset + 6];
             action.I_07 = bytes[offset + 7];
 
@@ -1667,8 +1741,7 @@ namespace Xv2CoreLib.FMP
         public bool IsEqual(FMP_Action other)
         {
             if (I_00 != other.I_00) return false;
-            if (I_04 != other.I_04) return false;
-            if (I_05 != other.I_05) return false;
+            if (Mask != other.Mask) return false;
             if (I_06 != other.I_06) return false;
             if (I_07 != other.I_07) return false;
             if ((Commands != null && other.Commands == null) || (Commands == null && other.Commands != null)) return false;
@@ -1698,16 +1771,69 @@ namespace Xv2CoreLib.FMP
 
     public class FMP_Command
     {
-        [YAXAttributeForClass]
+
+        [YAXDontSerializeIfNull]
         public string Name { get; set; }
         [YAXAttributeForClass]
-        public byte I_04 { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public CommandType Type { get; set; }
         [YAXAttributeForClass]
-        public byte I_05 { get; set; }
+        [YAXHexValue]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public ushort Mask { get; set; }
+
+        #region LegacyCompatibility
+        //Value aliases for legacy XML compat
+        //Unfortunately YAXAltAlias does not work with class attributes or split values
         [YAXAttributeForClass]
-        public byte I_06 { get; set; }
+        [YAXSerializeAs("I_04")]
+        [YAXDontSerializeIfNull]
+        public string XML_I_04
+        {
+            get => null;
+            set
+            {
+                if (ushort.TryParse(value, out ushort sValue))
+                    Mask |= sValue;
+            }
+        }
         [YAXAttributeForClass]
-        public byte I_07 { get; set; }
+        [YAXSerializeAs("I_05")]
+        [YAXDontSerializeIfNull]
+        public string XML_I_05
+        {
+            get => null;
+            set
+            {
+                if (ushort.TryParse(value, out ushort sValue))
+                    Mask |= (ushort)(sValue >> 8);
+            }
+        }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_06")]
+        [YAXDontSerializeIfNull]
+        public string XML_I_06
+        {
+            get => null;
+            set
+            {
+                if (short.TryParse(value, out short sValue))
+                    Type |= (CommandType)sValue;
+            }
+        }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_07")]
+        [YAXDontSerializeIfNull]
+        public string XML_I_07
+        {
+            get => null;
+            set
+            {
+                if (short.TryParse(value, out short sValue))
+                    Type |= (CommandType)(sValue >> 8);
+            }
+        }
+        #endregion
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Parameter")]
         [YAXDontSerializeIfNull]
@@ -1731,11 +1857,12 @@ namespace Xv2CoreLib.FMP
 
             int nameOffset = BitConverter.ToInt32(bytes, offset);
 
-            command.Name = nameOffset > 0 ? StringEx.GetString(bytes, nameOffset) : null;
-            command.I_04 = bytes[offset + 4];
-            command.I_05 = bytes[offset + 5];
-            command.I_06 = bytes[offset + 6];
-            command.I_07 = bytes[offset + 7];
+            command.Mask = BitConverter.ToUInt16(bytes, offset + 4);
+            command.Type = (CommandType)BitConverter.ToInt16(bytes, offset + 6);
+
+            //Only read the name if it is an unknown type
+            if(!CommandNamesDic.ContainsKey(command.Type) && nameOffset > 0)
+                command.Name = StringEx.GetString(bytes, nameOffset);
 
             int parameterCount = BitConverter.ToInt32(bytes, offset + 8);
             int parameterOffset = BitConverter.ToInt32(bytes, offset + 12);
@@ -1748,10 +1875,8 @@ namespace Xv2CoreLib.FMP
         public bool IsEqual(FMP_Command command)
         {
             if(Name !=  command.Name) return false;
-            if (I_04 != command.I_04) return false;
-            if (I_05 != command.I_05) return false;
-            if (I_06 != command.I_06) return false;
-            if (I_07 != command.I_07) return false;
+            if (Mask != command.Mask) return false;
+            if (Type != command.Type) return false;
             if ((Parameters != null && command.Parameters == null) || (Parameters == null && command.Parameters != null)) return false;
             
             if(Parameters != null)
@@ -1766,6 +1891,50 @@ namespace Xv2CoreLib.FMP
 
             return true;
         }
+
+        public static readonly Dictionary<CommandType, string> CommandNamesDic = new Dictionary<CommandType, string>()
+        {
+            { CommandType.TimerSet, "TIMER SET" },
+            { CommandType.OccluderDel, "OCCLUDER DEL" },
+            { CommandType.OccluderAdd, "OCCLUDER ADD" },
+            { CommandType.MirrorObject, "MIRROR OBJECT" },
+            { CommandType.MotionSet, "MOTION SET" },
+            { CommandType.MotionState, "MOTION STATE" },
+            { CommandType.EventCall, "EVENT CALL" },
+            { CommandType.NoParameter, "[NO PARAMETER]" },
+            { CommandType.SetSky, "SET SKY" },
+            { CommandType.SetSun, "SET SUN" },
+            { CommandType.AddSound, "ADD SOUND" },
+            { CommandType.PlaySound3D, "PLAY SOUND 3D" },
+            { CommandType.PlayEffect, "PLAY EFFECT" },
+            { CommandType.Water, "Water" },
+            { CommandType.ChangeArea, "CHANGE AREA" },
+            { CommandType.SetLct, "SET LCT" },
+            { CommandType.WaterFall, "Water Fall" },
+            { CommandType.SmallScene, "Small Scene" },
+            { CommandType.SetBreakPartsEffect, "SET BREAK PARTS EFFECT" },
+            { CommandType.SetShadowArea, "SET SHADOW AREA" },
+            { CommandType.SetFlagUseCmnBreakPartsEffect, "SET FLAG USE CMN BREAK PARTS EFFECT" },
+            { CommandType.SetBreakPartsInvisible, "SET BREAK PARTS INVISIBLE" },
+            { CommandType.SetMotion, "SET MOTION" },
+            { CommandType.LimitMoveInvisible, "LIMIT MOVE INVISIBLE" },
+            { CommandType.HideObject, "HideObject" },
+            { CommandType.HitCapsule, "HitCapsule" },
+            { CommandType.LockonEnable, "LockonEnable" },
+            { CommandType.HenshinImpossible, "Henshin Impossible" },
+            { CommandType.PlayMassiveParticles, "Play Massive Particles" },
+            { CommandType.ScatterFragment, "ScatterFragment" },
+            { CommandType.ScatterFragmentCustom, "ScatterFragmentCustom" },
+            { CommandType.Camera, "Camera" },
+            { CommandType.ChaseStart, "Chase Start" },
+            { CommandType.LockCamera, "Lock Camera" },
+            { CommandType.UnlockCamera, "Unlock Camera" },
+            { CommandType.ChangeFootEffect, "Change Foot Effect" },
+            { CommandType.ChangeInteraction, "Change Interaction" },
+            { CommandType.AddPlaneSound, "Add Plane Sound" },
+            { CommandType.ChangeEnvSound, "Change Env Sound" }
+        };
+
     }
 
     public class FMP_Parameter
@@ -1795,8 +1964,6 @@ namespace Xv2CoreLib.FMP
             get => GetXmlFormattedValue();
             set => SetValueFromXmlFormattedValue(value);
         }
-
-
 
         public static List<FMP_Parameter> ReadAll(byte[] bytes, int offset, int count)
         {
@@ -1920,6 +2087,7 @@ namespace Xv2CoreLib.FMP
                     return Value.ToString();
             }
         }
+
     }
 
     [YAXSerializeAs("Entity")]
