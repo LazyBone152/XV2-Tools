@@ -175,6 +175,8 @@ namespace Xv2CoreLib.SPM
     [YAXSerializeAs("SPMEntry")]
     public class SPM_Entry
     {
+        private const int SPM_BASE_ENTRY_SIZE = 784;
+
         [YAXAttributeForClass]
         public string Name { get; set; }
         [CustomSerialize]
@@ -218,7 +220,9 @@ namespace Xv2CoreLib.SPM
         public float[] F_144 { get; set; }
 
         [CustomSerialize]
-        public int I_236 { get; set; }
+        public float ShadowParam48 { get; set; }
+        [CustomSerialize]
+        public float ShadowDepthBias { get; set; }
 
         [CustomSerialize("FogMultiColor", "R")]
         public float FogMultiColorR { get; set; }
@@ -306,16 +310,16 @@ namespace Xv2CoreLib.SPM
         public ushort I_362 { get; set; }
 
         [CustomSerialize]
-        public float F_364 { get; set; }
+        public float ShadowForceMinY { get; set; }
 
         [CustomSerialize]
-        public float ShadowEndAngle { get; set; }
+        public float ShadowFarMax { get; set; }
 
         [CustomSerialize]
         public float F_372 { get; set; }
 
         [CustomSerialize]
-        public float ShadowStartAngle { get; set; }
+        public float ShadowFadeStartRatio { get; set; }
 
         [CustomSerialize]
         public float SunFactor { get; set; }
@@ -389,8 +393,8 @@ namespace Xv2CoreLib.SPM
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public float[] F_500 { get; set; }
 
-        [CustomSerialize]
-        public int I_512 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_512 { get; set; }
 
         [CustomSerialize]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
@@ -433,22 +437,24 @@ namespace Xv2CoreLib.SPM
         public float ShadowDirY { get; set; }
         [CustomSerialize("ShadowDir", "Z")]
         public float ShadowDirZ { get; set; }
+        [CustomSerialize("ShadowDir", "W")]
+        public float ShadowDirW { get; set; }
 
         [CustomSerialize]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_620 { get; set; }
+        public float[] F_624 { get; set; }
 
-        [CustomSerialize("ShadowFilterColor", "R")]
-        public float ShadowFilterColorR { get; set; }
+        [CustomSerialize("ShadowColor", "R")]
+        public float ShadowColorR { get; set; }
 
-        [CustomSerialize("ShadowFilterColor", "G")]
-        public float ShadowFilterColorG { get; set; }
+        [CustomSerialize("ShadowColor", "G")]
+        public float ShadowColorG { get; set; }
 
-        [CustomSerialize("ShadowFilterColor", "B")]
-        public float ShadowFilterColorB { get; set; }
+        [CustomSerialize("ShadowColor", "B")]
+        public float ShadowColorB { get; set; }
 
-        [CustomSerialize]
-        public float F_684 { get; set; }
+        [CustomSerialize("ShadowColor", "A")]
+        public float ShadowColorA { get; set; }
 
         [CustomSerialize("SunGodRayColor", "R")]
         public float SunGodRayColorR { get; set; }
@@ -507,13 +513,13 @@ namespace Xv2CoreLib.SPM
 
         internal byte[] Write(bool useExtendedData)
         {
-            List<byte> bytes = new List<byte>();
+            List<byte> bytes = new List<byte>(useExtendedData ? SPM_BASE_ENTRY_SIZE + SPM_ExtendedEntry.EXPANDED_ENTRY_SIZE : SPM_BASE_ENTRY_SIZE);
 
             //Check array sizes
             Assertion.AssertArraySize(I_18, 5, "SPMEntry", nameof(I_18));
             Assertion.AssertArraySize(F_32, 4, "SPMEntry", nameof(F_32));
             Assertion.AssertArraySize(F_64, 19, "SPMEntry", nameof(F_64));
-            Assertion.AssertArraySize(F_144, 23, "SPMEntry", nameof(F_144));
+            Assertion.AssertArraySize(F_144, 22, "SPMEntry", nameof(F_144));
             Assertion.AssertArraySize(F_416, 6, "SPMEntry", nameof(F_416));
             Assertion.AssertArraySize(F_480, 4, "SPMEntry", nameof(F_480));
             Assertion.AssertArraySize(F_500, 3, "SPMEntry", nameof(F_500));
@@ -522,7 +528,7 @@ namespace Xv2CoreLib.SPM
             Assertion.AssertArraySize(I_544, 8, "SPMEntry", nameof(I_544));
             Assertion.AssertArraySize(F_560, 4, "SPMEntry", nameof(F_560));
             Assertion.AssertArraySize(F_592, 4, "SPMEntry", nameof(F_592));
-            Assertion.AssertArraySize(F_620, 13, "SPMEntry", nameof(F_620));
+            Assertion.AssertArraySize(F_624, 12, "SPMEntry", nameof(F_624));
             Assertion.AssertArraySize(F_720, 8, "SPMEntry", nameof(F_720));
 
             //Write main entry values
@@ -539,7 +545,8 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter_Ex.GetBytes(F_64));
             bytes.AddRange(BitConverter.GetBytes(I_140));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_144));
-            bytes.AddRange(BitConverter.GetBytes(I_236));
+            bytes.AddRange(BitConverter.GetBytes(ShadowParam48));
+            bytes.AddRange(BitConverter.GetBytes(ShadowDepthBias));
             bytes.AddRange(BitConverter.GetBytes(FogMultiColorR));
             bytes.AddRange(BitConverter.GetBytes(FogMultiColorG));
             bytes.AddRange(BitConverter.GetBytes(FogMultiColorB));
@@ -568,10 +575,10 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter.GetBytes(F_356));
             bytes.AddRange(BitConverter.GetBytes(HaloAlphaRejection));
             bytes.AddRange(BitConverter.GetBytes(I_362));
-            bytes.AddRange(BitConverter.GetBytes(F_364));
-            bytes.AddRange(BitConverter.GetBytes(ShadowEndAngle));
+            bytes.AddRange(BitConverter.GetBytes(ShadowForceMinY));
+            bytes.AddRange(BitConverter.GetBytes(ShadowFarMax));
             bytes.AddRange(BitConverter.GetBytes(F_372));
-            bytes.AddRange(BitConverter.GetBytes(ShadowStartAngle));
+            bytes.AddRange(BitConverter.GetBytes(ShadowFadeStartRatio));
             bytes.AddRange(BitConverter.GetBytes(SunFactor));
             bytes.AddRange(BitConverter.GetBytes(SunFactorHidden));
             bytes.AddRange(BitConverter.GetBytes(SunSize));
@@ -595,7 +602,7 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter_Ex.GetBytes(F_480));
             bytes.AddRange(BitConverter.GetBytes(LayerReceiveShadowW));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_500));
-            bytes.AddRange(BitConverter.GetBytes(I_512));
+            bytes.AddRange(BitConverter.GetBytes(F_512));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_516));
             bytes.AddRange(BitConverter.GetBytes(I_528));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_532));
@@ -609,11 +616,12 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter.GetBytes(ShadowDirX));
             bytes.AddRange(BitConverter.GetBytes(ShadowDirY));
             bytes.AddRange(BitConverter.GetBytes(ShadowDirZ));
-            bytes.AddRange(BitConverter_Ex.GetBytes(F_620));
-            bytes.AddRange(BitConverter.GetBytes(ShadowFilterColorR));
-            bytes.AddRange(BitConverter.GetBytes(ShadowFilterColorG));
-            bytes.AddRange(BitConverter.GetBytes(ShadowFilterColorB));
-            bytes.AddRange(BitConverter.GetBytes(F_684));
+            bytes.AddRange(BitConverter.GetBytes(ShadowDirW));
+            bytes.AddRange(BitConverter_Ex.GetBytes(F_624));
+            bytes.AddRange(BitConverter.GetBytes(ShadowColorR));
+            bytes.AddRange(BitConverter.GetBytes(ShadowColorG));
+            bytes.AddRange(BitConverter.GetBytes(ShadowColorB));
+            bytes.AddRange(BitConverter.GetBytes(ShadowColorA));
             bytes.AddRange(BitConverter.GetBytes(SunGodRayColorR));
             bytes.AddRange(BitConverter.GetBytes(SunGodRayColorG));
             bytes.AddRange(BitConverter.GetBytes(SunGodRayColorB));
@@ -635,10 +643,14 @@ namespace Xv2CoreLib.SPM
             if (bytes.Count != 784)
                 throw new Exception("SPM_Entry.Write: Incorrect size!");
 
-            if (ExtendedData == null && useExtendedData)
+            if(useExtendedData && ExtendedData != null)
+            {
+                bytes.AddRange(ExtendedData.Write());
+            }
+            else if (useExtendedData)
+            {
                 throw new Exception("ExtendedData is missing, but this version of SPM requires it.");
-
-            bytes.AddRange(ExtendedData.Write());
+            }
 
             return bytes.ToArray();
         }
@@ -659,8 +671,9 @@ namespace Xv2CoreLib.SPM
                 LightDirW = BitConverter.ToSingle(bytes, offset + 60),
                 F_64 = BitConverter_Ex.ToFloat32Array(bytes, offset + 64, 19),
                 I_140 = BitConverter.ToInt32(bytes, offset + 140),
-                F_144 = BitConverter_Ex.ToFloat32Array(bytes, offset + 144, 23),
-                I_236 = BitConverter.ToInt32(bytes, offset + 236),
+                F_144 = BitConverter_Ex.ToFloat32Array(bytes, offset + 144, 22),
+                ShadowParam48 = BitConverter.ToSingle(bytes, offset + 232),
+                ShadowDepthBias = BitConverter.ToSingle(bytes, offset + 236),
                 FogMultiColorR = BitConverter.ToSingle(bytes, offset + 240),
                 FogMultiColorG = BitConverter.ToSingle(bytes, offset + 244),
                 FogMultiColorB = BitConverter.ToSingle(bytes, offset + 248),
@@ -689,10 +702,10 @@ namespace Xv2CoreLib.SPM
                 F_356 = BitConverter.ToSingle(bytes, offset + 356),
                 HaloAlphaRejection = BitConverter.ToUInt16(bytes, offset + 360),
                 I_362 = BitConverter.ToUInt16(bytes, offset + 362),
-                F_364 = BitConverter.ToSingle(bytes, offset + 364),
-                ShadowEndAngle = BitConverter.ToSingle(bytes, offset + 368),
+                ShadowForceMinY = BitConverter.ToSingle(bytes, offset + 364),
+                ShadowFarMax = BitConverter.ToSingle(bytes, offset + 368),
                 F_372 = BitConverter.ToSingle(bytes, offset + 372),
-                ShadowStartAngle = BitConverter.ToSingle(bytes, offset + 376),
+                ShadowFadeStartRatio = BitConverter.ToSingle(bytes, offset + 376),
                 SunFactor = BitConverter.ToSingle(bytes, offset + 380),
                 SunFactorHidden = BitConverter.ToSingle(bytes, offset + 384),
                 SunSize = BitConverter.ToSingle(bytes, offset + 388),
@@ -716,7 +729,7 @@ namespace Xv2CoreLib.SPM
                 F_480 = BitConverter_Ex.ToFloat32Array(bytes, offset + 480, 4),
                 LayerReceiveShadowW = BitConverter.ToSingle(bytes, offset + 496),
                 F_500 = BitConverter_Ex.ToFloat32Array(bytes, offset + 500, 3),
-                I_512 = BitConverter.ToInt32(bytes, offset + 512),
+                F_512 = BitConverter.ToSingle(bytes, offset + 512),
                 F_516 = BitConverter_Ex.ToFloat32Array(bytes, offset + 516, 3),
                 I_528 = BitConverter.ToInt32(bytes, offset + 528),
                 F_532 = BitConverter_Ex.ToFloat32Array(bytes, offset + 532, 3),
@@ -730,11 +743,12 @@ namespace Xv2CoreLib.SPM
                 ShadowDirX = BitConverter.ToSingle(bytes, offset + 608),
                 ShadowDirY = BitConverter.ToSingle(bytes, offset + 612),
                 ShadowDirZ = BitConverter.ToSingle(bytes, offset + 616),
-                F_620 = BitConverter_Ex.ToFloat32Array(bytes, offset + 620, 13),
-                ShadowFilterColorR = BitConverter.ToSingle(bytes, offset + 672),
-                ShadowFilterColorG = BitConverter.ToSingle(bytes, offset + 676),
-                ShadowFilterColorB = BitConverter.ToSingle(bytes, offset + 680),
-                F_684 = BitConverter.ToSingle(bytes, offset + 684),
+                ShadowDirW = BitConverter.ToSingle(bytes, offset + 620),
+                F_624 = BitConverter_Ex.ToFloat32Array(bytes, offset + 624, 12),
+                ShadowColorR = BitConverter.ToSingle(bytes, offset + 672),
+                ShadowColorG = BitConverter.ToSingle(bytes, offset + 676),
+                ShadowColorB = BitConverter.ToSingle(bytes, offset + 680),
+                ShadowColorA = BitConverter.ToSingle(bytes, offset + 684),
                 SunGodRayColorR = BitConverter.ToSingle(bytes, offset + 688),
                 SunGodRayColorG = BitConverter.ToSingle(bytes, offset + 692),
                 SunGodRayColorB = BitConverter.ToSingle(bytes, offset + 696),
@@ -760,6 +774,8 @@ namespace Xv2CoreLib.SPM
 
     public class SPM_ExtendedEntry
     {
+        internal const int EXPANDED_ENTRY_SIZE = 336;
+
         [CustomSerialize]
         public ushort I_00 { get; set; }
 
@@ -828,16 +844,111 @@ namespace Xv2CoreLib.SPM
         [CustomSerialize]
         public int I_76 { get; set; }
 
-        [YAXDontSerializeIfNull]
-        public SPM_UnknownData UnknownData { get; set; }
+        [CustomSerialize(IsHex = true)]
+        public int I_80 { get; set; }
+        [CustomSerialize(IsHex = true)]
+        public int I_84 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float ShadowFarMin { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float ShadowFarExponent { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float ShadowHeightStart { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float ShadowHeightRange { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float ShadowAabbFloorHeight { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float ShadowAabbCeilingHeight { get; set; }
+        [CustomSerialize]
+        public int ShadowPerspective { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_116 { get; set; } //Size 4
+
+        [CustomSerialize(isFloat: true)]
+        public float F_132 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_136 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_140 { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_144 { get; set; } //Size 2
+        [CustomSerialize(isFloat: true)]
+        public float F_152 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_156 { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_160 { get; set; } //Size 4
+        [CustomSerialize(isFloat: true)]
+        public float F_176 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_180 { get; set; }
+        [CustomSerialize]
+        public int I_184 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_188 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_192 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_196 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_200 { get; set; }
+        [CustomSerialize]
+        public int ShadowMovingAabb { get; set; }
+        [CustomSerialize]
+        public int I_208 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_212 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_216 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_220 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_224 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_228 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_232 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_236 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_240 { get; set; }
+        [CustomSerialize]
+        public int I_244 { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_248 { get; set; } //Size 6
+        [CustomSerialize(isFloat: true)]
+        public float F_272 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_276 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_280 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_284 { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_288 { get; set; } //Size 10
+        [CustomSerialize(isFloat: true)]
+        public float F_328 { get; set; }
+        [CustomSerialize]
+        public int I_332 { get; set; }
 
         internal byte[] Write()
         {
-            List<byte> bytes = new List<byte>();
+            List<byte> bytes = new List<byte>(EXPANDED_ENTRY_SIZE);
 
             //Check array sizes
             Assertion.AssertArraySize(F_44, 5, "ExtendedData", nameof(F_44));
-            Assertion.AssertArraySize(F_68, 2, "ExtendedData", nameof(F_68));
+            Assertion.AssertArraySize(F_68, 2, "ExtendedData", nameof(F_68)); 
+            Assertion.AssertArraySize(I_116, 4, nameof(SPM_ExtendedEntry), nameof(I_116));
+            Assertion.AssertArraySize(I_144, 2, nameof(SPM_ExtendedEntry), nameof(I_144));
+            Assertion.AssertArraySize(I_160, 4, nameof(SPM_ExtendedEntry), nameof(I_160));
+            Assertion.AssertArraySize(I_248, 6, nameof(SPM_ExtendedEntry), nameof(I_248));
+            Assertion.AssertArraySize(I_288, 10, nameof(SPM_ExtendedEntry), nameof(I_288));
 
             //Write values
             bytes.AddRange(BitConverter.GetBytes(I_00));
@@ -862,22 +973,51 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter.GetBytes(I_64));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_68));
             bytes.AddRange(BitConverter.GetBytes(I_76));
+            bytes.AddRange(BitConverter.GetBytes(I_80));
+            bytes.AddRange(BitConverter.GetBytes(I_84));
+            bytes.AddRange(BitConverter.GetBytes(ShadowFarMin));
+            bytes.AddRange(BitConverter.GetBytes(ShadowFarExponent));
+            bytes.AddRange(BitConverter.GetBytes(ShadowHeightStart));
+            bytes.AddRange(BitConverter.GetBytes(ShadowHeightRange));
+            bytes.AddRange(BitConverter.GetBytes(ShadowAabbFloorHeight));
+            bytes.AddRange(BitConverter.GetBytes(ShadowAabbCeilingHeight));
+            bytes.AddRange(BitConverter.GetBytes(ShadowPerspective));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_116, 4));
+            bytes.AddRange(BitConverter.GetBytes(F_132));
+            bytes.AddRange(BitConverter.GetBytes(F_136));
+            bytes.AddRange(BitConverter.GetBytes(F_140));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_144));
+            bytes.AddRange(BitConverter.GetBytes(F_152));
+            bytes.AddRange(BitConverter.GetBytes(F_156));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_160));
+            bytes.AddRange(BitConverter.GetBytes(F_176));
+            bytes.AddRange(BitConverter.GetBytes(F_180));
+            bytes.AddRange(BitConverter.GetBytes(I_184));
+            bytes.AddRange(BitConverter.GetBytes(F_188));
+            bytes.AddRange(BitConverter.GetBytes(F_192));
+            bytes.AddRange(BitConverter.GetBytes(F_196));
+            bytes.AddRange(BitConverter.GetBytes(F_200));
+            bytes.AddRange(BitConverter.GetBytes(ShadowMovingAabb));
+            bytes.AddRange(BitConverter.GetBytes(I_208));
+            bytes.AddRange(BitConverter.GetBytes(F_212));
+            bytes.AddRange(BitConverter.GetBytes(F_216));
+            bytes.AddRange(BitConverter.GetBytes(F_220));
+            bytes.AddRange(BitConverter.GetBytes(F_224));
+            bytes.AddRange(BitConverter.GetBytes(F_228));
+            bytes.AddRange(BitConverter.GetBytes(F_232));
+            bytes.AddRange(BitConverter.GetBytes(F_236));
+            bytes.AddRange(BitConverter.GetBytes(F_240));
+            bytes.AddRange(BitConverter.GetBytes(I_244));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_248));
+            bytes.AddRange(BitConverter.GetBytes(F_272));
+            bytes.AddRange(BitConverter.GetBytes(F_276));
+            bytes.AddRange(BitConverter.GetBytes(F_280));
+            bytes.AddRange(BitConverter.GetBytes(F_284));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_288));
+            bytes.AddRange(BitConverter.GetBytes(F_328));
+            bytes.AddRange(BitConverter.GetBytes(I_332));
 
-            if (bytes.Count != 80)
-                throw new Exception("SPM_ExtendedEntry.Write: Incorrect size!");
-
-            //Write unknown values
-            if(UnknownData != null)
-            {
-                bytes.AddRange(UnknownData.Write());
-            }
-            else
-            {
-                //If missing, add null bytes.
-                bytes.AddRange(new byte[256]);
-            }
-
-            if (bytes.Count != 80 + 256)
+            if (bytes.Count != EXPANDED_ENTRY_SIZE)
                 throw new Exception("SPM_ExtendedEntry.Write: Incorrect size!");
 
             return bytes.ToArray();
@@ -909,209 +1049,49 @@ namespace Xv2CoreLib.SPM
                 I_64 = BitConverter.ToInt32(bytes, offset + 64),
                 F_68 = BitConverter_Ex.ToFloat32Array(bytes, offset + 68, 2),
                 I_76 = BitConverter.ToInt32(bytes, offset + 76),
-                UnknownData = SPM_UnknownData.Read(bytes, offset + 80)
-            };
-        }
-    }
-
-    public class SPM_UnknownData
-    {
-        [CustomSerialize(IsHex = true)]
-        public int I_00 { get; set; }
-        [CustomSerialize(IsHex = true)]
-        public int I_04 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_08 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_12 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_16 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_20 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_24 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_28 { get; set; }
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public int[] I_32 { get; set; } //Size 5
-
-        [CustomSerialize(isFloat: true)]
-        public float F_52 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_56 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_60 { get; set; }
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public int[] I_64 { get; set; } //Size 2
-        [CustomSerialize(isFloat: true)]
-        public float F_72 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_76 { get; set; }
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public int[] I_80 { get; set; } //Size 4
-        [CustomSerialize(isFloat: true)]
-        public float F_96 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_100 { get; set; }
-        [CustomSerialize]
-        public int I_104 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_108 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_112 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_116 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_120 { get; set; }
-        [CustomSerialize]
-        public int I_124 { get; set; }
-        [CustomSerialize]
-        public int I_128 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_132 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_136 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_140 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_144 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_148 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_152 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_156 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_160 { get; set; }
-        [CustomSerialize]
-        public int I_164 { get; set; }
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public int[] I_168 { get; set; } //Size 6
-        [CustomSerialize(isFloat: true)]
-        public float F_192 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_196 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_200 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_204 { get; set; }
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public int[] I_208 { get; set; } //Size 10
-        [CustomSerialize(isFloat: true)]
-        public float F_248 { get; set; }
-        [CustomSerialize]
-        public int I_252 { get; set; }
-
-        public byte[] Write()
-        {
-            List<byte> bytes = new List<byte>();
-
-            Assertion.AssertArraySize(I_32, 5, nameof(SPM_UnknownData), nameof(I_32));
-            Assertion.AssertArraySize(I_64, 2, nameof(SPM_UnknownData), nameof(I_64));
-            Assertion.AssertArraySize(I_80, 4, nameof(SPM_UnknownData), nameof(I_80));
-            Assertion.AssertArraySize(I_168, 6, nameof(SPM_UnknownData), nameof(I_168));
-            Assertion.AssertArraySize(I_208, 10, nameof(SPM_UnknownData), nameof(I_208));
-
-            bytes.AddRange(BitConverter.GetBytes(I_00));
-            bytes.AddRange(BitConverter.GetBytes(I_04));
-            bytes.AddRange(BitConverter.GetBytes(F_08));
-            bytes.AddRange(BitConverter.GetBytes(F_12));
-            bytes.AddRange(BitConverter.GetBytes(F_16));
-            bytes.AddRange(BitConverter.GetBytes(F_20));
-            bytes.AddRange(BitConverter.GetBytes(F_24));
-            bytes.AddRange(BitConverter.GetBytes(F_28));
-            bytes.AddRange(BitConverter_Ex.GetBytes(I_32));
-            bytes.AddRange(BitConverter.GetBytes(F_52));
-            bytes.AddRange(BitConverter.GetBytes(F_56));
-            bytes.AddRange(BitConverter.GetBytes(F_60));
-            bytes.AddRange(BitConverter_Ex.GetBytes(I_64));
-            bytes.AddRange(BitConverter.GetBytes(F_72));
-            bytes.AddRange(BitConverter.GetBytes(F_76));
-            bytes.AddRange(BitConverter_Ex.GetBytes(I_80));
-            bytes.AddRange(BitConverter.GetBytes(F_96));
-            bytes.AddRange(BitConverter.GetBytes(F_100));
-            bytes.AddRange(BitConverter.GetBytes(I_104));
-            bytes.AddRange(BitConverter.GetBytes(F_108));
-            bytes.AddRange(BitConverter.GetBytes(F_112));
-            bytes.AddRange(BitConverter.GetBytes(F_116));
-            bytes.AddRange(BitConverter.GetBytes(F_120));
-            bytes.AddRange(BitConverter.GetBytes(I_124));
-            bytes.AddRange(BitConverter.GetBytes(I_128));
-            bytes.AddRange(BitConverter.GetBytes(F_132));
-            bytes.AddRange(BitConverter.GetBytes(F_136));
-            bytes.AddRange(BitConverter.GetBytes(F_140));
-            bytes.AddRange(BitConverter.GetBytes(F_144));
-            bytes.AddRange(BitConverter.GetBytes(F_148));
-            bytes.AddRange(BitConverter.GetBytes(F_152));
-            bytes.AddRange(BitConverter.GetBytes(F_156));
-            bytes.AddRange(BitConverter.GetBytes(F_160));
-            bytes.AddRange(BitConverter.GetBytes(I_164));
-            bytes.AddRange(BitConverter_Ex.GetBytes(I_168));
-            bytes.AddRange(BitConverter.GetBytes(F_192));
-            bytes.AddRange(BitConverter.GetBytes(F_196));
-            bytes.AddRange(BitConverter.GetBytes(F_200));
-            bytes.AddRange(BitConverter.GetBytes(F_204));
-            bytes.AddRange(BitConverter_Ex.GetBytes(I_208));
-            bytes.AddRange(BitConverter.GetBytes(F_248));
-            bytes.AddRange(BitConverter.GetBytes(I_252));
-
-            if (bytes.Count != 256)
-                throw new Exception("SPM_UnknownData: Invalid size");
-
-            return bytes.ToArray();
-        }
-
-        public static SPM_UnknownData Read(byte[] bytes, int offset)
-        {
-            return new SPM_UnknownData()
-            {
-                I_00 = BitConverter.ToInt32(bytes, offset),
-                I_04 = BitConverter.ToInt32(bytes, offset + 4),
-                F_08 = BitConverter.ToSingle(bytes, offset + 8),
-                F_12 = BitConverter.ToSingle(bytes, offset + 12),
-                F_16 = BitConverter.ToSingle(bytes, offset + 16),
-                F_20 = BitConverter.ToSingle(bytes, offset + 20),
-                F_24 = BitConverter.ToSingle(bytes, offset + 24),
-                F_28 = BitConverter.ToSingle(bytes, offset + 28),
-                I_32 = BitConverter_Ex.ToInt32Array(bytes, offset + 32, 5),
-                F_52 = BitConverter.ToSingle(bytes, offset + 52),
-                F_56 = BitConverter.ToSingle(bytes, offset + 56),
-                F_60 = BitConverter.ToSingle(bytes, offset + 60),
-                I_64 = BitConverter_Ex.ToInt32Array(bytes, offset + 64, 2),
-                F_72 = BitConverter.ToSingle(bytes, offset + 72),
-                F_76 = BitConverter.ToSingle(bytes, offset + 76),
-                I_80 = BitConverter_Ex.ToInt32Array(bytes, offset + 80, 4),
-                F_96 = BitConverter.ToSingle(bytes, offset + 96),
-                F_100 = BitConverter.ToSingle(bytes, offset + 100),
-                I_104 = BitConverter.ToInt32(bytes, offset + 104),
-                F_108 = BitConverter.ToSingle(bytes, offset + 108),
-                F_112 = BitConverter.ToSingle(bytes, offset + 112),
-                F_116 = BitConverter.ToSingle(bytes, offset + 116),
-                F_120 = BitConverter.ToSingle(bytes, offset + 120),
-                I_124 = BitConverter.ToInt32(bytes, offset + 124),
-                I_128 = BitConverter.ToInt32(bytes, offset + 128),
+                I_80 = BitConverter.ToInt32(bytes, offset + 80),
+                I_84 = BitConverter.ToInt32(bytes, offset + 84),
+                ShadowFarMin = BitConverter.ToSingle(bytes, offset + 88),
+                ShadowFarExponent = BitConverter.ToSingle(bytes, offset + 92),
+                ShadowHeightStart = BitConverter.ToSingle(bytes, offset + 96),
+                ShadowHeightRange = BitConverter.ToSingle(bytes, offset + 100),
+                ShadowAabbFloorHeight = BitConverter.ToSingle(bytes, offset + 104),
+                ShadowAabbCeilingHeight = BitConverter.ToSingle(bytes, offset + 108),
+                ShadowPerspective = BitConverter.ToInt32(bytes, offset + 112),
+                I_116 = BitConverter_Ex.ToInt32Array(bytes, offset + 116, 4),
                 F_132 = BitConverter.ToSingle(bytes, offset + 132),
                 F_136 = BitConverter.ToSingle(bytes, offset + 136),
                 F_140 = BitConverter.ToSingle(bytes, offset + 140),
-                F_144 = BitConverter.ToSingle(bytes, offset + 144),
-                F_148 = BitConverter.ToSingle(bytes, offset + 148),
+                I_144 = BitConverter_Ex.ToInt32Array(bytes, offset + 144, 2),
                 F_152 = BitConverter.ToSingle(bytes, offset + 152),
                 F_156 = BitConverter.ToSingle(bytes, offset + 156),
-                F_160 = BitConverter.ToSingle(bytes, offset + 160),
-                I_164 = BitConverter.ToInt32(bytes, offset + 164),
-                I_168 = BitConverter_Ex.ToInt32Array(bytes, offset + 168, 6),
+                I_160 = BitConverter_Ex.ToInt32Array(bytes, offset + 160, 4),
+                F_176 = BitConverter.ToSingle(bytes, offset + 176),
+                F_180 = BitConverter.ToSingle(bytes, offset + 180),
+                I_184 = BitConverter.ToInt32(bytes, offset + 184),
+                F_188 = BitConverter.ToSingle(bytes, offset + 188),
                 F_192 = BitConverter.ToSingle(bytes, offset + 192),
                 F_196 = BitConverter.ToSingle(bytes, offset + 196),
                 F_200 = BitConverter.ToSingle(bytes, offset + 200),
-                F_204 = BitConverter.ToSingle(bytes, offset + 204),
-                I_208 = BitConverter_Ex.ToInt32Array(bytes, offset + 208, 10),
-                F_248 = BitConverter.ToSingle(bytes, offset + 248),
-                I_252 = BitConverter.ToInt32(bytes, offset + 252)
+                ShadowMovingAabb = BitConverter.ToInt32(bytes, offset + 204),
+                I_208 = BitConverter.ToInt32(bytes, offset + 208),
+                F_212 = BitConverter.ToSingle(bytes, offset + 212),
+                F_216 = BitConverter.ToSingle(bytes, offset + 216),
+                F_220 = BitConverter.ToSingle(bytes, offset + 220),
+                F_224 = BitConverter.ToSingle(bytes, offset + 224),
+                F_228 = BitConverter.ToSingle(bytes, offset + 228),
+                F_232 = BitConverter.ToSingle(bytes, offset + 232),
+                F_236 = BitConverter.ToSingle(bytes, offset + 236),
+                F_240 = BitConverter.ToSingle(bytes, offset + 240),
+                I_244 = BitConverter.ToInt32(bytes, offset + 244),
+                I_248 = BitConverter_Ex.ToInt32Array(bytes, offset + 248, 6),
+                F_272 = BitConverter.ToSingle(bytes, offset + 272),
+                F_276 = BitConverter.ToSingle(bytes, offset + 276),
+                F_280 = BitConverter.ToSingle(bytes, offset + 280),
+                F_284 = BitConverter.ToSingle(bytes, offset + 284),
+                I_288 = BitConverter_Ex.ToInt32Array(bytes, offset + 288, 10),
+                F_328 = BitConverter.ToSingle(bytes, offset + 328),
+                I_332 = BitConverter.ToInt32(bytes, offset + 332)
             };
         }
     }
