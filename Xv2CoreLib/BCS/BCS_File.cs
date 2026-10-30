@@ -1179,10 +1179,6 @@ namespace Xv2CoreLib.BCS
         public CustomColor Color3 { get; set; } = new CustomColor();
         public CustomColor Color4 { get; set; } = new CustomColor();
 
-        //Present for older XMLs only. Doesn't actually do anything.
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
-        public CustomColor Color5 { get; set; }
-
         public CustomColor GetColor(int colorIndex)
         {
             switch (colorIndex)
@@ -1275,16 +1271,21 @@ namespace Xv2CoreLib.BCS
 
         private SolidColorBrush CreateColorPreview()
         {
-            if (!Color1.IsBlack())
-                return new SolidColorBrush(Color1.ToWpfColor(true));
+            byte r = (byte)(((Color1.R + Color3.R) / 2f) * 255f);
+            byte g = (byte)(((Color1.G + Color3.G) / 2f) * 255f);
+            byte b = (byte)(((Color1.B + Color3.B) / 2f) * 255f);
 
-            if (!Color4.IsBlack())
-                return new SolidColorBrush(Color4.ToWpfColor(true));
+            int length = r + g + b;
 
-            if (!Color2.IsBlack())
-                return new SolidColorBrush(Color2.ToWpfColor(true));
+            if(length < 100)
+            {
+                //Attempt at "fixing" dark colors appearing as a dull color (black as dark grey)
+                r = (byte)(r * 0.25f);
+                g = (byte)(g * 0.25f);
+                b = (byte)(b * 0.25f);
+            }
 
-            return new SolidColorBrush(Color3.ToWpfColor(true));
+            return new SolidColorBrush(System.Windows.Media.Color.FromRgb(r, g, b));
         }
 
         public void RefreshPreview()
