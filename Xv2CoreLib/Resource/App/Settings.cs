@@ -551,6 +551,7 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_RimLightingEnabled { get; set; } = true;
         public int XenoKit_SuperSamplingFactor { get; set; } = 2;
         public int XenoKit_ShadowMapRes { get; set; } = 2048;
+        public float XenoKit_ShadowDistanceModifier { get; set; } = 1f;
         public bool XenoKit_FullLowRez { get; set; } = false;
         public bool XenoKit_UseOutlinePostEffect { get; set; } = true;
         public bool XenoKit_HalfRenderRate { get; set; }
@@ -611,17 +612,8 @@ namespace Xv2CoreLib.Resource.App
             }
 
             //Setup Undo
-            if (UndoLimit < 0) UndoLimit = 0;
-            if (UndoLimit > UndoManager.MaximumMaxCapacity) UndoLimit = UndoManager.MaximumMaxCapacity;
-
+            UndoLimit = MathHelpers.Clamp(0, UndoManager.MaximumMaxCapacity, UndoLimit);
             UndoManager.Instance.SetCapacity(UndoLimit);
-
-            //Allowed SuperSamplingFactors: 1, 2, 4 and 8
-            if (XenoKit_SuperSamplingFactor != 1 && XenoKit_SuperSamplingFactor != 2 &&
-                XenoKit_SuperSamplingFactor != 4 && XenoKit_SuperSamplingFactor != 8)
-            {
-                XenoKit_SuperSamplingFactor = 2;
-            }
 
             //Theme
             InitTheme();
@@ -638,6 +630,17 @@ namespace Xv2CoreLib.Resource.App
 
             //XenoKit
             XenoKit_DelayedUpdateFrameInterval = MathHelpers.Clamp(1, 60, XenoKit_DelayedUpdateFrameInterval);
+
+            //Clamp shadow res to range allowed by XenoKit. Will drop anyone that had the old "ultra" setting selected down to the more reasonable "higher" setting
+            XenoKit_ShadowMapRes = MathHelpers.Clamp(16, 12000, XenoKit_ShadowMapRes);
+            XenoKit_ShadowDistanceModifier = MathHelpers.Clamp(1f, 10f, XenoKit_ShadowDistanceModifier);
+
+            //Allowed SuperSamplingFactors: 1, 2, 4 and 8
+            if (XenoKit_SuperSamplingFactor != 1 && XenoKit_SuperSamplingFactor != 2 &&
+                XenoKit_SuperSamplingFactor != 4 && XenoKit_SuperSamplingFactor != 8)
+            {
+                XenoKit_SuperSamplingFactor = 2;
+            }
         }
 
         private string FindGameDirectory()
