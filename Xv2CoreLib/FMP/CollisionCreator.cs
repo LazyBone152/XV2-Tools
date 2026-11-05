@@ -146,7 +146,6 @@ namespace Xv2CoreLib.FMP
                 {
                     FMP_Collider collider = new FMP_Collider();
                     collider.Name = "PART_" + idx;
-                    collider.unk_a0 = ushort.MaxValue;
 
                     MeshFlags prevOptions = new MeshFlags();
                     List<MeshFlags> flagArray = new List<MeshFlags>(); //Per-group options.
@@ -174,24 +173,24 @@ namespace Xv2CoreLib.FMP
                             {
                                 HavokTagFile havokFile = havokStep[totalSubmeshIdx].HavokFile;
 
-                                FMP_Havok havok = new FMP_Havok();
+                                FMP_Shape havok = new FMP_Shape();
                                 havok.Group = havokGroup;
 
                                 //The FMP Havok entry requires different values for convex/mesh colliders, or the game crashes
                                 //I'm not sure on the exact values; but these work...
                                 if (havokStep[totalSubmeshIdx].IsConvex)
                                 {
-                                    havok.I_08 = 0;
+                                    havok.Flags = 0;
                                     havok.I_32 = 4;
                                 }
                                 else
                                 {
-                                    havok.I_08 = 78;
+                                    havok.Flags = 78;
                                     havok.I_28 = 6;
                                     havok.I_28 = 26;
                                 }
 
-                                havok.F_36 = 0.01f;
+                                havok.Margin = 0.01f;
                                 havok.HvkFile = havokFile.Write();
 
                                 //Set fragment group
@@ -324,7 +323,7 @@ namespace Xv2CoreLib.FMP
             }
         }
 
-        private static string GetSubmeshFlag(FMP_Havok havokEntry, FMP_HavokGroupParameters havokGroupParams, bool isConvex)
+        private static string GetSubmeshFlag(FMP_Shape havokEntry, FMP_HavokGroupParameters havokGroupParams, bool isConvex)
         {
             List<string> flags = new List<string>();
 
