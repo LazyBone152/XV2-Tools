@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CriPakTools;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,8 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using CriPakTools;
 using _cpk = CriPakTools.CPK;
 
 namespace Xv2CoreLib.CPK
@@ -20,6 +19,7 @@ namespace Xv2CoreLib.CPK
     public class CPK_Reader
     {
         private const string CRILAYLA_STRING = "CRILAYLA";
+        private readonly static ulong CRILAYLA_MAGIC = 4705233847682945603; //"CRILAYLA"
 
         public bool ValidCpkDirectory
         {
@@ -110,21 +110,6 @@ namespace Xv2CoreLib.CPK
                 _binaryReaders = binaryReaders.ToArray();
 
                 CpkFiles = new ReadOnlyCollection<_cpk>(_cpkFiles);
-                /*
-                CpkFiles = new List<CriPakTools.CPK>(CPK_LOAD_ORDER.Length);
-                binaryReader = new List<BinaryReader>(CPK_LOAD_ORDER.Length);
-                
-                foreach (string s in CPK_LOAD_ORDER)
-                {
-                    if (File.Exists(GetFullCpkPath(s)))
-                    {
-                        var cpk = new CriPakTools.CPK(new Tools());
-                        cpk.ReadCPK(GetFullCpkPath(s)); 
-                        CpkFiles.Add(cpk);
-                        binaryReader.Add(new BinaryReader(File.OpenRead(GetFullCpkPath(s))));
-                    }
-                }
-                */
             }
         }
 
@@ -163,17 +148,54 @@ namespace Xv2CoreLib.CPK
 
             for (int i = 0; i < _cpkFiles.Length; i++)
             {
-                lock (_binaryReaders[i])
+                /*
+                try
                 {
-                    var bytes = GetFileFromCpkAsByteArray(_cpkFiles[i], _binaryReaders[i], fileToFind);
+                    lock (_binaryReaders[i])
+                    {
+                        byte[] file = GetFileFromCpkAsByteArray(_cpkFiles[i], _binaryReaders[i], fileToFind);
 
-                    if (bytes != null) return bytes;
+                        if (file != null) return file;
+                    }
                 }
+                catch
+                {
+                    return null;
+                }
+                */
+                
+                if (_cpkFiles[i].Files.TryGetValue(fileToFind, out FileEntry fileEntry))
+                {
+                    byte[] chunk;
+
+                    try
+                    {
+                        lock (_binaryReaders[i])
+                        {
+                            _binaryReaders[i].BaseStream.Seek((long)fileEntry.FileOffset, SeekOrigin.Begin);
+                            chunk = _binaryReaders[i].ReadBytes((int)fileEntry.FileSize);
+                        }
+
+                        //Decompress if necessary
+                        if (chunk?.Length > 8 && BitConverter.ToUInt64(chunk, 0) == CRILAYLA_MAGIC)
+                        {
+                            chunk = _cpk.DecompressCRILAYLA(chunk);
+                        }
+
+                        return chunk;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+
+                
             }
 
             return null;
         }
-        
+
         private byte[] GetFileFromCpkAsByteArray(CriPakTools.CPK cpk, BinaryReader binaryReader, string fileToFind)
         {
             if (cpk.Files.TryGetValue(fileToFind, out FileEntry fileEntry))
@@ -184,10 +206,9 @@ namespace Xv2CoreLib.CPK
                     string isComp = Encoding.ASCII.GetString(binaryReader.ReadBytes(8));
                     binaryReader.BaseStream.Seek((long)fileEntry.FileOffset, SeekOrigin.Begin);
 
-                    byte[] chunk = binaryReader.ReadBytes(int.Parse(fileEntry.FileSize.ToString()));
+                    byte[] chunk = binaryReader.ReadBytes((int)fileEntry.FileSize);
                     if (isComp == CRILAYLA_STRING)
                     {
-                        int size = int.Parse((fileEntry.ExtractSize ?? fileEntry.FileSize).ToString());
                         chunk = _cpk.DecompressCRILAYLA(chunk);
                     }
                     return chunk;
@@ -198,27 +219,6 @@ namespace Xv2CoreLib.CPK
                 }
             }
 
-            /*
-            var results = cpk.FileTable.Where(p => (Path.Equals(p.DirName, dirToFind)));
-
-            foreach (var e in results)
-            {
-                if (String.Equals(nameToFind, (string)e.FileName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    binaryReader.BaseStream.Seek((long)e.FileOffset, SeekOrigin.Begin);
-                    string isComp = Encoding.ASCII.GetString(binaryReader.ReadBytes(8));
-                    binaryReader.BaseStream.Seek((long)e.FileOffset, SeekOrigin.Begin);
-
-                    byte[] chunk = binaryReader.ReadBytes(Int32.Parse(e.FileSize.ToString()));
-                    if (isComp == "CRILAYLA")
-                    {
-                        int size = Int32.Parse((e.ExtractSize ?? e.FileSize).ToString());
-                        chunk = _cpk.DecompressCRILAYLA(chunk, size);
-                    }
-                    return chunk;
-                }
-            }
-            */
             return null;
 
         }
@@ -235,58 +235,41 @@ namespace Xv2CoreLib.CPK
 
             for (int i = 0; i < _cpkFiles.Length; i++)
             {
-                lock (_binaryReaders[i])
+                //No need to lock for just a dictionary lookup
+                if(_cpkFiles[i].Files.ContainsKey(fileToFind))
                 {
-                    if (DoesFileExist(_cpkFiles[i], _binaryReaders[i], fileToFind)) return true;
+                    return true;
                 }
             }
 
             return false;
         }
         
-        private bool DoesFileExist(CriPakTools.CPK cpk, BinaryReader binaryReader, string file)
-        {
-            return cpk.Files.TryGetValue(file, out FileEntry fileEntry);
-        }
-        
         public string[] GetFilesInDirectory(string directory)
         {
-            List<string> files = new List<string>();
+            string dirToFind = Utils.SanitizePath(directory);
+            List<string> files = new List<string>(64);
 
             for (int i = 0; i < _cpkFiles.Length; i++)
             {
-                lock (_binaryReaders[i])
-                {
-                    files.AddRange(GetFilesinDirectoryFromCpk(_cpkFiles[i], directory));
-                }
+                files.AddRange(GetFilesinDirectoryFromCpk(_cpkFiles[i], dirToFind, files));
             }
 
             return files.ToArray();
         }
 
-        private string[] GetFilesinDirectoryFromCpk(CriPakTools.CPK cpk, string dir)
+        private string[] GetFilesinDirectoryFromCpk(CriPakTools.CPK cpk, string dir, List<string> files)
         {
-            string dirToFind = Utils.SanitizePath(dir);
-            List<string> files = new List<string>(64);
-            
             for(int i = 0; i < cpk.FileTable.Count; i++)
             {
                 FileEntry entry = cpk.FileTable[i];
 
-                if(Path.Equals(entry.DirName, dirToFind))
+                if(Path.Equals(entry.DirName, dir))
                 {
                     files.Add(string.Format("{0}/{1}", entry.DirName, entry.FileName));
                 }
             }
 
-            /*
-            var results = cpk.FileTable.Where(p => (Path.Equals(p.DirName, dirToFind)));
-
-            foreach (var e in results)
-            {
-                files.Add(string.Format("{0}/{1}", e.DirName, e.FileName));
-            }
-            */
             return files.ToArray();
         }
 
@@ -315,18 +298,14 @@ namespace Xv2CoreLib.CPK
 
                         //Extract it
                         _binaryReaders[i].BaseStream.Seek((long)file.FileOffset, SeekOrigin.Begin);
-                        string isComp = Encoding.ASCII.GetString(_binaryReaders[i].ReadBytes(8));
-                        _binaryReaders[i].BaseStream.Seek((long)file.FileOffset, SeekOrigin.Begin);
+                        byte[] chunk = _binaryReaders[i].ReadBytes((int)file.FileSize);
 
-                        byte[] chunk = _binaryReaders[i].ReadBytes(Int32.Parse(file.FileSize.ToString()));
-                        if (isComp == "CRILAYLA")
+                        if (chunk?.Length > 8 && BitConverter.ToUInt64(chunk, 0) == CRILAYLA_MAGIC)
                         {
-                            int size = Int32.Parse((file.ExtractSize ?? file.FileSize).ToString());
                             chunk = _cpk.DecompressCRILAYLA(chunk);
                         }
 
-                        if (!Directory.Exists(string.Format("{0}{1}{3}{1}", outputDir, Path.DirectorySeparatorChar, file.FileName, file.DirName)))
-                            Directory.CreateDirectory(string.Format("{0}{1}{3}{1}", outputDir, Path.DirectorySeparatorChar, file.FileName, file.DirName));
+                        Directory.CreateDirectory(string.Format("{0}{1}{3}{1}", outputDir, Path.DirectorySeparatorChar, file.FileName, file.DirName));
 
                         if(chunk != null)
                             File.WriteAllBytes(string.Format("{0}{1}{3}{1}{2}", outputDir, Path.DirectorySeparatorChar, file.FileName, file.DirName), chunk);
@@ -500,7 +479,7 @@ namespace Xv2CoreLib.CPK
 
                     if (isComp == "CRILAYLA")
                     {
-                        int size = Int32.Parse((e.ExtractSize ?? e.FileSize).ToString());
+                        //int size = (int)(e.ExtractSize > 0 ? e.ExtractSize : e.FileSize);
                         chunk = _cpk.DecompressCRILAYLA(chunk);
                     }
 
