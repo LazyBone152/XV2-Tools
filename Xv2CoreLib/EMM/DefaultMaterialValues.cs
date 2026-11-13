@@ -17,18 +17,20 @@ namespace Xv2CoreLib.EMM
         //The value types must be the same for Int, float, and bools
         //For Vectors, Colors and MatUVs they must be float[4].
 
-        public readonly static float[] MatOffset0 = new float[4] { 0, 0, 0, 0 };
-        public readonly static float[] MatOffset1 = MatOffset0;
-        public readonly static float[] MatScale0 = new float[4] { 1, 1, 1, 1 };
-        public readonly static float[] MatScale1 = MatScale0;
-        public readonly static float[] MatCol0 = new float[4] { 1, 1, 1, 1 };
-        public readonly static float[] MatCol1 = MatCol0;
-        public readonly static float[] MatCol2 = new float[4] { 1, 1, 1, 1 };
-        public readonly static float[] MatCol3 = new float[4] { 0, 0, 1, 1 };
-        public readonly static float[] MatCol4 = new float[4] { 0, 0, 0, 0 };
-        public readonly static float[] MatCol5 = MatCol4;
-        public readonly static float[] MatCol6 = MatCol4;
-        public readonly static float[] MatCol7 = MatCol4;
+        private readonly static float[] MatOffset0 = new float[4] { 0, 0, 0, 0 };
+        private readonly static float[] MatOffset1 = MatOffset0;
+        private readonly static float[] MatScale0 = new float[4] { 1, 1, 1, 1 };
+        private readonly static float[] MatScale1 = MatScale0;
+        private readonly static float[] MatCol0 = new float[4] { 1, 1, 1, 1 };
+        private readonly static float[] MatCol1 = MatCol0;
+        private readonly static float[] MatCol2 = new float[4] { 1, 1, 1, 1 };
+        private readonly static float[] MatCol3 = new float[4] { 0, 0, 1, 1 };
+        private readonly static float[] MatCol4 = new float[4] { 0, 0, 0, 0 };
+        private readonly static float[] MatCol5 = MatCol4;
+        private readonly static float[] MatCol6 = MatCol4;
+        private readonly static float[] MatCol7 = MatCol4;
+        private readonly static float[] MatDif = new float[4] { 1, 1, 1, 0 };
+        private readonly static float[] MatSpc = MatDif;
 
 
 

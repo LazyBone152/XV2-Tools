@@ -394,10 +394,6 @@ namespace Xv2CoreLib.EMM
             }
             else if (type == VectorType.Color)
             {
-                if(valueIdx == 3)
-                {
-                    bool test = true;
-                }
                 value = ((CustomColor)currentValue).GetValue(valueIdx);
             }
             else if (type == VectorType.UV && currentValue is CustomMatUV)
