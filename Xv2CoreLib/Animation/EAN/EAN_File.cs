@@ -2449,6 +2449,7 @@ namespace Xv2CoreLib.EAN
             return new EAN_AnimationComponent()
             {
                 Type = Type,
+                I_01 = I_01,
                 I_02 = I_02,
                 Keyframes = _keyframes
             };

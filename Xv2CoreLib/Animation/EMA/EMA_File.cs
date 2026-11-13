@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ControlzEx.Standard;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using Xv2CoreLib.AnimationFramework;
-using Xv2CoreLib.EAN;
 using Xv2CoreLib.Color;
+using Xv2CoreLib.EAN;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.ValuesDictionary;
@@ -574,7 +575,7 @@ namespace Xv2CoreLib.EMA
         [YAXSerializeAs("Type")]
         public EmaAnimationType EmaType { get; set; }
         [YAXAttributeForClass]
-        public byte LightUnknown { get; set; } //Light = 1, all other types = 0
+        public byte LightUnknown { get; set; } //Light = 1, all other types = 0. This is the type of the engines internal EmLight object, where 1 is a point light
         [YAXAttributeForClass]
         [YAXSerializeAs("FloatType")]
         public ValueType FloatPrecision { get; set; }
