@@ -994,7 +994,7 @@ namespace Xv2CoreLib.EEPK
         I_36_3 = 0x08,
         LightApplyToCharacter = 0x10, //Note: These 3 light flags act as if they are all enabled if none of them are set.
         LightApplyToStage = 0x20,
-        LightUnknown = 0x40,
+        LightApplyToVfx = 0x40,
         I_36_7 = 0x80,
         I_37_0 = 0x100,
         I_37_1 = 0x200,
@@ -1013,7 +1013,7 @@ namespace Xv2CoreLib.EEPK
         I_38_6 = 0x400000, //Something to do with orientation type 1
         I_38_7 = 0x800000,
         IsDecal = 0x1000000, //A decal, such as stage battle damage. Draws in a separate pass. (EMO only)
-        I_39_1 = 0x2000000,
+        UseCharaLight = 0x2000000, //Uses the character light for the effect draw (the default is the stage light - BgLight from SPM, the chara light is Light0 from SPM)
         PriorityDrawPassA = 0x4000000, //Draws EMO in an earlier pass (before the PriorityDrawPassB pass)
         PositionScaleUnk = 0x8000000, //Requires UseBoneDirection... and applies a scale to the position. Needs more research.
         InheritUsersScaleOnUpdate = 0x10000000, //Every frame

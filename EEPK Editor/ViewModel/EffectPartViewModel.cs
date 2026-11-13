@@ -152,8 +152,8 @@ namespace EEPK_Organiser.ViewModel
         }
         public bool I_36_6
         {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.LightUnknown);
-            set => SetFlags2(EepkEffectPartFlags2.LightUnknown, value);
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.LightApplyToVfx);
+            set => SetFlags2(EepkEffectPartFlags2.LightApplyToVfx, value);
         }
         public bool I_36_7
         {
@@ -211,8 +211,8 @@ namespace EEPK_Organiser.ViewModel
         }
         public bool I_39_1
         {
-            get => effectPart.HasFlag2(EepkEffectPartFlags2.I_39_1);
-            set => SetFlags2(EepkEffectPartFlags2.I_39_1, value);
+            get => effectPart.HasFlag2(EepkEffectPartFlags2.UseCharaLight);
+            set => SetFlags2(EepkEffectPartFlags2.UseCharaLight, value);
         }
         public bool I_39_3
         {
