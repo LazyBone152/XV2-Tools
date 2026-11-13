@@ -22,8 +22,8 @@ namespace Xv2CoreLib.SPM
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "SPMEntry")]
         public List<SPM_Entry> Entries { get; set; } = new List<SPM_Entry>();
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "DSCSection")]
-        public List<DSC_Section> DSC_Sections { get; set; } = new List<DSC_Section>();
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BlendBlock")]
+        public List<DSC_BlendBlock> BlendBlocks { get; set; } = new List<DSC_BlendBlock>();
 
         #region LoadSave
         public static void SerializeToXml(string path)
@@ -91,7 +91,7 @@ namespace Xv2CoreLib.SPM
                 int dscSectionOffset = BitConverter.ToInt32(bytes, dscOffset + (8  * i));
 
                 if(dscSectionOffset > 0)
-                    spm.DSC_Sections.Add(DSC_Section.Read(bytes, dscSectionOffset + dscOffset));
+                    spm.BlendBlocks.Add(DSC_BlendBlock.Read(bytes, dscSectionOffset + dscOffset));
             }
 
             return spm;
@@ -103,7 +103,7 @@ namespace Xv2CoreLib.SPM
             List<byte> bytes = new List<byte>();
             bool useDsc = false, useExtendedEntry = false;
             int entryCount = Entries?.Count ?? 0;
-            int dscSections = DSC_Sections?.Count ?? 0;
+            int dscSections = BlendBlocks?.Count ?? 0;
 
             if(Signature == SPM_SIG)
             {
@@ -160,7 +160,7 @@ namespace Xv2CoreLib.SPM
                 for(int i = 0; i < dscSections; i++)
                 {
                     Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - dscStart), dscStart + (8 * i));
-                    bytes.AddRange(DSC_Sections[i].Write());
+                    bytes.AddRange(BlendBlocks[i].Write());
                 }
 
             }
@@ -179,6 +179,8 @@ namespace Xv2CoreLib.SPM
 
         [YAXAttributeForClass]
         public string Name { get; set; }
+        [YAXAttributeForClass]
+        public short ID { get; set; }
         [CustomSerialize]
         public ushort LensFlareEnabled { get; set; }
 
@@ -192,32 +194,118 @@ namespace Xv2CoreLib.SPM
         [CustomSerialize]
         public ushort I_30 { get; set; }
 
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_32 { get; set; }
+        [CustomSerialize("BgFillColor", "R")]
+        public float BgFillColorR { get; set; }
+        [CustomSerialize("BgFillColor", "G")]
+        public float BgFillColorG { get; set; }
+        [CustomSerialize("BgFillColor", "B")]
+        public float BgFillColorB { get; set; }
+        [CustomSerialize("BgFillColor", "A")]
+        public float BgFillColorA { get; set; }
 
-        [CustomSerialize("LightDir", "X")]
-        public float LightDirX { get; set; }
+        //The game only uses light 0
+        [CustomSerialize("Light0Dir", "X")]
+        public float Light0DirX { get; set; }
+        [CustomSerialize("Light0Dir", "Y")]
+        public float Light0DirY { get; set; }
+        [CustomSerialize("Light0Dir", "Z")]
+        public float Light0DirZ { get; set; }
+        [CustomSerialize("Light0Dir", "W")]
+        public float Light0DirW { get; set; }
+        [CustomSerialize("Light0DiffuseColor", "R")]
+        public float Light0DiffuseColorR { get; set; }
+        [CustomSerialize("Light0DiffuseColor", "G")]
+        public float Light0DiffuseColorG { get; set; }
+        [CustomSerialize("Light0DiffuseColor", "B")]
+        public float Light0DiffuseColorB { get; set; }
+        [CustomSerialize("Light0DiffuseColor", "A")]
+        public float Light0DiffuseColorA { get; set; }
 
-        [CustomSerialize("LightDir", "Y")]
-        public float LightDirY { get; set; }
+        [CustomSerialize("Light0SpecularColor", "R")]
+        public float Light0SpecularColorR { get; set; }
+        [CustomSerialize("Light0SpecularColor", "G")]
+        public float Light0SpecularColorG { get; set; }
+        [CustomSerialize("Light0SpecularColor", "B")]
+        public float Light0SpecularColorB { get; set; }
+        [CustomSerialize("Light0SpecularColor", "A")]
+        public float Light0SpecularColorA { get; set; }
 
-        [CustomSerialize("LightDir", "Z")]
-        public float LightDirZ { get; set; }
+        [CustomSerialize("Light1Dir", "X")]
+        public float Light1DirX { get; set; }
+        [CustomSerialize("Light1Dir", "Y")]
+        public float Light1DirY { get; set; }
+        [CustomSerialize("Light1Dir", "Z")]
+        public float Light1DirZ { get; set; }
+        [CustomSerialize("Light1Dir", "W")]
+        public float Light1DirW { get; set; }
+        [CustomSerialize("Light1DiffuseColor", "R")]
+        public float Light1DiffuseColorR { get; set; }
+        [CustomSerialize("Light1DiffuseColor", "G")]
+        public float Light1DiffuseColorG { get; set; }
+        [CustomSerialize("Light1DiffuseColor", "B")]
+        public float Light1DiffuseColorB { get; set; }
+        [CustomSerialize("Light1DiffuseColor", "A")]
+        public float Light1DiffuseColorA { get; set; }
+        [CustomSerialize("Light1SpecularColor", "R")]
+        public float Light1SpecularColorR { get; set; }
+        [CustomSerialize("Light1SpecularColor", "G")]
+        public float Light1SpecularColorG { get; set; }
+        [CustomSerialize("Light1SpecularColor", "B")]
+        public float Light1SpecularColorB { get; set; }
+        [CustomSerialize("Light1SpecularColor", "A")]
+        public float Light1SpecularColorA { get; set; }
 
-        [CustomSerialize("LightDir", "W")]
-        public float LightDirW { get; set; }
 
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_64 { get; set; }
+        //Shader parameter g_vRimColor_VS and g_vRimColor_PS
+        [CustomSerialize("RimColor", "R")]
+        public float RimColorR { get; set; }
+        [CustomSerialize("RimColor", "G")]
+        public float RimColorG { get; set; }
+        [CustomSerialize("RimColor", "B")]
+        public float RimColorB { get; set; }
+        [CustomSerialize("RimColor", "A")]
+        public float RimColorA { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float RimParam1 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float RimParam2 { get; set; }
 
-        [CustomSerialize]
-        public int I_140 { get; set; }
+        [CustomSerialize("HemiSet0_Upper", "R")]
+        public float HemiSet0UpperR { get; set; }
+        [CustomSerialize("HemiSet0_Upper", "G")]
+        public float HemiSet0UpperG { get; set; }
+        [CustomSerialize("HemiSet0_Upper", "B")]
+        public float HemiSet0UpperB { get; set; }
+        [CustomSerialize("HemiSet0_Upper", "A")]
+        public float HemiSet0UpperA { get; set; }
 
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_144 { get; set; }
+        //Shader parameter g_vAmbUni_VS and g_vAmbUni_PS
+        [CustomSerialize("HemiSet0_Mid", "R")]
+        public float HemiSet0MidR { get; set; }
+        [CustomSerialize("HemiSet0_Mid", "G")]
+        public float HemiSet0MidG { get; set; }
+        [CustomSerialize("HemiSet0_Mid", "B")]
+        public float HemiSet0MidB { get; set; }
+        [CustomSerialize("HemiSet0_Mid", "A")]
+        public float HemiSet0MidA { get; set; }
+
+        [CustomSerialize("HemiSet0_Lower", "R")]
+        public float HemiSet0LowerR { get; set; }
+        [CustomSerialize("HemiSet0_Lower", "G")]
+        public float HemiSet0LowerG { get; set; }
+        [CustomSerialize("HemiSet0_Lower", "B")]
+        public float HemiSet0LowerB { get; set; }
+        [CustomSerialize("HemiSet0_Lower", "A")]
+        public float HemiSet0LowerA { get; set; }
+
+        [CustomSerialize("AmbOcl", "R")]
+        public float AmbOclR { get; set; }
+        [CustomSerialize("AmbOcl", "G")]
+        public float AmbOclG { get; set; }
+        [CustomSerialize("AmbOcl", "B")]
+        public float AmbOclB { get; set; }
+        [CustomSerialize("AmbOcl", "A")]
+        public float AmbOclA { get; set; }
 
         [CustomSerialize]
         public float ShadowParam48 { get; set; }
@@ -336,21 +424,24 @@ namespace Xv2CoreLib.SPM
         [CustomSerialize]
         public float F_396 { get; set; }
 
-        [CustomSerialize("BackgroundGlaraAdditiveColor", "R")]
-        public float BackgroundGlareAdditiveColorR { get; set; }
 
-        [CustomSerialize("BackgroundGlaraAdditiveColor", "G")]
-        public float BackgroundGlareAdditiveColorG { get; set; }
+        [CustomSerialize("Tone", "R")]
+        public float ToneR { get; set; }
 
-        [CustomSerialize("BackgroundGlaraAdditiveColor", "B")]
-        public float BackgroundGlareAdditiveColorB { get; set; }
+        [CustomSerialize("Tone", "G")]
+        public float ToneG { get; set; }
 
-        [CustomSerialize("BackgroundGlaraAdditiveColor", "A")]
-        public float BackgroundGlareAdditiveColorA { get; set; }
+        [CustomSerialize("Tone", "B")]
+        public float ToneB { get; set; }
+        [CustomSerialize("Tone", "A")]
+        public float ToneA { get; set; } //Comes before RGB values
+        [CustomSerialize("Tone", "Scale")]
+        public float ToneScale { get; set; }
+
 
         [CustomSerialize]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_416 { get; set; }
+        public float[] F_420 { get; set; }
 
         [CustomSerialize]
         public float EffectGlareTone { get; set; }
@@ -408,41 +499,75 @@ namespace Xv2CoreLib.SPM
         public float[] F_532 { get; set; }
 
         [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public ushort[] I_544 { get; set; }
+        public ushort I_544 { get; set; }
+        [CustomSerialize]
+        public ushort I_546 { get; set; }
 
         [CustomSerialize]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_560 { get; set; }
+        public ushort[] I_550 { get; set; }
 
-        [CustomSerialize("BackgroundMultiplyColor", "R")]
-        public float BackgroundSpecificMultiplyColorR { get; set; }
 
-        [CustomSerialize("BackgroundMultiplyColor", "G")]
-        public float BackgroundSpecificMultiplyColorG { get; set; }
+        [CustomSerialize("HemiSet1_Upper", "R")]
+        public float HemiSet1UpperR { get; set; }
+        [CustomSerialize("HemiSet1_Upper", "G")]
+        public float HemiSet1UpperG { get; set; }
+        [CustomSerialize("HemiSet1_Upper", "B")]
+        public float HemiSet1UpperB { get; set; }
+        [CustomSerialize("HemiSet1_Upper", "A")]
+        public float HemiSet1UpperA { get; set; }
 
-        [CustomSerialize("BackgroundMultiplyColor", "B")]
-        public float BackgroundSpecificMultiplyColorB { get; set; }
+        [CustomSerialize("HemiSet1_Mid", "R")]
+        public float HemiSet1MidR { get; set; }
 
-        [CustomSerialize("BackgroundMultiplyColor", "A")]
-        public float BackgroundSpecificMultiplyColorA { get; set; }
+        [CustomSerialize("HemiSet1_Mid", "G")]
+        public float HemiSet1MidG { get; set; }
 
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_592 { get; set; }
+        [CustomSerialize("HemiSet1_Mid", "B")]
+        public float HemiSet1MidB { get; set; }
+
+        [CustomSerialize("HemiSet1_Mid", "A")]
+        public float HemiSet1MidA { get; set; }
+
+        [CustomSerialize("HemiSet1_Lower", "R")]
+        public float HemiSet1LowerR { get; set; }
+        [CustomSerialize("HemiSet1_Lower", "G")]
+        public float HemiSet1LowerG { get; set; }
+        [CustomSerialize("HemiSet1_Lower", "B")]
+        public float HemiSet1LowerB { get; set; }
+        [CustomSerialize("HemiSet1_Lower", "A")]
+        public float HemiSet1LowerA { get; set; }
 
         [CustomSerialize("ShadowDir", "X")]
-        public float ShadowDirX { get; set; }
+        public float BgLightDirectionX { get; set; }
         [CustomSerialize("ShadowDir", "Y")]
-        public float ShadowDirY { get; set; }
+        public float BgLightDirectionY { get; set; }
         [CustomSerialize("ShadowDir", "Z")]
-        public float ShadowDirZ { get; set; }
+        public float BgLightDirectionZ { get; set; }
         [CustomSerialize("ShadowDir", "W")]
-        public float ShadowDirW { get; set; }
+        public float BgLightDirectionW { get; set; }
+
+        [CustomSerialize("BgLightDiffuse", "R")]
+        public float BgLightDiffuseR { get; set; }
+        [CustomSerialize("BgLightDiffuse", "G")]
+        public float BgLightDiffuseG { get; set; }
+        [CustomSerialize("BgLightDiffuse", "B")]
+        public float BgLightDiffuseB { get; set; }
+        [CustomSerialize("BgLightDiffuse", "A")]
+        public float BgLightDiffuseA { get; set; }
+
+        [CustomSerialize("BgLightSpecular", "R")]
+        public float BgLightSpecularR { get; set; }
+        [CustomSerialize("BgLightSpecular", "G")]
+        public float BgLightSpecularG { get; set; }
+        [CustomSerialize("BgLightSpecular", "B")]
+        public float BgLightSpecularB { get; set; }
+        [CustomSerialize("BgLightSpecular", "A")]
+        public float BgLightSpecularA { get; set; }
 
         [CustomSerialize]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_624 { get; set; }
+        public float[] F_656 { get; set; }
 
         [CustomSerialize("ShadowColor", "R")]
         public float ShadowColorR { get; set; }
@@ -517,18 +642,13 @@ namespace Xv2CoreLib.SPM
 
             //Check array sizes
             Assertion.AssertArraySize(I_18, 5, "SPMEntry", nameof(I_18));
-            Assertion.AssertArraySize(F_32, 4, "SPMEntry", nameof(F_32));
-            Assertion.AssertArraySize(F_64, 19, "SPMEntry", nameof(F_64));
-            Assertion.AssertArraySize(F_144, 22, "SPMEntry", nameof(F_144));
-            Assertion.AssertArraySize(F_416, 6, "SPMEntry", nameof(F_416));
+            Assertion.AssertArraySize(F_420, 5, "SPMEntry", nameof(F_420));
             Assertion.AssertArraySize(F_480, 4, "SPMEntry", nameof(F_480));
             Assertion.AssertArraySize(F_500, 3, "SPMEntry", nameof(F_500));
             Assertion.AssertArraySize(F_516, 3, "SPMEntry", nameof(F_516));
             Assertion.AssertArraySize(F_532, 3, "SPMEntry", nameof(F_532));
-            Assertion.AssertArraySize(I_544, 8, "SPMEntry", nameof(I_544));
-            Assertion.AssertArraySize(F_560, 4, "SPMEntry", nameof(F_560));
-            Assertion.AssertArraySize(F_592, 4, "SPMEntry", nameof(F_592));
-            Assertion.AssertArraySize(F_624, 12, "SPMEntry", nameof(F_624));
+            Assertion.AssertArraySize(I_550, 5, "SPMEntry", nameof(I_550));
+            Assertion.AssertArraySize(F_656, 4, "SPMEntry", nameof(F_656));
             Assertion.AssertArraySize(F_720, 8, "SPMEntry", nameof(F_720));
 
             //Write main entry values
@@ -537,14 +657,56 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter_Ex.GetBytes(I_18));
             bytes.AddRange(BitConverter.GetBytes(GodRayAndSunHalo));
             bytes.AddRange(BitConverter.GetBytes(I_30));
-            bytes.AddRange(BitConverter_Ex.GetBytes(F_32));
-            bytes.AddRange(BitConverter.GetBytes(LightDirX));
-            bytes.AddRange(BitConverter.GetBytes(LightDirY));
-            bytes.AddRange(BitConverter.GetBytes(LightDirZ));
-            bytes.AddRange(BitConverter.GetBytes(LightDirW));
-            bytes.AddRange(BitConverter_Ex.GetBytes(F_64));
-            bytes.AddRange(BitConverter.GetBytes(I_140));
-            bytes.AddRange(BitConverter_Ex.GetBytes(F_144));
+            bytes.AddRange(BitConverter.GetBytes(BgFillColorR));
+            bytes.AddRange(BitConverter.GetBytes(BgFillColorG));
+            bytes.AddRange(BitConverter.GetBytes(BgFillColorB));
+            bytes.AddRange(BitConverter.GetBytes(BgFillColorA));
+            bytes.AddRange(BitConverter.GetBytes(Light0DirX));
+            bytes.AddRange(BitConverter.GetBytes(Light0DirY));
+            bytes.AddRange(BitConverter.GetBytes(Light0DirZ));
+            bytes.AddRange(BitConverter.GetBytes(Light0DirW));
+            bytes.AddRange(BitConverter.GetBytes(Light1DirX));
+            bytes.AddRange(BitConverter.GetBytes(Light1DirY));
+            bytes.AddRange(BitConverter.GetBytes(Light1DirZ));
+            bytes.AddRange(BitConverter.GetBytes(Light1DirW));
+            bytes.AddRange(BitConverter.GetBytes(Light0DiffuseColorR));
+            bytes.AddRange(BitConverter.GetBytes(Light0DiffuseColorG));
+            bytes.AddRange(BitConverter.GetBytes(Light0DiffuseColorB));
+            bytes.AddRange(BitConverter.GetBytes(Light0DiffuseColorA));
+            bytes.AddRange(BitConverter.GetBytes(Light1DiffuseColorR));
+            bytes.AddRange(BitConverter.GetBytes(Light1DiffuseColorG));
+            bytes.AddRange(BitConverter.GetBytes(Light1DiffuseColorB));
+            bytes.AddRange(BitConverter.GetBytes(Light1DiffuseColorA));
+            bytes.AddRange(BitConverter.GetBytes(Light0SpecularColorR));
+            bytes.AddRange(BitConverter.GetBytes(Light0SpecularColorG));
+            bytes.AddRange(BitConverter.GetBytes(Light0SpecularColorB));
+            bytes.AddRange(BitConverter.GetBytes(Light0SpecularColorA));
+            bytes.AddRange(BitConverter.GetBytes(Light1SpecularColorR));
+            bytes.AddRange(BitConverter.GetBytes(Light1SpecularColorG));
+            bytes.AddRange(BitConverter.GetBytes(Light1SpecularColorB));
+            bytes.AddRange(BitConverter.GetBytes(Light1SpecularColorA));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0UpperR));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0UpperG));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0UpperB));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0UpperA));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0MidR));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0MidG));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0MidB));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0MidA));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0LowerR));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0LowerG));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0LowerB));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet0LowerA));
+            bytes.AddRange(BitConverter.GetBytes(RimColorR));
+            bytes.AddRange(BitConverter.GetBytes(RimColorG));
+            bytes.AddRange(BitConverter.GetBytes(RimColorB));
+            bytes.AddRange(BitConverter.GetBytes(RimColorA));
+            bytes.AddRange(BitConverter.GetBytes(AmbOclR));
+            bytes.AddRange(BitConverter.GetBytes(AmbOclG));
+            bytes.AddRange(BitConverter.GetBytes(AmbOclB));
+            bytes.AddRange(BitConverter.GetBytes(AmbOclA));
+            bytes.AddRange(BitConverter.GetBytes(RimParam1));
+            bytes.AddRange(BitConverter.GetBytes(RimParam2));
             bytes.AddRange(BitConverter.GetBytes(ShadowParam48));
             bytes.AddRange(BitConverter.GetBytes(ShadowDepthBias));
             bytes.AddRange(BitConverter.GetBytes(FogMultiColorR));
@@ -584,11 +746,12 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter.GetBytes(SunSize));
             bytes.AddRange(BitConverter.GetBytes(F_392));
             bytes.AddRange(BitConverter.GetBytes(F_396));
-            bytes.AddRange(BitConverter.GetBytes(BackgroundGlareAdditiveColorR));
-            bytes.AddRange(BitConverter.GetBytes(BackgroundGlareAdditiveColorG));
-            bytes.AddRange(BitConverter.GetBytes(BackgroundGlareAdditiveColorB));
-            bytes.AddRange(BitConverter.GetBytes(BackgroundGlareAdditiveColorA));
-            bytes.AddRange(BitConverter_Ex.GetBytes(F_416));
+            bytes.AddRange(BitConverter.GetBytes(ToneA));
+            bytes.AddRange(BitConverter.GetBytes(ToneR));
+            bytes.AddRange(BitConverter.GetBytes(ToneG));
+            bytes.AddRange(BitConverter.GetBytes(ToneB));
+            bytes.AddRange(BitConverter.GetBytes(ToneScale));
+            bytes.AddRange(BitConverter_Ex.GetBytes(F_420));
             bytes.AddRange(BitConverter.GetBytes(EffectGlareTone));
             bytes.AddRange(BitConverter.GetBytes(CharacterGlareAdditiveColorR));
             bytes.AddRange(BitConverter.GetBytes(CharacterGlareAdditiveColorG));
@@ -606,18 +769,35 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter_Ex.GetBytes(F_516));
             bytes.AddRange(BitConverter.GetBytes(I_528));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_532));
-            bytes.AddRange(BitConverter_Ex.GetBytes(I_544));
-            bytes.AddRange(BitConverter_Ex.GetBytes(F_560));
-            bytes.AddRange(BitConverter.GetBytes(BackgroundSpecificMultiplyColorR));
-            bytes.AddRange(BitConverter.GetBytes(BackgroundSpecificMultiplyColorG));
-            bytes.AddRange(BitConverter.GetBytes(BackgroundSpecificMultiplyColorB));
-            bytes.AddRange(BitConverter.GetBytes(BackgroundSpecificMultiplyColorA));
-            bytes.AddRange(BitConverter_Ex.GetBytes(F_592));
-            bytes.AddRange(BitConverter.GetBytes(ShadowDirX));
-            bytes.AddRange(BitConverter.GetBytes(ShadowDirY));
-            bytes.AddRange(BitConverter.GetBytes(ShadowDirZ));
-            bytes.AddRange(BitConverter.GetBytes(ShadowDirW));
-            bytes.AddRange(BitConverter_Ex.GetBytes(F_624));
+            bytes.AddRange(BitConverter.GetBytes(I_544));
+            bytes.AddRange(BitConverter.GetBytes(I_546));
+            bytes.AddRange(BitConverter.GetBytes(ID));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_550));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1UpperR));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1UpperG));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1UpperB));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1UpperA));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1MidR));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1MidG));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1MidB));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1MidA));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1LowerR));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1LowerG));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1LowerB));
+            bytes.AddRange(BitConverter.GetBytes(HemiSet1LowerA));
+            bytes.AddRange(BitConverter.GetBytes(BgLightDirectionX));
+            bytes.AddRange(BitConverter.GetBytes(BgLightDirectionY));
+            bytes.AddRange(BitConverter.GetBytes(BgLightDirectionZ));
+            bytes.AddRange(BitConverter.GetBytes(BgLightDirectionW));
+            bytes.AddRange(BitConverter.GetBytes(BgLightDiffuseR));
+            bytes.AddRange(BitConverter.GetBytes(BgLightDiffuseG));
+            bytes.AddRange(BitConverter.GetBytes(BgLightDiffuseB));
+            bytes.AddRange(BitConverter.GetBytes(BgLightDiffuseA));
+            bytes.AddRange(BitConverter.GetBytes(BgLightSpecularR));
+            bytes.AddRange(BitConverter.GetBytes(BgLightSpecularG));
+            bytes.AddRange(BitConverter.GetBytes(BgLightSpecularB));
+            bytes.AddRange(BitConverter.GetBytes(BgLightSpecularA));
+            bytes.AddRange(BitConverter_Ex.GetBytes(F_656));
             bytes.AddRange(BitConverter.GetBytes(ShadowColorR));
             bytes.AddRange(BitConverter.GetBytes(ShadowColorG));
             bytes.AddRange(BitConverter.GetBytes(ShadowColorB));
@@ -664,14 +844,56 @@ namespace Xv2CoreLib.SPM
                 I_18 = BitConverter_Ex.ToUInt16Array(bytes, offset + 18, 5),
                 GodRayAndSunHalo = BitConverter.ToUInt16(bytes, offset + 28),
                 I_30 = BitConverter.ToUInt16(bytes, offset + 30),
-                F_32 = BitConverter_Ex.ToFloat32Array(bytes, offset + 32, 4),
-                LightDirX = BitConverter.ToSingle(bytes, offset + 48),
-                LightDirY = BitConverter.ToSingle(bytes, offset + 52),
-                LightDirZ = BitConverter.ToSingle(bytes, offset + 56),
-                LightDirW = BitConverter.ToSingle(bytes, offset + 60),
-                F_64 = BitConverter_Ex.ToFloat32Array(bytes, offset + 64, 19),
-                I_140 = BitConverter.ToInt32(bytes, offset + 140),
-                F_144 = BitConverter_Ex.ToFloat32Array(bytes, offset + 144, 22),
+                BgFillColorR = BitConverter.ToSingle(bytes, offset + 32),
+                BgFillColorG = BitConverter.ToSingle(bytes, offset + 36),
+                BgFillColorB = BitConverter.ToSingle(bytes, offset + 40),
+                BgFillColorA = BitConverter.ToSingle(bytes, offset + 44),
+                Light0DirX = BitConverter.ToSingle(bytes, offset + 48),
+                Light0DirY = BitConverter.ToSingle(bytes, offset + 52),
+                Light0DirZ = BitConverter.ToSingle(bytes, offset + 56),
+                Light0DirW = BitConverter.ToSingle(bytes, offset + 60),
+                Light1DirX = BitConverter.ToSingle(bytes, offset + 64),
+                Light1DirY = BitConverter.ToSingle(bytes, offset + 68),
+                Light1DirZ = BitConverter.ToSingle(bytes, offset + 72),
+                Light1DirW = BitConverter.ToSingle(bytes, offset + 76),
+                Light0DiffuseColorR = BitConverter.ToSingle(bytes, offset + 80),
+                Light0DiffuseColorG = BitConverter.ToSingle(bytes, offset + 84),
+                Light0DiffuseColorB = BitConverter.ToSingle(bytes, offset + 88),
+                Light0DiffuseColorA = BitConverter.ToSingle(bytes, offset + 92),
+                Light1DiffuseColorR = BitConverter.ToSingle(bytes, offset + 96),
+                Light1DiffuseColorG = BitConverter.ToSingle(bytes, offset + 100),
+                Light1DiffuseColorB = BitConverter.ToSingle(bytes, offset + 104),
+                Light1DiffuseColorA = BitConverter.ToSingle(bytes, offset + 108),
+                Light0SpecularColorR = BitConverter.ToSingle(bytes, offset + 112),
+                Light0SpecularColorG = BitConverter.ToSingle(bytes, offset + 116),
+                Light0SpecularColorB = BitConverter.ToSingle(bytes, offset + 120),
+                Light0SpecularColorA = BitConverter.ToSingle(bytes, offset + 124),
+                Light1SpecularColorR = BitConverter.ToSingle(bytes, offset + 128),
+                Light1SpecularColorG = BitConverter.ToSingle(bytes, offset + 132),
+                Light1SpecularColorB = BitConverter.ToSingle(bytes, offset + 136),
+                Light1SpecularColorA = BitConverter.ToSingle(bytes, offset + 140),
+                HemiSet0UpperR = BitConverter.ToSingle(bytes, offset + 144),
+                HemiSet0UpperG = BitConverter.ToSingle(bytes, offset + 148),
+                HemiSet0UpperB = BitConverter.ToSingle(bytes, offset + 152),
+                HemiSet0UpperA = BitConverter.ToSingle(bytes, offset + 156),
+                HemiSet0MidR = BitConverter.ToSingle(bytes, offset + 160),
+                HemiSet0MidG = BitConverter.ToSingle(bytes, offset + 164),
+                HemiSet0MidB = BitConverter.ToSingle(bytes, offset + 168),
+                HemiSet0MidA = BitConverter.ToSingle(bytes, offset + 172),
+                HemiSet0LowerR = BitConverter.ToSingle(bytes, offset + 176),
+                HemiSet0LowerG = BitConverter.ToSingle(bytes, offset + 180),
+                HemiSet0LowerB = BitConverter.ToSingle(bytes, offset + 184),
+                HemiSet0LowerA = BitConverter.ToSingle(bytes, offset + 188),
+                RimColorR = BitConverter.ToSingle(bytes, offset + 192),
+                RimColorG = BitConverter.ToSingle(bytes, offset + 196),
+                RimColorB = BitConverter.ToSingle(bytes, offset + 200),
+                RimColorA = BitConverter.ToSingle(bytes, offset + 204),
+                AmbOclR = BitConverter.ToSingle(bytes, offset + 208),
+                AmbOclG = BitConverter.ToSingle(bytes, offset + 212),
+                AmbOclB = BitConverter.ToSingle(bytes, offset + 216),
+                AmbOclA = BitConverter.ToSingle(bytes, offset + 220),
+                RimParam1 = BitConverter.ToSingle(bytes, offset + 224),
+                RimParam2 = BitConverter.ToSingle(bytes, offset + 228),
                 ShadowParam48 = BitConverter.ToSingle(bytes, offset + 232),
                 ShadowDepthBias = BitConverter.ToSingle(bytes, offset + 236),
                 FogMultiColorR = BitConverter.ToSingle(bytes, offset + 240),
@@ -711,11 +933,12 @@ namespace Xv2CoreLib.SPM
                 SunSize = BitConverter.ToSingle(bytes, offset + 388),
                 F_392 = BitConverter.ToSingle(bytes, offset + 392),
                 F_396 = BitConverter.ToSingle(bytes, offset + 396),
-                BackgroundGlareAdditiveColorR = BitConverter.ToSingle(bytes, offset + 400),
-                BackgroundGlareAdditiveColorG = BitConverter.ToSingle(bytes, offset + 404),
-                BackgroundGlareAdditiveColorB = BitConverter.ToSingle(bytes, offset + 408),
-                BackgroundGlareAdditiveColorA = BitConverter.ToSingle(bytes, offset + 412),
-                F_416 = BitConverter_Ex.ToFloat32Array(bytes, offset + 416, 6),
+                ToneA = BitConverter.ToSingle(bytes, offset + 400),
+                ToneR = BitConverter.ToSingle(bytes, offset + 404),
+                ToneG = BitConverter.ToSingle(bytes, offset + 408),
+                ToneB = BitConverter.ToSingle(bytes, offset + 412),
+                ToneScale = BitConverter.ToSingle(bytes, offset + 416),
+                F_420 = BitConverter_Ex.ToFloat32Array(bytes, offset + 420, 5),
                 EffectGlareTone = BitConverter.ToSingle(bytes, offset + 440),
                 CharacterGlareAdditiveColorR = BitConverter.ToSingle(bytes, offset + 444),
                 CharacterGlareAdditiveColorG = BitConverter.ToSingle(bytes, offset + 448),
@@ -733,18 +956,35 @@ namespace Xv2CoreLib.SPM
                 F_516 = BitConverter_Ex.ToFloat32Array(bytes, offset + 516, 3),
                 I_528 = BitConverter.ToInt32(bytes, offset + 528),
                 F_532 = BitConverter_Ex.ToFloat32Array(bytes, offset + 532, 3),
-                I_544 = BitConverter_Ex.ToUInt16Array(bytes, offset + 544, 8),
-                F_560 = BitConverter_Ex.ToFloat32Array(bytes, offset + 560, 4),
-                BackgroundSpecificMultiplyColorR = BitConverter.ToSingle(bytes, offset + 576),
-                BackgroundSpecificMultiplyColorG = BitConverter.ToSingle(bytes, offset + 580),
-                BackgroundSpecificMultiplyColorB = BitConverter.ToSingle(bytes, offset + 584),
-                BackgroundSpecificMultiplyColorA = BitConverter.ToSingle(bytes, offset + 588),
-                F_592 = BitConverter_Ex.ToFloat32Array(bytes, offset + 592, 4),
-                ShadowDirX = BitConverter.ToSingle(bytes, offset + 608),
-                ShadowDirY = BitConverter.ToSingle(bytes, offset + 612),
-                ShadowDirZ = BitConverter.ToSingle(bytes, offset + 616),
-                ShadowDirW = BitConverter.ToSingle(bytes, offset + 620),
-                F_624 = BitConverter_Ex.ToFloat32Array(bytes, offset + 624, 12),
+                I_544 = BitConverter.ToUInt16(bytes, offset + 544),
+                I_546 = BitConverter.ToUInt16(bytes, offset + 546),
+                ID = BitConverter.ToInt16(bytes, offset + 548),
+                I_550 = BitConverter_Ex.ToUInt16Array(bytes, offset + 550, 5),
+                HemiSet1UpperR = BitConverter.ToSingle(bytes, offset + 560),
+                HemiSet1UpperG = BitConverter.ToSingle(bytes, offset + 564),
+                HemiSet1UpperB = BitConverter.ToSingle(bytes, offset + 568),
+                HemiSet1UpperA = BitConverter.ToSingle(bytes, offset + 572),
+                HemiSet1MidR = BitConverter.ToSingle(bytes, offset + 576),
+                HemiSet1MidG = BitConverter.ToSingle(bytes, offset + 580),
+                HemiSet1MidB = BitConverter.ToSingle(bytes, offset + 584),
+                HemiSet1MidA = BitConverter.ToSingle(bytes, offset + 588),
+                HemiSet1LowerR = BitConverter.ToSingle(bytes, offset + 592),
+                HemiSet1LowerG = BitConverter.ToSingle(bytes, offset + 596),
+                HemiSet1LowerB = BitConverter.ToSingle(bytes, offset + 600),
+                HemiSet1LowerA = BitConverter.ToSingle(bytes, offset + 604),
+                BgLightDirectionX = BitConverter.ToSingle(bytes, offset + 608),
+                BgLightDirectionY = BitConverter.ToSingle(bytes, offset + 612),
+                BgLightDirectionZ = BitConverter.ToSingle(bytes, offset + 616),
+                BgLightDirectionW = BitConverter.ToSingle(bytes, offset + 620),
+                BgLightDiffuseR = BitConverter.ToSingle(bytes, offset + 624),
+                BgLightDiffuseG = BitConverter.ToSingle(bytes, offset + 628),
+                BgLightDiffuseB = BitConverter.ToSingle(bytes, offset + 632),
+                BgLightDiffuseA = BitConverter.ToSingle(bytes, offset + 636),
+                BgLightSpecularR = BitConverter.ToSingle(bytes, offset + 640),
+                BgLightSpecularG = BitConverter.ToSingle(bytes, offset + 644),
+                BgLightSpecularB = BitConverter.ToSingle(bytes, offset + 648),
+                BgLightSpecularA = BitConverter.ToSingle(bytes, offset + 652),
+                F_656 = BitConverter_Ex.ToFloat32Array(bytes, offset + 656, 4),
                 ShadowColorR = BitConverter.ToSingle(bytes, offset + 672),
                 ShadowColorG = BitConverter.ToSingle(bytes, offset + 676),
                 ShadowColorB = BitConverter.ToSingle(bytes, offset + 680),
@@ -839,7 +1079,7 @@ namespace Xv2CoreLib.SPM
 
         [CustomSerialize]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_68 { get; set; }
+        public float[] F_68 { get; set; } //[0] = g_vMotionBlur_VS.z
 
         [CustomSerialize]
         public int I_76 { get; set; }
@@ -922,11 +1162,11 @@ namespace Xv2CoreLib.SPM
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public int[] I_248 { get; set; } //Size 6
         [CustomSerialize(isFloat: true)]
-        public float F_272 { get; set; }
+        public float F_272 { get; set; } //g_vColor14_PS.x (characters)
         [CustomSerialize(isFloat: true)]
-        public float F_276 { get; set; }
+        public float F_276 { get; set; } //g_vColor14_PS.y (characters)
         [CustomSerialize(isFloat: true)]
-        public float F_280 { get; set; }
+        public float F_280 { get; set; } //g_vColor14_PS.z (g_vColor14_PS.w is 1.0, not F_284) (characters)
         [CustomSerialize(isFloat: true)]
         public float F_284 { get; set; }
         [CustomSerialize]
@@ -1096,8 +1336,8 @@ namespace Xv2CoreLib.SPM
         }
     }
 
-    [YAXSerializeAs("DSCSection")]
-    public class DSC_Section
+    [YAXSerializeAs("BlendBlock")]
+    public class DSC_BlendBlock
     {
         private const int SIGNATURE = 1129530403; //#DSC
 
@@ -1106,13 +1346,13 @@ namespace Xv2CoreLib.SPM
         [YAXAttributeForClass]
         public int I_12 { get; set; }
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "DSCEntry")]
-        public List<DSC_Entry> Entries { get; set; } = new List<DSC_Entry>();
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Descriptor")]
+        public List<DSC_Descriptor> Descriptors { get; set; } = new List<DSC_Descriptor>();
 
         public byte[] Write()
         {
             List<byte> bytes = new List<byte>();
-            int entryCount = Entries?.Count ?? 0;
+            int entryCount = Descriptors?.Count ?? 0;
 
             bytes.AddRange(BitConverter.GetBytes(SIGNATURE));
             bytes.AddRange(BitConverter.GetBytes(entryCount));
@@ -1129,21 +1369,21 @@ namespace Xv2CoreLib.SPM
             for (int i = 0; i < entryCount; i++)
             {
                 Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - offsetStart), offsetStart + (8 * i));
-                bytes.AddRange(Entries[i].Write());
+                bytes.AddRange(Descriptors[i].Write());
             }
 
             return bytes.ToArray();
         }
 
-        public static DSC_Section Read(byte[] bytes, int offset)
+        public static DSC_BlendBlock Read(byte[] bytes, int offset)
         {
             if (BitConverter.ToInt32(bytes, offset) != SIGNATURE)
-                throw new Exception("DSC_Section.Read: #DSC signature not found");
+                throw new Exception("DSC_BlendBlock.Read: #DSC signature not found");
 
             int entryCount = BitConverter.ToInt32(bytes, offset + 4);
             int entryOffset = BitConverter.ToInt32(bytes, offset + 16);
 
-            DSC_Section dsc = new DSC_Section();
+            DSC_BlendBlock dsc = new DSC_BlendBlock();
             dsc.I_08 = BitConverter.ToInt32(bytes, offset + 8);
             dsc.I_12 = BitConverter.ToInt32(bytes, offset + 12);
 
@@ -1151,15 +1391,15 @@ namespace Xv2CoreLib.SPM
             {
                 int absoluteEntryOffset = BitConverter.ToInt32(bytes, entryOffset + offset + (i * 8));
                 if(absoluteEntryOffset > 0)
-                    dsc.Entries.Add(DSC_Entry.Read(bytes, absoluteEntryOffset + entryOffset + offset));
+                    dsc.Descriptors.Add(DSC_Descriptor.Read(bytes, absoluteEntryOffset + entryOffset + offset));
             }
 
             return dsc;
         }
     }
 
-    [YAXSerializeAs("DSCEntry")]
-    public class DSC_Entry
+    [YAXSerializeAs("Descriptor")]
+    public class DSC_Descriptor
     {
         internal const int SIZE = 48;
 
@@ -1168,8 +1408,8 @@ namespace Xv2CoreLib.SPM
         [YAXAttributeForClass]
         public int Index { get; set; }
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Entry")]
-        public List<DSC_Data> SubEntries { get; set; } = new List<DSC_Data>();
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Layer")]
+        public List<DSC_Layer> SubEntries { get; set; } = new List<DSC_Layer>();
 
         public byte[] Write()
         {
@@ -1179,7 +1419,7 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(StringEx.WriteFixedSizeString(Name, 16));
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(BitConverter.GetBytes(0));
-            bytes.AddRange(BitConverter.GetBytes(DSC_Data.SIZE)); //24, size
+            bytes.AddRange(BitConverter.GetBytes(DSC_Layer.SIZE)); //24, size
             bytes.AddRange(BitConverter.GetBytes(0));
             bytes.AddRange(BitConverter.GetBytes(count > 0 ? SIZE : 0)); //32, offset
             bytes.AddRange(BitConverter.GetBytes(0));
@@ -1194,9 +1434,9 @@ namespace Xv2CoreLib.SPM
             return bytes.ToArray();
         }
 
-        public static DSC_Entry Read(byte[] bytes, int offset)
+        public static DSC_Descriptor Read(byte[] bytes, int offset)
         {
-            DSC_Entry entry = new DSC_Entry();
+            DSC_Descriptor entry = new DSC_Descriptor();
             entry.Name = StringEx.GetString(bytes, offset, false, maxSize: 16);
             entry.Index = BitConverter.ToInt32(bytes, offset + 40);
 
@@ -1204,29 +1444,29 @@ namespace Xv2CoreLib.SPM
             int dataSize = BitConverter.ToInt32(bytes, offset + 24);
             int dataOffset = BitConverter.ToInt32(bytes, offset + 32);
 
-            if (dataSize != DSC_Data.SIZE)
-                throw new Exception("DSC_Entry: unsupported version, or bad file.");
+            if (dataSize != DSC_Layer.SIZE)
+                throw new Exception("DSC_Descriptor: unsupported version, or bad file.");
 
             for(int i = 0; i < dataCount; i++)
             {
-                entry.SubEntries.Add(DSC_Data.Read(bytes, dataOffset + offset + (i * DSC_Data.SIZE)));
+                entry.SubEntries.Add(DSC_Layer.Read(bytes, dataOffset + offset + (i * DSC_Layer.SIZE)));
             }
 
             return entry;
         }
     }
 
-    [YAXSerializeAs("Entry")]
-    public class DSC_Data
+    [YAXSerializeAs("Layer")]
+    public class DSC_Layer
     {
         internal const int SIZE = 32;
 
         [CustomSerialize]
-        public int I_00 { get; set; }
+        public int SpmEntryID { get; set; }
+        [CustomSerialize(isHex: true)]
+        public int GroupFlagMask { get; set; }
         [CustomSerialize]
-        public int I_04 { get; set; }
-        [CustomSerialize]
-        public int I_08 { get; set; }
+        public int Mode { get; set; }
         [CustomSerialize]
         public int I_12 { get; set; }
         [CustomSerialize]
@@ -1242,9 +1482,9 @@ namespace Xv2CoreLib.SPM
         {
             List<byte> bytes = new List<byte>(32);
 
-            bytes.AddRange(BitConverter.GetBytes(I_00));
-            bytes.AddRange(BitConverter.GetBytes(I_04));
-            bytes.AddRange(BitConverter.GetBytes(I_08));
+            bytes.AddRange(BitConverter.GetBytes(SpmEntryID));
+            bytes.AddRange(BitConverter.GetBytes(GroupFlagMask));
+            bytes.AddRange(BitConverter.GetBytes(Mode));
             bytes.AddRange(BitConverter.GetBytes(I_12));
             bytes.AddRange(BitConverter.GetBytes(I_16));
             bytes.AddRange(BitConverter.GetBytes(ColorR));
@@ -1252,18 +1492,18 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter.GetBytes(ColorB));
 
             if (bytes.Count != 32)
-                throw new Exception("DSC_Data.Write: Invalid size!");
+                throw new Exception("DSC_Layer.Write: Invalid size!");
 
             return bytes.ToArray();
         }
 
-        public static DSC_Data Read(byte[] bytes, int offset)
+        public static DSC_Layer Read(byte[] bytes, int offset)
         {
-            return new DSC_Data()
+            return new DSC_Layer()
             {
-                I_00 = BitConverter.ToInt32(bytes, offset),
-                I_04 = BitConverter.ToInt32(bytes, offset + 4),
-                I_08 = BitConverter.ToInt32(bytes, offset + 8),
+                SpmEntryID = BitConverter.ToInt32(bytes, offset),
+                GroupFlagMask = BitConverter.ToInt32(bytes, offset + 4),
+                Mode = BitConverter.ToInt32(bytes, offset + 8),
                 I_12 = BitConverter.ToInt32(bytes, offset + 12),
                 I_16 = BitConverter.ToInt32(bytes, offset + 16),
                 ColorR = BitConverter.ToSingle(bytes, offset + 20),
