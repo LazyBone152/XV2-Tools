@@ -347,7 +347,7 @@
                                                             <ColumnDefinition Width="20"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Label Content="No Frustum Culling" ToolTip="Disable frustum culling when drawing this EMO. Useful for animated EMOs where the bounding boxes used for culling are no longer accurate to the animated shape."/>
-                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.EnableDistanceCulling, UpdateSourceTrigger=PropertyChanged}"/>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=EffectPartViewModel.NoFrustumCulling, UpdateSourceTrigger=PropertyChanged}"/>
                                                     </Grid>
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EffectPartViewModel.IsNotLIGHT, Converter={StaticResource BooleanToVisibilityConverter}}">

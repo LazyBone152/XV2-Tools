@@ -209,6 +209,15 @@ namespace EEPK_Organiser.ViewModel
                 NotifyPropertyChanged(nameof(EnableDistanceCulling));
             }
         }
+        public bool NoFrustumCulling
+        {
+            get => !effectPart.HasFlag2(EepkEffectPartFlags2.DisableFrustumCulling);
+            set
+            {
+                SetFlags2(EepkEffectPartFlags2.DisableFrustumCulling, !value);
+                NotifyPropertyChanged(nameof(NoFrustumCulling));
+            }
+        }
         public bool I_39_1
         {
             get => effectPart.HasFlag2(EepkEffectPartFlags2.UseCharaLight);
@@ -568,6 +577,7 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(() => IsEmoOrPbind);
 
             RaisePropertyChanged(() => EnableDistanceCulling);
+            RaisePropertyChanged(() => NoFrustumCulling);
             RaisePropertyChanged(() => EmoDrawPass);
         }
 
